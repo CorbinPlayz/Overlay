@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scoreboard control</title>
+<style>
+  :root { --bg:#0a0f1e; --panel:#121a30; --line:#243252; --ink:#e6f4fb; --cyan:#19e3ff; --pink:#ff2e88; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:24px; background:var(--bg); color:var(--ink); font-family:'Segoe UI',Arial,sans-serif; }
+  h1 { font-size:22px; margin:0 0 16px; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:900px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; }
+  .panel.a { border-top:4px solid var(--cyan); } .panel.b { border-top:4px solid var(--pink); }
+  .big { font-size:64px; font-weight:700; text-align:center; margin:4px 0 12px; }
+  input { width:100%; padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid var(--line); background:#0a1226; color:var(--ink); font-size:16px; }
+  button { padding:10px 14px; margin:3px; border-radius:6px; border:1px solid var(--line); background:#1b2745; color:var(--ink); font-size:16px; cursor:pointer; }
+  button:hover { background:#27386a; } button:focus-visible { outline:2px solid var(--cyan); }
+  .wide { max-width:900px; margin-top:16px; }
+  #login { max-width:900px; } #app { display:none; }
+  code { background:#0a1226; padding:2px 6px; border-radius:4px; user-select:all; }
+  #msg { margin-top:12px; color:#ffb86b; min-height:20px; }
+  @media (max-width:640px){ .row{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<h1>Scoreboard control</h1>
+
+<div id="login">
+  <button id="signin">Sign in with Google</button>
+</div>
+
+<div id="app">
+  <div class="row">
+    <div class="panel a">
+      <input id="nameA" placeholder="Left team name">
+      <button onclick="setName('A')">Set name</button>
+      <div class="big" id="sA">0</div>
+      <button onclick="add('A',1)">+1</button><button onclick="add('A',2)">+2</button><button onclick="add('A',3)">+3</button><button onclick="add('A',-1)">-1</button>
+    </div>
+    <div class="panel b">
+      <input id="nameB" placeholder="Right team name">
+      <button onclick="setName('B')">Set name</button>
+      <div class="big" id="sB">0</div>
+      <button onclick="add('B',1)">+1</button><button onclick="add('B',2)">+2</button><button onclick="add('B',3)">+3</button><button onclick="add('B',-1)">-1</button>
+    </div>
+  </div>
+  <div class="panel wide">
+    <input id="label" placeholder="Middle text (e.g. ROUND 1, FINAL)">
+    <button onclick="setLabel()">Set middle text</button>
+    <button onclick="swap()">Swap sides</button>
+    <button onclick="resetScores()">Reset scores</button>
+    <button onclick="toggle()">Show / hide board</button>
+  </div>
+</div>
+
+<div id="msg"></div>
+<p style="max-width:900px;opacity:.7;font-size:14px">Your user ID (needed once for the database rules): <code id="uid">sign in first</code></p>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBKUIKlJFekXZBqGFDJPSbB26uyUc2erB4",
+  authDomain: "scoreboard-64131.firebaseapp.com",
+  databaseURL: "https://scoreboard-64131-default-rtdb.firebaseio.com",
+  projectId: "scoreboard-64131",
+  storageBucket: "scoreboard-64131.firebasestorage.app",
+  messagingSenderId: "898885184342",
+  appId: "1:898885184342:web:1434e53e5af35b18d4c4f7"
+};
+firebase.initializeApp(firebaseConfig);
+const ref = firebase.database().ref('board');
+const $ = id => document.getElementById(id);
+let state = { nameA:'TEAM A', nameB:'TEAM B', scoreA:0, scoreB:0, label:'VS', visible:true };
+
+function say(t){ $('msg').textContent = t; }
+function save(patch){ Object.assign(state, patch); ref.update(patch).catch(e => say('Save failed: ' + e.message + ' (check database rules)')); }
+
+$('signin').onclick = () => firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => say('Sign-in failed: ' + e.message));
+firebase.auth().onAuthStateChanged(u => {
+  $('login').style.display = u ? 'none' : 'block';
+  $('app').style.display = u ? 'block' : 'none';
+  $('uid').textContent = u ? u.uid : 'sign in first';
+});
+
+ref.on('value', s => {
+  const d = s.val(); if (!d) return;
+  state = Object.assign(state, d);
+  $('sA').textContent = state.scoreA || 0; $('sB').textContent = state.scoreB || 0;
+  $('nameA').placeholder = state.nameA; $('nameB').placeholder = state.nameB;
+}, e => say('Cannot read database: ' + e.message));
+
+function add(t, n){ const k='score'+t; save({ [k]: Math.max(0, (state[k]||0) + n) }); }
+function setName(t){ const v=$('name'+t).value.trim(); if(v){ save({ ['name'+t]: v.toUpperCase() }); $('name'+t).value=''; } }
+function setLabel(){ const v=$('label').value.trim(); save({ label: v ? v.toUpperCase() : 'VS' }); $('label').value=''; }
+function swap(){ save({ nameA:state.nameB, nameB:state.nameA, scoreA:state.scoreB, scoreB:state.scoreA }); }
+function resetScores(){ if(confirm('Reset both scores to 0?')) save({ scoreA:0, scoreB:0 }); }
+function toggle(){ save({ visible: state.visible === false }); }
+</script>
+</body>
+</html>
