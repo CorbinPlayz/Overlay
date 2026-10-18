@@ -8,60 +8,103 @@
   :root { --bg:#0a0f1e; --panel:#121a30; --line:#243252; --ink:#e6f4fb; --cyan:#19e3ff; --pink:#ff2e88; }
   * { box-sizing:border-box; }
   body { margin:0; padding:24px; background:var(--bg); color:var(--ink); font-family:'Segoe UI',Arial,sans-serif; }
-  h1 { font-size:22px; margin:0 0 16px; }
-  .row { display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:900px; }
-  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; }
-  .panel.a { border-top:4px solid var(--cyan); } .panel.b { border-top:4px solid var(--pink); }
+  h1 { font-size:22px; margin:0 0 16px; } h2 { font-size:16px; margin:0 0 10px; }
+  .wrap { max-width:900px; } .row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-top:16px; }
+  .row .panel { margin-top:0; } .panel.a { border-top:4px solid var(--cyan); } .panel.b { border-top:4px solid var(--pink); }
   .big { font-size:64px; font-weight:700; text-align:center; margin:4px 0 12px; }
-  input { width:100%; padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid var(--line); background:#0a1226; color:var(--ink); font-size:16px; }
+  input[type=text], input[type=number], select { width:100%; padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid var(--line); background:#0a1226; color:var(--ink); font-size:16px; }
+  input[type=number] { width:90px; display:inline-block; }
+  input[type=color] { width:56px; height:38px; border:1px solid var(--line); border-radius:6px; background:none; padding:2px; }
   button { padding:10px 14px; margin:3px; border-radius:6px; border:1px solid var(--line); background:#1b2745; color:var(--ink); font-size:16px; cursor:pointer; }
   button:hover { background:#27386a; } button:focus-visible { outline:2px solid var(--cyan); }
-  .wide { max-width:900px; margin-top:16px; }
-  #login { max-width:900px; } #app { display:none; }
-  code { background:#0a1226; padding:2px 6px; border-radius:4px; user-select:all; }
+  button.on { background:var(--cyan); color:#04121a; border-color:var(--cyan); font-weight:700; }
+  .colors { display:flex; flex-wrap:wrap; gap:18px; align-items:end; } .colors label { font-size:13px; display:flex; flex-direction:column; gap:4px; }
+  #login { } #app { display:none; } code { background:#0a1226; padding:2px 6px; border-radius:4px; user-select:all; }
   #msg { margin-top:12px; color:#ffb86b; min-height:20px; }
   @media (max-width:640px){ .row{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
+<div class="wrap">
 <h1>Scoreboard control</h1>
-
-<div id="login">
-  <button id="signin">Sign in with Google</button>
-</div>
+<div id="login"><button id="signin">Sign in with Google</button></div>
 
 <div id="app">
-  <div class="row">
+  <div class="panel" style="margin-top:0">
+    <h2>On air</h2>
+    <button data-page="score" onclick="page('score')">Scoreboard</button>
+    <button data-page="timer" onclick="page('timer')">Timer</button>
+    <button data-page="soon" onclick="page('soon')">Starting / BRB</button>
+    <button data-page="off" onclick="page('off')">Hide all</button>
+    <button id="lowBtn" onclick="toggleLower()">Lower third</button>
+  </div>
+
+  <div class="row" style="margin-top:16px">
     <div class="panel a">
-      <input id="nameA" placeholder="Left team name">
-      <button onclick="setName('A')">Set name</button>
+      <input type="text" id="nameA" placeholder="Left team name"><button onclick="setName('A')">Set name</button>
       <div class="big" id="sA">0</div>
       <button onclick="add('A',1)">+1</button><button onclick="add('A',2)">+2</button><button onclick="add('A',3)">+3</button><button onclick="add('A',-1)">-1</button>
     </div>
     <div class="panel b">
-      <input id="nameB" placeholder="Right team name">
-      <button onclick="setName('B')">Set name</button>
+      <input type="text" id="nameB" placeholder="Right team name"><button onclick="setName('B')">Set name</button>
       <div class="big" id="sB">0</div>
       <button onclick="add('B',1)">+1</button><button onclick="add('B',2)">+2</button><button onclick="add('B',3)">+3</button><button onclick="add('B',-1)">-1</button>
     </div>
   </div>
-  <div class="panel wide">
-    <input id="label" placeholder="Middle text (e.g. ROUND 1, FINAL)">
-    <button onclick="setLabel()">Set middle text</button>
-    <button onclick="swap()">Swap sides</button>
-    <button onclick="resetScores()">Reset scores</button>
-    <button onclick="toggle()">Show / hide board</button>
+  <div class="panel">
+    <input type="text" id="label" placeholder="Middle text (e.g. ROUND 1)">
+    <button onclick="setLabel()">Set middle text</button><button onclick="swap()">Swap sides</button><button onclick="resetScores()">Reset scores</button>
+  </div>
+
+  <div class="panel">
+    <h2>Timer <span id="tNow" style="float:right;font-variant-numeric:tabular-nums"></span></h2>
+    <input type="number" id="tm" min="0" value="5"> min <input type="number" id="ts" min="0" max="59" value="0"> sec
+    <select id="tmode" style="width:auto;margin-left:8px"><option value="down">Countdown</option><option value="up">Stopwatch</option></select>
+    <div><button onclick="setTimer()">Set</button><button onclick="startT()">Start</button><button onclick="pauseT()">Pause</button><button onclick="resetT()">Reset</button>
+    <button id="tbBtn" onclick="save({timerOnBoard:!state.timerOnBoard})">Show timer in scoreboard</button></div>
+  </div>
+
+  <div class="panel">
+    <h2>Starting / BRB screen</h2>
+    <input type="text" id="soonH" placeholder="Big text"><input type="text" id="soonS" placeholder="Small text (optional)">
+    <button onclick="setSoon()">Update screen</button>
+    <button onclick="quick('STARTING SOON')">Starting soon</button><button onclick="quick('BE RIGHT BACK')">BRB</button><button onclick="quick('THANKS FOR WATCHING')">Thanks</button>
+  </div>
+
+  <div class="panel">
+    <h2>Lower third</h2>
+    <input type="text" id="lowN" placeholder="Name"><input type="text" id="lowR" placeholder="Title or role">
+    <button onclick="setLower()">Update and show</button>
+  </div>
+
+  <div class="panel">
+    <h2>Colors</h2>
+    <div class="colors">
+      <label>Left team<input type="color" id="cA" value="#19e3ff"></label>
+      <label>Right team<input type="color" id="cB" value="#ff2e88"></label>
+      <label>Accent<input type="color" id="cAcc" value="#19e3ff"></label>
+      <label>Panels<input type="color" id="cBg" value="#060a18"></label>
+      <label>Text<input type="color" id="cText" value="#eaf9ff"></label>
+    </div>
+    <div style="margin-top:10px">
+      <button onclick="preset('#19e3ff','#ff2e88','#19e3ff')">Neon</button>
+      <button onclick="preset('#ff3b3b','#3b82ff','#ffd23b')">Red / Blue</button>
+      <button onclick="preset('#39ff88','#b84dff','#39ff88')">Toxic</button>
+      <button onclick="preset('#ffb020','#20c8ff','#ffb020')">Gold</button>
+    </div>
   </div>
 </div>
 
 <div id="msg"></div>
-<p style="max-width:900px;opacity:.7;font-size:14px">Your user ID (needed once for the database rules): <code id="uid">sign in first</code></p>
+<p style="opacity:.7;font-size:14px">Your user ID: <code id="uid">sign in first</code></p>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 <script>
-const firebaseConfig = {
+firebase.initializeApp({
   apiKey: "AIzaSyBKUIKlJFekXZBqGFDJPSbB26uyUc2erB4",
   authDomain: "scoreboard-64131.firebaseapp.com",
   databaseURL: "https://scoreboard-64131-default-rtdb.firebaseio.com",
@@ -69,35 +112,53 @@ const firebaseConfig = {
   storageBucket: "scoreboard-64131.firebasestorage.app",
   messagingSenderId: "898885184342",
   appId: "1:898885184342:web:1434e53e5af35b18d4c4f7"
-};
-firebase.initializeApp(firebaseConfig);
-const ref = firebase.database().ref('board');
-const $ = id => document.getElementById(id);
-let state = { nameA:'TEAM A', nameB:'TEAM B', scoreA:0, scoreB:0, label:'VS', visible:true };
-
-function say(t){ $('msg').textContent = t; }
-function save(patch){ Object.assign(state, patch); ref.update(patch).catch(e => say('Save failed: ' + e.message + ' (check database rules)')); }
+});
+const ref = firebase.database().ref('board'), $ = id => document.getElementById(id);
+let state = { page:'score', scoreA:0, scoreB:0 }, off = 0;
+firebase.database().ref('.info/serverTimeOffset').on('value', s => off = s.val() || 0);
+const say = t => $('msg').textContent = t;
+function save(p){ Object.assign(state, p); ref.update(p).catch(e => say('Save failed: ' + e.message + ' (check database rules)')); }
 
 $('signin').onclick = () => firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => say('Sign-in failed: ' + e.message));
 firebase.auth().onAuthStateChanged(u => {
-  $('login').style.display = u ? 'none' : 'block';
-  $('app').style.display = u ? 'block' : 'none';
+  $('login').style.display = u ? 'none' : 'block'; $('app').style.display = u ? 'block' : 'none';
   $('uid').textContent = u ? u.uid : 'sign in first';
 });
+
+const colorIds = ['cA','cB','cAcc','cBg','cText'];
+colorIds.forEach(id => $(id).addEventListener('change', e => save({ [id]: e.target.value })));
+function preset(a,b,c){ save({ cA:a, cB:b, cAcc:c }); }
 
 ref.on('value', s => {
   const d = s.val(); if (!d) return;
   state = Object.assign(state, d);
   $('sA').textContent = state.scoreA || 0; $('sB').textContent = state.scoreB || 0;
-  $('nameA').placeholder = state.nameA; $('nameB').placeholder = state.nameB;
+  $('nameA').placeholder = state.nameA || 'Left team name'; $('nameB').placeholder = state.nameB || 'Right team name';
+  colorIds.forEach(id => { if (state[id]) $(id).value = state[id]; });
+  document.querySelectorAll('[data-page]').forEach(b => b.classList.toggle('on', b.dataset.page === (state.page || 'score')));
+  $('lowBtn').classList.toggle('on', !!state.lowOn); $('tbBtn').classList.toggle('on', !!state.timerOnBoard);
 }, e => say('Cannot read database: ' + e.message));
 
-function add(t, n){ const k='score'+t; save({ [k]: Math.max(0, (state[k]||0) + n) }); }
+function page(p){ save({ page:p }); }
+function add(t,n){ const k='score'+t; save({ [k]: Math.max(0,(state[k]||0)+n) }); }
 function setName(t){ const v=$('name'+t).value.trim(); if(v){ save({ ['name'+t]: v.toUpperCase() }); $('name'+t).value=''; } }
 function setLabel(){ const v=$('label').value.trim(); save({ label: v ? v.toUpperCase() : 'VS' }); $('label').value=''; }
 function swap(){ save({ nameA:state.nameB, nameB:state.nameA, scoreA:state.scoreB, scoreB:state.scoreA }); }
 function resetScores(){ if(confirm('Reset both scores to 0?')) save({ scoreA:0, scoreB:0 }); }
-function toggle(){ save({ visible: state.visible === false }); }
+
+function cur(){ const base = state.tBase||0; if(!state.tRun||!state.tStart) return base;
+  const el = Date.now()+off-state.tStart; return state.tMode==='up' ? base+el : Math.max(0, base-el); }
+function setTimer(){ const t=((+$('tm').value||0)*60+(+$('ts').value||0))*1000, m=$('tmode').value;
+  save({ tMode:m, tInit:m==='up'?0:t, tBase:m==='up'?0:t, tRun:false, tStart:null }); }
+function startT(){ if(!state.tRun) save({ tRun:true, tStart:firebase.database.ServerValue.TIMESTAMP }); }
+function pauseT(){ if(state.tRun) save({ tBase:cur(), tRun:false, tStart:null }); }
+function resetT(){ save({ tBase: state.tMode==='up' ? 0 : (state.tInit||0), tRun:false, tStart:null }); }
+setInterval(() => { const t=Math.ceil(cur()/1000); $('tNow').textContent = Math.floor(t/60) + ':' + String(t%60).padStart(2,'0'); }, 250);
+
+function setSoon(){ save({ soonH: $('soonH').value.trim().toUpperCase() || 'STARTING SOON', soonS: $('soonS').value.trim() }); }
+function quick(t){ save({ soonH:t, page:'soon' }); }
+function setLower(){ save({ lowN:$('lowN').value.trim(), lowR:$('lowR').value.trim(), lowOn:true }); }
+function toggleLower(){ save({ lowOn: !state.lowOn }); }
 </script>
 </body>
 </html>
