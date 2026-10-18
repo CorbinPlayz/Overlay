@@ -61,7 +61,7 @@
     <h2>Timer <span id="tNow" style="float:right;font-variant-numeric:tabular-nums"></span></h2>
     <input type="number" id="tm" min="0" value="5"> min <input type="number" id="ts" min="0" max="59" value="0"> sec
     <select id="tmode" style="width:auto;margin-left:8px"><option value="down">Countdown</option><option value="up">Stopwatch</option></select>
-    <div><button onclick="setTimer()">Set</button><button onclick="startT()">Start</button><button onclick="pauseT()">Pause</button><button onclick="resetT()">Reset</button>
+    <div><button onclick="setTimer()">Set</button><button onclick="startT()">Start</button><button onclick="pauseT()">Pause</button><button onclick="resetT()">Reset</button><button onclick="clearT()">Clear</button>
     <button id="tbBtn" onclick="save({timerOnBoard:!state.timerOnBoard})">Show timer in scoreboard</button></div>
   </div>
 
@@ -69,6 +69,7 @@
     <h2>Starting / BRB screen</h2>
     <input type="text" id="soonH" placeholder="Big text"><input type="text" id="soonS" placeholder="Small text (optional)">
     <button onclick="setSoon()">Update screen</button>
+    <button onclick="page('score')">Back to scoreboard</button><button onclick="clearSoon()">Clear text</button>
     <button onclick="quick('STARTING SOON')">Starting soon</button><button onclick="quick('BE RIGHT BACK')">BRB</button><button onclick="quick('THANKS FOR WATCHING')">Thanks</button>
   </div>
 
@@ -156,6 +157,8 @@ function resetT(){ save({ tBase: state.tMode==='up' ? 0 : (state.tInit||0), tRun
 setInterval(() => { const t=Math.ceil(cur()/1000); $('tNow').textContent = Math.floor(t/60) + ':' + String(t%60).padStart(2,'0'); }, 250);
 
 function setSoon(){ save({ soonH: $('soonH').value.trim().toUpperCase() || 'STARTING SOON', soonS: $('soonS').value.trim() }); }
+function clearT(){ save({ tBase:0, tInit:0, tRun:false, tStart:null }); }
+function clearSoon(){ $('soonH').value=''; $('soonS').value=''; save({ soonH:'STARTING SOON', soonS:'' }); }
 function quick(t){ save({ soonH:t, page:'soon' }); }
 function setLower(){ save({ lowN:$('lowN').value.trim(), lowR:$('lowR').value.trim(), lowOn:true }); }
 function toggleLower(){ save({ lowOn: !state.lowOn }); }
