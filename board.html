@@ -334,7 +334,6 @@ const SFX = (() => {
     g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + dur * .2); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
     s.connect(f); f.connect(g); g.connect(out); s.start(t);
   };
-  const sparkle = (t, from, to, step, vol) => { for (let s = from; s < to; s += step) P(84 + ((Math.random() * 14) | 0), t + s, .35, vol); };
   const K = (t, vol) => { T('sine', 150, 42, t, .38, vol, .003); Z(t, .04, vol * .4, 4000, 2000, 1); };
   const S = (t, vol) => { Z(t, .18, vol, 2500, 1500, .8); T('triangle', 220, 120, t, .1, vol * .6, .002); };
   const H = (t, vol) => Z(t, .06, vol, 7000, 9000, 1, 'highpass');
@@ -385,21 +384,18 @@ const SFX = (() => {
         T('sine', 100, 28, t + 1.1, 1.2, .55, .005); Z(t + 1.1, .9, .35, 2500, 150, .7, 'lowpass');
         [60, 64, 67, 72, 76, 79, 84, 88].forEach((n, i) => T('triangle', N(n), N(n), t + 1.15 + i * .09, 1.4, .17));
         [48, 55, 64].forEach(n => { T('sawtooth', N(n), N(n), t + 1.15, 4, .05, .1); T('sawtooth', N(n) * 1.006, N(n) * 1.006, t + 1.15, 4, .05, .1); });
-        sparkle(t, 2, L - 1.5, .22, .07);
       }],
       ['Hyper drive', (t, L) => {
         Z(t, 1.1, .3, 150, 8000, 1.5); T('square', 90, 1600, t, 1.1, .08, .9);
         T('sine', 80, 25, t + 1.1, 1.3, .6, .005); Z(t + 1.1, .8, .4, 3000, 120, .7, 'lowpass');
         const q = [57, 60, 64, 67, 69, 67, 64, 60]; for (let i = 0; i < 24; i++) { const n = q[i % 8] + (i >= 16 ? 12 : 0); T('sawtooth', N(n), N(n), t + 1.2 + i * .125, .16, .07); }
         P(88, t + 4.2, 1.8, .18); P(95, t + 4.25, 1.6, .12);
-        sparkle(t, 4.5, L - 1.5, .3, .06);
       }],
       ['Victory bells', (t, L) => {
         Z(t, 1, .2, 300, 6000, 1.2);
         [72, 76, 79, 84, 88, 91].forEach((n, i) => { P(n, t + .9 + i * .15, 1.2, .2); P(n + 12, t + .9 + i * .15, .8, .06); });
         T('sine', 90, 30, t + 1.1, 1, .5, .005); Z(t + 1.1, .6, .25, 2500, 200, .8, 'lowpass');
         [72, 76, 79, 84].forEach(n => T('triangle', N(n), N(n), t + 2.1, 2.5, .13, .02));
-        sparkle(t, 2.2, L - 1.5, .3, .07);
       }]]],
     raidIn: ['Raid alert', 'Raid', [
       ['Siren', t => { T('sawtooth', 400, 1200, t, .45, .12, .2); T('sawtooth', 400, 1200, t + .5, .45, .12, .2); T('sine', 90, 30, t + .35, .8, .5, .005); }],
@@ -444,18 +440,16 @@ const SFX = (() => {
         Z(t, Math.min(L - 1, 5), .22, 500, 1500, .8); horn(t + 1.1, .4, .12); horn(t + 1.6, .4, .12); horn(t + 2.1, 1.4, .13);
         for (let i = 0; i < 12; i++) { K(t + 1.2 + i * .25, .35); if (i % 2) S(t + 1.2 + i * .25, .18); H(t + 1.325 + i * .25, .1); }
         [60, 64, 67, 72].forEach(n => T('sawtooth', N(n), N(n), t + 1.15, 3, .07, .02));
-        sparkle(t, 3.5, L - 1.5, .25, .07);
       }],
       ['Drop party', (t, L) => {
         for (let o = 0, g = .22; o < 1.05; o += g, g *= .88) S(t + o, .12 + o * .2);
         Z(t, 1.1, .26, 200, 7000, 1.3); T('sine', 180, 32, t + 1.1, 1.6, .6, .005); K(t + 1.1, .5);
         W(t + 1.2, 3, 55, .25, 4); for (let i = 0; i < 16; i++) H(t + 1.2 + i * .25, .1);
-        sparkle(t, 2.5, L - 1.5, .28, .07);
       }],
       ['Arcade jackpot', (t, L) => {
         for (let i = 0; i < 22; i++) { const n = 76 + i * .9; T('square', N(n), N(n), t + .6 + i * .12, .08, .06); }
         T('sine', 90, 30, t + 3.3, 1, .5, .005); [72, 76, 79, 84].forEach(n => T('triangle', N(n), N(n), t + 3.3, 2.5, .13, .02));
-        bell(t + 3.3, 1200, .18); sparkle(t, 3.5, L - 1.5, .25, .07);
+        bell(t + 3.3, 1200, .18);
       }]],
     raidIn: [
       ['Air horn raid', t => { horn(t, .6, .11); horn(t + .35, .9, .12); K(t + .35, .5); }],
