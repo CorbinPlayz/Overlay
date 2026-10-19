@@ -95,6 +95,9 @@
     <label class="f">Goal <input type="number" id="gGoal" min="1"></label><button onclick="gSet()">Update</button>
     <div><button onclick="gAdd(1)">+1</button><button onclick="gAdd(5)">+5</button><button onclick="gAdd(10)">+10</button><button onclick="gAdd(-1)">-1</button></div>
     <div><button class="gb" onclick="gToggle()">Show goal</button><button id="gbBtn" onclick="save({gNoBar:!state.gNoBar})">Progress bar</button></div>
+    <div style="margin-top:10px"><label class="f">Size <b id="gScaleV">100%</b></label><input type="range" id="gScale" min="10" max="200" step="5" value="100" style="width:60%;vertical-align:middle"><button onclick="save({gScale:1})">1x</button></div>
+    <div><button data-gpos="br" onclick="save({gPos:'br'})">Bottom right</button><button data-gpos="bl" onclick="save({gPos:'bl'})">Bottom left</button><button data-gpos="c" onclick="save({gPos:'c'})">Center</button></div>
+    <p class="hint">Bottom left shares a spot with the lower third, so don't show both at once.</p>
   </div>
   <div class="panel" data-tab="goal"><h2>Goal colors</h2><div class="colors">
     <label>Bar / numbers<input type="color" id="cGF" value="#19e3ff"></label><label>Bar background<input type="color" id="cGT" value="#1a2440"></label>
@@ -172,6 +175,8 @@ ref.on('value', s => {
   $('lowBtn').classList.toggle('on', !!state.lowOn); $('tbBtn').classList.toggle('on', !!state.timerOnBoard);
   document.querySelectorAll('.gb').forEach(b => b.classList.toggle('on', !!state.gOn)); $('gbBtn').classList.toggle('on', !state.gNoBar);
   $('gShow').textContent = (state.gCur || 0) + ' / ' + (state.gGoal || 100);
+  $('gScale').value = Math.round((state.gScale || 1) * 100); $('gScaleV').textContent = $('gScale').value + '%';
+  document.querySelectorAll('[data-gpos]').forEach(b => b.classList.toggle('on', b.dataset.gpos === (state.gPos || 'br')));
 }, e => say('Cannot read database: ' + e.message));
 
 function page(p){ save({ page:p }); }
@@ -204,6 +209,8 @@ function gAdd(n){ save({ gCur: Math.max(0,(state.gCur||0)+n) }); $('gCur').value
 function gToggle(){ save({ gOn: !state.gOn }); }
 function playRaid(){ save({ rName:$('rName').value.trim().toUpperCase(), rHead:$('rHead').value.trim().toUpperCase() || 'INCOMING RAID', rMsg:$('rMsg').value.trim(),
   rCount:+$('rCount').value||0, rDur:Math.min(30,Math.max(4,+$('rDur').value||8)), rTrig:firebase.database.ServerValue.TIMESTAMP }); }
+$('gScale').addEventListener('input', e => $('gScaleV').textContent = e.target.value + '%');
+$('gScale').addEventListener('change', e => save({ gScale: e.target.value / 100 }));
 </script>
 </body>
 </html>
