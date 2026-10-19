@@ -201,7 +201,7 @@
 <div id="gWin"><div id="gwDim"></div><div id="gwGrid"></div><i class="gwB" style="left:7%"></i><i class="gwB" style="right:7%"></i><div id="gwScan"></div>
 <div id="gwStage"><div id="gwRays"></div><div id="gwRays2"></div><div id="gwRings"></div><svg id="gwHud" viewBox="-400 -400 800 800"><circle class="h1" r="380"/><circle class="h2" r="340"/><circle class="h3" r="300"/><circle class="h4" r="250"/></svg><div id="gwNum"></div><div id="gwBand"></div><div id="gwHead"></div><div id="gwSub"></div></div>
 <div id="gwTL">SYSTEM // OBJECTIVE COMPLETE</div><div id="gwTR">STATUS // 100% SYNCED</div><div id="gwFlash"></div><canvas id="gwC" width="1920" height="1080"></canvas></div>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 <script>
 firebase.initializeApp({
@@ -221,6 +221,7 @@ firebase.database().ref('.info/serverTimeOffset').on('value', s => off = s.val()
 function setScore(id, v) {
   const el = $(id);
   if (last[id] !== undefined && last[id] !== v) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+  if (last[id] !== undefined && last[id] !== v) scoreSnd(v > last[id]);
   last[id] = v; el.textContent = v;
 }
 function ms() {
@@ -234,6 +235,7 @@ function fmt(t) {
   return (h ? h + ':' + String(m).padStart(2,'0') : m) + ':' + String(x).padStart(2,'0');
 }
 function tick() {
+  timerSnd();
   const t = fmt(d.tMode === 'up' ? Math.floor(ms()/1000)*1000 : ms());
   $('tBig').textContent = t;
   $('soonT').textContent = (d.tBase > 0 || d.tRun) ? t : '';
@@ -269,11 +271,11 @@ function sparks(k) {
     P.appendChild(e);
   }
 }
-  let swapT, swapped = false;
+let swapT, swapped = false;
 function swapNum() { swapped = true; $('gOne').textContent = curNow(); $('gNum').textContent = curNow() + ' / ' + totNow(); }
 function intro(delta) {
   const f = $('gFx'), c = $('gCard'), k = (Math.min(10, Math.max(1, delta)) - 1) / 9, B = $('gBloom'), R = $('gRays');
-  fxK = k; lights(); $('gOne').textContent = '+' + delta; $('gOne').style.fontSize = Math.round(170 + 90 * k) + 'px';
+  fxK = k; lights(); snd('followPop', k); $('gOne').textContent = '+' + delta; $('gOne').style.fontSize = Math.round(170 + 90 * k) + 'px';
   const bw = 1100 * (1 + .9 * k), bh = 520 * (1 + .9 * k), rs = 1500 * (1 + .7 * k);
   B.style.cssText = `width:${bw}px;height:${bh}px;left:${-bw/2}px;top:${-bh/2}px`; R.style.cssText = `width:${rs}px;height:${rs}px;left:${-rs/2}px;top:${-rs/2}px`;
   document.querySelectorAll('.gring').forEach((e, i) => e.style.display = i < 2 + Math.round(3 * k) ? '' : 'none');
@@ -287,7 +289,7 @@ function render(cur, tot, delta) {
   if (delta > 0) {
     const p = $('gPlus'), t = $('gTip'), f = $('gFill'); p.textContent = t.textContent = '+' + delta;
     [p, n, t, f].forEach(e => e.classList.remove('go', 'bump', 'spin', 'surge')); void p.offsetWidth;
-    p.classList.add('go'); t.classList.add('go'); f.classList.add('surge'); n.classList.add('bump');
+    p.classList.add('go'); t.classList.add('go'); f.classList.add('surge'); n.classList.add('bump'); snd('followFill');
   }
 }
 function pop(delta) {
@@ -308,6 +310,105 @@ function goal() {
   if (rose && d.gOn) { if (d.gMode === 'always') render(cur, tot, delta); else pop(delta); }
   else if (!pendT) render(cur, tot, 0);
   updOn();
+}
+const SFX = (() => {
+  let c, out;
+  const N = n => 440 * Math.pow(2, (n - 69) / 12);
+  const ctx = () => {
+    if (!c) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; c = new C(); out = c.createGain(); const k = c.createDynamicsCompressor(); out.connect(k); k.connect(c.destination); }
+    if (c.state === 'suspended') c.resume();
+    return c;
+  };
+  const T = (type, f0, f1, t, dur, vol, atk) => {
+    const o = c.createOscillator(), g = c.createGain(); o.type = type;
+    o.frequency.setValueAtTime(f0, t); if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + (atk || .01)); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + .05);
+  };
+  const P = (n, t, dur, vol, atk) => T('sine', N(n), N(n), t, dur, vol, atk);
+  const Z = (t, dur, vol, f0, f1, q, type) => {
+    const n = Math.floor(c.sampleRate * dur), b = c.createBuffer(1, n, c.sampleRate), ch = b.getChannelData(0);
+    for (let i = 0; i < n; i++) ch[i] = Math.random() * 2 - 1;
+    const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    s.buffer = b; f.type = type || 'bandpass'; f.Q.value = q || 1; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + dur * .2); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(out); s.start(t);
+  };
+  const sparkle = (t, from, to, step, vol) => { for (let s = from; s < to; s += step) P(84 + ((Math.random() * 14) | 0), t + s, .35, vol); };
+  const D = {
+    scoreUp: ['Score goes up', 'Scoreboard', [
+      ['Neon blip', t => { T('square', 660, 990, t, .09, .13); T('square', 990, 1480, t + .08, .13, .13); }],
+      ['Power up', t => [72, 76, 79, 84].forEach((n, i) => T('triangle', N(n), N(n), t + i * .06, .16, .2))],
+      ['Crystal chime', t => { P(88, t, .6, .22); P(95, t + .07, .6, .14); }]]],
+    scoreDown: ['Score goes down', 'Scoreboard', [
+      ['Low blip', t => { T('square', 440, 220, t, .16, .13); T('square', 300, 150, t + .1, .18, .12); }],
+      ['Power down', t => T('sawtooth', 700, 110, t, .4, .1)],
+      ['Glitch drop', t => { T('triangle', N(72), N(60), t, .14, .2); T('triangle', N(65), N(53), t + .12, .2, .2); Z(t, .25, .15, 3000, 400, 2); }]]],
+    timerEnd: ['Timer hits zero', 'Timer', [
+      ['Buzzer', t => { T('square', 150, 150, t, 1.1, .16, .02); T('square', 156, 156, t, 1.1, .12, .02); }],
+      ['Triple alarm', t => [0, .28, .56].forEach(o => T('square', 880, 880, t + o, .2, .14))],
+      ['System shutdown', t => { T('sawtooth', 900, 60, t, 1.3, .12, .05); Z(t, 1.3, .2, 4000, 100, 1); }]]],
+    timerTick: ['Last 10 seconds tick', 'Timer', [
+      ['Soft tick', t => T('sine', 1300, 900, t, .06, .2, .003)],
+      ['Beep', t => T('square', 880, 880, t, .08, .1, .003)],
+      ['Pulse', t => { T('triangle', 330, 220, t, .14, .22, .005); Z(t, .05, .08, 3000, 1500, 1); }]]],
+    pageChange: ['Screen switch', 'Screens', [
+      ['Swoosh', t => Z(t, .4, .22, 300, 4500, 1.2)],
+      ['Scan blips', t => { T('sine', 800, 1600, t, .1, .18); T('sine', 1200, 2000, t + .09, .12, .16); }],
+      ['Glass ping', t => { P(84, t, .5, .2); P(91, t + .05, .4, .1); }]]],
+    lowerIn: ['Lower third appears', 'Screens', [
+      ['Slide in', t => { Z(t, .3, .16, 500, 3500, 1); T('sine', 500, 900, t, .22, .12); }],
+      ['Double blip', t => { P(84, t, .12, .2); P(91, t + .11, .2, .2); }],
+      ['Data beeps', t => [0, .05, .1].forEach(o => T('square', 1200, 1200, t + o, .035, .09))]]],
+    followPop: ['New follower pop-up', 'Followers', [
+      ['Cyber riser', (t, k) => { T('triangle', 200, 1000, t, .95, .14, .6); Z(t, .95, .18, 300, 5000, 1.5); for (let i = 0, n = 2 + Math.round(4 * k); i < n; i++) P(79 + i * 3, t + .97 + i * .07, .5, .18); }],
+      ['Sparkle burst', (t, k) => { const n = 5 + Math.round(8 * k); for (let i = 0; i < n; i++) P(80 + (i * 3) % 18, t + i * (.95 / n), .25, .12); P(91, t + .97, .6, .22); }],
+      ['Bass hit', (t, k) => { T('sine', 140, 40, t, .5, .35, .005); T('sawtooth', 1500, 250, t, .3, .06); P(84, t + .97, .6, .2); P(91 + Math.round(4 * k), t + 1, .6, .16); }]]],
+    followFill: ['Progress bar fills', 'Followers', [
+      ['Charge up', t => { T('sine', 300, 900, t, .8, .18, .3); Z(t, .8, .08, 1000, 4000, 2); }],
+      ['Zap', t => { T('sawtooth', 200, 1400, t, .6, .08, .2); P(91, t + .6, .35, .16); }],
+      ['Chimes', t => [0, .1, .2].forEach((o, i) => P(79 + i * 4, t + o, .6, .18))]]],
+    goalWin: ['Goal reached', 'Celebration', [
+      ['Epic finale', (t, L) => {
+        T('sawtooth', 70, 900, t, 1.1, .1, .9); Z(t, 1.1, .26, 200, 6000, 1.2);
+        T('sine', 100, 28, t + 1.1, 1.2, .55, .005); Z(t + 1.1, .9, .35, 2500, 150, .7, 'lowpass');
+        [60, 64, 67, 72, 76, 79, 84, 88].forEach((n, i) => T('triangle', N(n), N(n), t + 1.15 + i * .09, 1.4, .17));
+        [48, 55, 64].forEach(n => { T('sawtooth', N(n), N(n), t + 1.15, 4, .05, .1); T('sawtooth', N(n) * 1.006, N(n) * 1.006, t + 1.15, 4, .05, .1); });
+        sparkle(t, 2, L - 1.5, .22, .07);
+      }],
+      ['Hyper drive', (t, L) => {
+        Z(t, 1.1, .3, 150, 8000, 1.5); T('square', 90, 1600, t, 1.1, .08, .9);
+        T('sine', 80, 25, t + 1.1, 1.3, .6, .005); Z(t + 1.1, .8, .4, 3000, 120, .7, 'lowpass');
+        const q = [57, 60, 64, 67, 69, 67, 64, 60]; for (let i = 0; i < 24; i++) { const n = q[i % 8] + (i >= 16 ? 12 : 0); T('sawtooth', N(n), N(n), t + 1.2 + i * .125, .16, .07); }
+        P(88, t + 4.2, 1.8, .18); P(95, t + 4.25, 1.6, .12);
+        sparkle(t, 4.5, L - 1.5, .3, .06);
+      }],
+      ['Victory bells', (t, L) => {
+        Z(t, 1, .2, 300, 6000, 1.2);
+        [72, 76, 79, 84, 88, 91].forEach((n, i) => { P(n, t + .9 + i * .15, 1.2, .2); P(n + 12, t + .9 + i * .15, .8, .06); });
+        T('sine', 90, 30, t + 1.1, 1, .5, .005); Z(t + 1.1, .6, .25, 2500, 200, .8, 'lowpass');
+        [72, 76, 79, 84].forEach(n => T('triangle', N(n), N(n), t + 2.1, 2.5, .13, .02));
+        sparkle(t, 2.2, L - 1.5, .3, .07);
+      }]]],
+    raidIn: ['Raid alert', 'Raid', [
+      ['Siren', t => { T('sawtooth', 400, 1200, t, .45, .12, .2); T('sawtooth', 400, 1200, t + .5, .45, .12, .2); T('sine', 90, 30, t + .35, .8, .5, .005); }],
+      ['Warp in', t => { Z(t, .9, .3, 200, 7000, 1.3); T('sine', 90, 28, t + .35, 1, .55, .005); P(79, t + .4, 1.2, .18); P(86, t + .45, 1.2, .14); }],
+      ['War horn', t => { T('sawtooth', N(46), N(46), t, 1.2, .14, .05); T('sawtooth', N(53), N(53), t + .01, 1.2, .12, .05); T('sine', 80, 30, t + .35, .8, .4, .005); T('square', N(70), N(70), t + .35, .6, .06, .02); }]]]
+  };
+  const play = (id, v, a, vol) => {
+    const e = D[id]; if (!e || !v || !e[2][v - 1] || !vol || !ctx()) return;
+    out.gain.value = vol; e[2][v - 1][1](c.currentTime + .03, a || 0);
+  };
+  return { D, play, dv: id => id === 'timerTick' ? 0 : 1 };
+})();
+let pPrev, lowPrev, tEnded = null, tickS = -1, sndGate = 0;
+function snd(id, a) { const vol = d.sMute ? 0 : (d.sVol == null ? 60 : +d.sVol) / 100, v = d['s_' + id] == null ? SFX.dv(id) : +d['s_' + id]; SFX.play(id, v, a, vol); }
+function scoreSnd(up) { const n = Date.now(); if (n - sndGate < 250) return; sndGate = n; snd(up ? 'scoreUp' : 'scoreDown'); }
+function timerSnd() {
+  if (!d.tRun || d.tMode === 'up') { tEnded = null; tickS = -1; return; }
+  const m = ms(), s = Math.ceil(m / 1000);
+  if (m <= 0) { if (tEnded === false) snd('timerEnd'); tEnded = true; return; }
+  tEnded = false; if (s <= 10) { if (s !== tickS) { tickS = s; snd('timerTick'); } } else tickS = -1;
 }
 let wFirst = true, wLast, winSoonT, winEndT, winOffT, winRaf, winI;
 function winSoon(ms) { clearTimeout(winSoonT); winSoonT = setTimeout(win, ms); }
@@ -352,11 +453,11 @@ function win() {
   w.classList.add('on', 'go');
   const t0 = Date.now();
   winI = setInterval(() => { const p = Math.min(1, Math.max(0, (Date.now() - t0 - 700) / 1600)); $('gwNum').textContent = Math.round(tot * (1 - Math.pow(1 - p, 3))); if (p >= 1) clearInterval(winI); }, 40);
-  winFx(L, k, [c1, c2, ck, '#ffffff']);
+  winFx(L, k, [c1, c2, ck, '#ffffff']); snd('goalWin', L);
   winEndT = setTimeout(() => w.classList.remove('on'), (L - 1.2) * 1000);
   winOffT = setTimeout(() => w.classList.remove('show', 'go'), L * 1000);
 }
-  function trigCheck() {
+function trigCheck() {
   if (wFirst) { wFirst = false; wLast = d.gWinTrig; } else if (d.gWinTrig && d.gWinTrig !== wLast) { wLast = d.gWinTrig; win(); } if (tFirst) { tFirst = false; tLast = d.gTrig; return; }
   if (d.gTrig && d.gTrig !== tLast) { tLast = d.gTrig; if (d.gOn) { const n = Math.max(1, +d.gTrigN || 1); if (d.gMode === 'always') render(curNow(), totNow(), n); else pop(n); } }
 }
@@ -374,7 +475,7 @@ function raid() {
     const e = document.createElement('i'), a = Math.random() * 6.283, m = 300 + Math.random() * 900;
     e.style.cssText = `--x:${Math.cos(a)*m}px;--y:${Math.sin(a)*m}px;--del:${Math.random()*.5}s;background:var(${i % 2 ? '--r1' : '--r2'})`; P.appendChild(e);
   }
-  el.classList.remove('play'); void el.offsetWidth; el.classList.add('play');
+  el.classList.remove('play'); void el.offsetWidth; el.classList.add('play'); snd('raidIn', dur);
   const n = +d.rCount || 0, c = $('rCount'), t0 = Date.now(); clearInterval(rI); clearTimeout(rT); c.textContent = '';
   if (n > 0) rI = setInterval(() => { const k = Math.min(1, (Date.now() - t0) / 2000); c.textContent = '+' + Math.round(n * k) + ' VIEWERS'; if (k >= 1) clearInterval(rI); }, 40);
   rT = setTimeout(() => el.classList.remove('play'), dur * 1000);
@@ -390,10 +491,12 @@ firebase.database().ref('board').on('value', snap => {
   $('soonH').textContent = d.soonH || 'STARTING SOON'; $('soonS').textContent = d.soonS || '';
   $('lowN').textContent = d.lowN || ''; $('lowR').textContent = d.lowR || '';
   const p = d.page || (d.visible === false ? 'off' : 'score');
+  if (pPrev !== undefined && p !== pPrev) snd('pageChange'); pPrev = p;
   $('score').classList.toggle('on', p === 'score');
   $('timer').classList.toggle('on', p === 'timer');
   $('soon').classList.toggle('on', p === 'soon');
-  $('lower').classList.toggle('on', !!d.lowOn && !!d.lowN);
+  const lo = !!d.lowOn && !!d.lowN; if (lo && lowPrev === false) snd('lowerIn'); lowPrev = lo;
+  $('lower').classList.toggle('on', lo);
   goal(); trigCheck(); raidCheck(); tick();
   const pk = [d.gAuto, d.gChan, d.gWorker].join('|'); if (pk !== pollKey) { pollKey = pk; autoN = null; poll(); }
 });
