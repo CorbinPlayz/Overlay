@@ -22,6 +22,10 @@
   .colors { display:flex; flex-wrap:wrap; gap:18px; align-items:end; } .colors label { font-size:13px; display:flex; flex-direction:column; gap:4px; }
   #login { } #app { display:none; } code { background:#0a1226; padding:2px 6px; border-radius:4px; user-select:all; }
   #msg { margin-top:12px; color:#ffb86b; min-height:20px; }
+  .tabs { display:flex; flex-wrap:wrap; margin-top:16px; border-bottom:1px solid var(--line); }
+  .tabs button { border-radius:6px 6px 0 0; margin:0 3px 0 0; }
+  label.f { font-size:13px; margin-right:12px; } .hint { font-size:13px; opacity:.7; margin:6px 0 0; }
+  #playRaid { width:100%; font-size:20px; padding:16px; background:var(--pink); border-color:var(--pink); color:#fff; font-weight:700; margin:8px 0 0; }
   @media (max-width:640px){ .row{grid-template-columns:1fr} }
 </style>
 </head>
@@ -37,10 +41,15 @@
     <button data-page="timer" onclick="page('timer')">Timer</button>
     <button data-page="soon" onclick="page('soon')">Starting / BRB</button>
     <button data-page="off" onclick="page('off')">Hide all</button>
-    <button id="lowBtn" onclick="toggleLower()">Lower third</button>
+    <button id="lowBtn" onclick="toggleLower()">Lower third</button><button class="gb" onclick="gToggle()">Goal bar</button>
   </div>
 
-  <div class="row" style="margin-top:16px">
+  <div class="tabs">
+    <button data-go="score" onclick="tab('score')">Scoreboard</button><button data-go="timer" onclick="tab('timer')">Timer</button>
+    <button data-go="screens" onclick="tab('screens')">Screens</button><button data-go="goal" onclick="tab('goal')">Goal</button>
+    <button data-go="raid" onclick="tab('raid')">Raid</button><button data-go="colors" onclick="tab('colors')">Colors</button>
+  </div>
+  <div class="row" data-tab="score" style="margin-top:16px">
     <div class="panel a">
       <input type="text" id="nameA" placeholder="Left team name"><button onclick="setName('A')">Set name</button>
       <div class="big" id="sA">0</div>
@@ -52,12 +61,12 @@
       <button onclick="add('B',1)">+1</button><button onclick="add('B',2)">+2</button><button onclick="add('B',3)">+3</button><button onclick="add('B',-1)">-1</button>
     </div>
   </div>
-  <div class="panel">
+  <div class="panel" data-tab="score">
     <input type="text" id="label" placeholder="Middle text (e.g. ROUND 1)">
     <button onclick="setLabel()">Set middle text</button><button onclick="swap()">Swap sides</button><button onclick="resetScores()">Reset scores</button>
   </div>
 
-  <div class="panel">
+  <div class="panel" data-tab="timer">
     <h2>Timer <span id="tNow" style="float:right;font-variant-numeric:tabular-nums"></span></h2>
     <input type="number" id="tm" min="0" value="5"> min <input type="number" id="ts" min="0" max="59" value="0"> sec
     <select id="tmode" style="width:auto;margin-left:8px"><option value="down">Countdown</option><option value="up">Stopwatch</option></select>
@@ -65,7 +74,7 @@
     <button id="tbBtn" onclick="save({timerOnBoard:!state.timerOnBoard})">Show timer in scoreboard</button></div>
   </div>
 
-  <div class="panel">
+  <div class="panel" data-tab="screens">
     <h2>Starting / BRB screen</h2>
     <input type="text" id="soonH" placeholder="Big text"><input type="text" id="soonS" placeholder="Small text (optional)">
     <button onclick="setSoon()">Update screen</button>
@@ -73,13 +82,35 @@
     <button onclick="quick('STARTING SOON')">Starting soon</button><button onclick="quick('BE RIGHT BACK')">BRB</button><button onclick="quick('THANKS FOR WATCHING')">Thanks</button>
   </div>
 
-  <div class="panel">
+  <div class="panel" data-tab="screens">
     <h2>Lower third</h2>
     <input type="text" id="lowN" placeholder="Name"><input type="text" id="lowR" placeholder="Title or role">
     <button onclick="setLower()">Update and show</button>
   </div>
 
-  <div class="panel">
+  <div class="panel" data-tab="goal">
+    <h2>Follower goal <span id="gShow" style="float:right"></span></h2>
+    <input type="text" id="gLabel" placeholder="Goal title (e.g. FOLLOWER GOAL)">
+    <label class="f">Followers now <input type="number" id="gCur" min="0"></label>
+    <label class="f">Goal <input type="number" id="gGoal" min="1"></label><button onclick="gSet()">Update</button>
+    <div><button onclick="gAdd(1)">+1</button><button onclick="gAdd(5)">+5</button><button onclick="gAdd(10)">+10</button><button onclick="gAdd(-1)">-1</button></div>
+    <div><button class="gb" onclick="gToggle()">Show goal</button><button id="gbBtn" onclick="save({gNoBar:!state.gNoBar})">Progress bar</button></div>
+  </div>
+  <div class="panel" data-tab="goal"><h2>Goal colors</h2><div class="colors">
+    <label>Bar / numbers<input type="color" id="cGF" value="#19e3ff"></label><label>Bar background<input type="color" id="cGT" value="#1a2440"></label>
+    <label>Panel<input type="color" id="cGB" value="#060a18"></label><label>Text<input type="color" id="cGK" value="#eaf9ff"></label></div></div>
+  <div class="panel" data-tab="raid">
+    <h2>Raid animation</h2>
+    <input type="text" id="rName" placeholder="Raider channel name">
+    <input type="text" id="rHead" placeholder="Headline (default: INCOMING RAID)">
+    <input type="text" id="rMsg" placeholder="Message (e.g. Welcome raiders!)">
+    <label class="f">Viewers <input type="number" id="rCount" min="0"></label><label class="f">Length (seconds) <input type="number" id="rDur" min="4" max="30" value="8"></label>
+    <button id="playRaid" onclick="playRaid()">PLAY RAID ANIMATION</button>
+    <p class="hint">It plays on the stream only, so you won't see it on this page.</p>
+  </div>
+  <div class="panel" data-tab="raid"><h2>Raid colors</h2><div class="colors">
+    <label>Headline / rings<input type="color" id="cR1" value="#ff2e88"></label><label>Name / accents<input type="color" id="cR2" value="#19e3ff"></label></div></div>
+  <div class="panel" data-tab="colors">
     <h2>Colors</h2>
     <div class="colors">
       <label>Left team<input type="color" id="cA" value="#19e3ff"></label>
@@ -126,18 +157,21 @@ firebase.auth().onAuthStateChanged(u => {
   $('uid').textContent = u ? u.uid : 'sign in first';
 });
 
-const colorIds = ['cA','cB','cAcc','cBg','cText'];
+const colorIds = ['cA','cB','cAcc','cBg','cText','cGF','cGT','cGB','cGK','cR1','cR2'];
 colorIds.forEach(id => $(id).addEventListener('change', e => save({ [id]: e.target.value })));
 function preset(a,b,c){ save({ cA:a, cB:b, cAcc:c }); }
 
 ref.on('value', s => {
   const d = s.val(); if (!d) return;
   state = Object.assign(state, d);
+  if (!window.filled) { window.filled = 1; ['gLabel','gCur','gGoal','rName','rCount','rHead','rMsg','rDur'].forEach(k => { if (state[k] != null) $(k).value = state[k]; }); }
   $('sA').textContent = state.scoreA || 0; $('sB').textContent = state.scoreB || 0;
   $('nameA').placeholder = state.nameA || 'Left team name'; $('nameB').placeholder = state.nameB || 'Right team name';
   colorIds.forEach(id => { if (state[id]) $(id).value = state[id]; });
   document.querySelectorAll('[data-page]').forEach(b => b.classList.toggle('on', b.dataset.page === (state.page || 'score')));
   $('lowBtn').classList.toggle('on', !!state.lowOn); $('tbBtn').classList.toggle('on', !!state.timerOnBoard);
+  document.querySelectorAll('.gb').forEach(b => b.classList.toggle('on', !!state.gOn)); $('gbBtn').classList.toggle('on', !state.gNoBar);
+  $('gShow').textContent = (state.gCur || 0) + ' / ' + (state.gGoal || 100);
 }, e => say('Cannot read database: ' + e.message));
 
 function page(p){ save({ page:p }); }
@@ -162,6 +196,14 @@ function clearSoon(){ $('soonH').value=''; $('soonS').value=''; save({ soonH:'ST
 function quick(t){ save({ soonH:t, page:'soon' }); }
 function setLower(){ save({ lowN:$('lowN').value.trim(), lowR:$('lowR').value.trim(), lowOn:true }); }
 function toggleLower(){ save({ lowOn: !state.lowOn }); }
+function tab(t){ document.querySelectorAll('[data-tab]').forEach(e => e.style.display = e.dataset.tab === t ? '' : 'none'); document.querySelectorAll('[data-go]').forEach(b => b.classList.toggle('on', b.dataset.go === t)); }
+tab('score');
+function gSet(){ const c=$('gCur').value, g=$('gGoal').value;
+  save({ gCur: c==='' ? (state.gCur||0) : Math.max(0,+c), gGoal: g==='' ? (state.gGoal||100) : Math.max(1,+g), gLabel: $('gLabel').value.trim().toUpperCase() || 'FOLLOWER GOAL' }); }
+function gAdd(n){ save({ gCur: Math.max(0,(state.gCur||0)+n) }); $('gCur').value = state.gCur; }
+function gToggle(){ save({ gOn: !state.gOn }); }
+function playRaid(){ save({ rName:$('rName').value.trim().toUpperCase(), rHead:$('rHead').value.trim().toUpperCase() || 'INCOMING RAID', rMsg:$('rMsg').value.trim(),
+  rCount:+$('rCount').value||0, rDur:Math.min(30,Math.max(4,+$('rDur').value||8)), rTrig:firebase.database.ServerValue.TIMESTAMP }); }
 </script>
 </body>
 </html>
