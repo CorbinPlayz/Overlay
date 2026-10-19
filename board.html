@@ -43,7 +43,7 @@
   #goal .gn { font-size:52px; font-weight:800; color:var(--gf); text-shadow:0 0 20px currentColor; font-variant-numeric:tabular-nums; }
   #goal .gn.bump { animation:bump .5s ease-out; }
   .gbar { height:26px; margin-top:10px; background:var(--gt); transform:skewX(-20deg); overflow:hidden; }
-  #goal.nobar .gbar { display:none; }
+  #goal.nobar .gw { display:none; }
   .gbar i { display:block; height:100%; width:0; background:var(--gf); box-shadow:0 0 18px var(--gf); position:relative; overflow:hidden; transition:width .9s cubic-bezier(.2,.9,.3,1); }
   .gbar i::after { content:""; position:absolute; inset:0; background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%); animation:shine 2.4s linear infinite; }
   #goal .gd { display:none; font-size:28px; font-weight:800; color:var(--gf); letter-spacing:.14em; margin-top:8px; text-align:center; }
@@ -51,6 +51,14 @@
   #goal.done { animation:gpulse 1.6s ease-in-out infinite; }
   #gPlus { position:absolute; right:40px; top:30px; font-size:44px; font-weight:800; color:var(--gf); opacity:0; }
   #gPlus.go { animation:plus 1.1s ease-out; }
+  .gw { position:relative; }
+  #gTip { position:absolute; left:0; top:-4px; transform:translate(-50%,-100%); padding:0 12px; background:var(--gf); color:#04121a; font-size:26px; font-weight:800; opacity:0; transition:left .9s cubic-bezier(.2,.9,.3,1); }
+  #gTip.go { animation:tip 1.4s ease-out .3s; }
+  #gFill.surge { animation:surge .9s ease-out; }
+  #goal .gn.spin { animation:spin 1s ease-in-out; }
+  @keyframes tip { 0%{opacity:0;transform:translate(-50%,-60%) scale(.4)} 20%{opacity:1;transform:translate(-50%,-100%) scale(1.3)} 100%{opacity:0;transform:translate(-50%,-190%) scale(1)} }
+  @keyframes surge { 0%{filter:brightness(2.4)} 100%{filter:none} }
+  @keyframes spin { 0%{transform:perspective(500px) rotateY(0)} 50%{text-shadow:0 0 40px currentColor,0 0 80px currentColor} 100%{transform:perspective(500px) rotateY(720deg)} }
   @keyframes bump { 0%{transform:scale(1.35);filter:brightness(2)} 100%{transform:none;filter:none} }
   @keyframes shine { from{transform:translateX(-100%)} to{transform:translateX(100%)} }
   @keyframes plus { 0%{opacity:1;transform:translateY(20px) scale(1.4)} 100%{opacity:0;transform:translateY(-40px)} }
@@ -76,7 +84,7 @@
   #rP i { position:absolute; left:50%; top:50%; width:12px; height:12px; opacity:0; }
   .play #rP i { animation:fly 2.2s ease-out var(--del) forwards; }
   @keyframes fly { 0%{transform:translate(0,0) rotate(0);opacity:1} 100%{transform:translate(var(--x),var(--y)) rotate(540deg) scale(.2);opacity:0} }
-  @media (prefers-reduced-motion:reduce){ .score.pop,.gn.bump,#gPlus.go,.gbar i::after{animation:none} .pg{transition:none} }
+  @media (prefers-reduced-motion:reduce){ .score.pop,.gn.bump,#gPlus.go,.gbar i::after,#gTip.go,#gFill.surge,#goal .gn.spin{animation:none} .pg{transition:none} }
 </style>
 </head>
 <body>
@@ -88,7 +96,7 @@
 <div id="timer" class="pg top"><div class="t" id="tBig">0:00</div></div>
 <div id="soon" class="pg"><div class="h" id="soonH"></div><div class="s" id="soonS"></div><div class="t" id="soonT"></div></div>
 <div id="lower" class="pg"><div class="n" id="lowN"></div><div class="r" id="lowR"></div></div>
-<div id="goal" class="pg"><div class="gh"><span id="gLabel"></span><span class="gn" id="gNum"></span></div><div class="gbar"><i id="gFill"></i></div><div class="gd">GOAL REACHED!</div><div id="gPlus"></div></div>
+<div id="goal" class="pg"><div class="gh"><span id="gLabel"></span><span class="gn" id="gNum"></span></div><div class="gw"><div class="gbar"><i id="gFill"></i></div><b id="gTip"></b></div><div class="gd">GOAL REACHED!</div><div id="gPlus"></div></div>
 <div id="raid"><div class="rflash"></div><b class="ring"></b><b class="ring" style="animation-delay:.25s;border-color:var(--r2)"></b><b class="ring" style="animation-delay:.5s"></b><div id="rP"></div>
 <div class="rt" id="rHead"></div><div class="rt" id="rName" style="animation-delay:.35s"></div><div class="rt" id="rCount" style="animation-delay:.7s"></div><div class="rt" id="rMsg" style="animation-delay:1s"></div></div>
 
@@ -132,7 +140,7 @@ function tick() {
 }
 setInterval(tick, 200);
 
-let gLast, rLast, rFirst = true, rT, rI, autoN = null, pollKey = '';
+let spinT, gLast, rLast, rFirst = true, rT, rI, autoN = null, pollKey = '';
 function poll() {
   if (!(d.gAuto && d.gChan && d.gWorker)) return;
   fetch(d.gWorker.replace(/\/+$/, '') + '?login=' + encodeURIComponent(d.gChan)).then(r => r.json()).then(j => {
@@ -144,12 +152,14 @@ function goal() {
   const r = document.documentElement.style, cur = (d.gAuto && autoN !== null) ? autoN : (d.gCur || 0), tot = Math.max(1, d.gGoal || 100);
   r.setProperty('--gf', d.cGF || '#19e3ff'); r.setProperty('--gt', d.cGT || '#1a2440'); r.setProperty('--gk', d.cGK || '#eaf9ff'); r.setProperty('--gg', rgba(d.cGB || '#060a18', .82));
   $('gLabel').textContent = d.gLabel || 'FOLLOWER GOAL'; $('gNum').textContent = cur + ' / ' + tot;
-  $('gFill').style.width = Math.min(100, cur / tot * 100) + '%';
+  $('gFill').style.width = Math.min(100, cur / tot * 100) + '%'; $('gTip').style.left = Math.min(100, cur / tot * 100) + '%';
   const g = $('goal'); g.classList.toggle('on', !!d.gOn); g.classList.toggle('nobar', !!d.gNoBar); g.classList.toggle('done', cur >= tot);
   g.classList.toggle('pbl', d.gPos === 'bl'); g.classList.toggle('pc', d.gPos === 'c'); g.style.setProperty('--gs', Math.min(2, Math.max(.1, d.gScale || 1)));
   if (gLast !== undefined && cur > gLast) {
-    const p = $('gPlus'), n = $('gNum'); p.textContent = '+' + (cur - gLast);
-    [p, n].forEach(e => e.classList.remove('go', 'bump')); void p.offsetWidth; p.classList.add('go'); n.classList.add('bump');
+    const p = $('gPlus'), n = $('gNum'), t = $('gTip'), f = $('gFill'); p.textContent = t.textContent = '+' + (cur - gLast);
+    [p, n, t, f].forEach(e => e.classList.remove('go', 'bump', 'spin', 'surge')); void p.offsetWidth;
+    p.classList.add('go'); t.classList.add('go'); f.classList.add('surge'); n.classList.add('bump');
+    clearTimeout(spinT); spinT = setTimeout(() => { n.classList.remove('bump'); n.classList.add('spin'); }, 2000);
   }
   gLast = cur;
 }
