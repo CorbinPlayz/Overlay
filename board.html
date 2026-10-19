@@ -33,9 +33,11 @@
     clip-path:polygon(0 0,100% 0,calc(100% - 24px) 100%,0 100%); transform:translateX(-60px); }
   #lower.on { transform:none; }
   #lower .n { font-size:56px; font-weight:800; } #lower .r { font-size:30px; font-weight:500; color:var(--acc); }
-  #goal { right:80px; bottom:90px; width:640px; padding:18px 34px 22px; background:var(--gg); border-bottom:4px solid var(--gf); color:var(--gk);
-    clip-path:polygon(24px 0,100% 0,100% 100%,0 100%); transform-origin:right bottom;
+  #goal { right:80px; bottom:90px; width:708px; transform-origin:right bottom;
     transform:translate(var(--gx,0),var(--gy,0)) translateY(40px) scale(var(--gs,1)); }
+  #goal.inst { transition:none; }
+  #gCard { position:relative; z-index:1; box-sizing:border-box; padding:18px 34px 22px; background:var(--gg); border-bottom:4px solid var(--gf); color:var(--gk);
+    clip-path:polygon(24px 0,100% 0,100% 100%,0 100%); }
   #goal.on { transform:translate(var(--gx,0),var(--gy,0)) scale(var(--gs,1)); }
   #goal.pbl { right:auto; left:80px; transform-origin:left bottom; }
   #goal.pc { right:auto; bottom:auto; left:50%; top:50%; --gx:-50%; --gy:-50%; transform-origin:center; }
@@ -59,6 +61,35 @@
   @keyframes tip { 0%{opacity:0;transform:translate(-50%,-60%) scale(.4)} 20%{opacity:1;transform:translate(-50%,-100%) scale(1.3)} 100%{opacity:0;transform:translate(-50%,-190%) scale(1)} }
   @keyframes surge { 0%{filter:brightness(2.4)} 100%{filter:none} }
   @keyframes spin { 0%{transform:perspective(500px) rotateY(0)} 50%{text-shadow:0 0 40px currentColor,0 0 80px currentColor} 100%{transform:perspective(500px) rotateY(720deg)} }
+  #gFx { position:absolute; left:50%; top:50%; width:0; height:0; pointer-events:none; }
+  #gBloom, #gRays, .gring, #gOne, #gSp i { position:absolute; opacity:0; }
+  #gBloom { z-index:0; width:1100px; height:520px; left:-550px; top:-260px; border-radius:50%; background:radial-gradient(closest-side,var(--gl0) 0,var(--gl1) 40%,transparent 100%); }
+  #gRays { z-index:0; width:1500px; height:1500px; left:-750px; top:-750px; background:repeating-conic-gradient(var(--gl2) 0 5deg,transparent 5deg 15deg);
+    -webkit-mask:radial-gradient(circle,#000 0,transparent 62%); mask:radial-gradient(circle,#000 0,transparent 62%); }
+  .gring { z-index:2; width:240px; height:240px; left:-120px; top:-120px; border:5px solid var(--gf); border-radius:50%; box-shadow:0 0 24px var(--gf); }
+  #gSp { position:absolute; z-index:2; }
+  #gSp i { left:-6px; top:-6px; width:12px; height:12px; box-shadow:0 0 12px 2px var(--gf); }
+  #gOne { z-index:2; left:-300px; top:-100px; width:600px; height:200px; line-height:200px; text-align:center; font-size:170px; font-weight:800; color:var(--gk); text-shadow:0 0 30px var(--gf),0 0 80px var(--gf); }
+  #gFx.go #gBloom { animation:gbloom 2.6s ease-out both; }
+  #gFx.go #gRays { animation:grays 2.6s linear both; }
+  #gFx.go .gring { animation:gring 1.4s ease-out both; }
+  #gFx.go #gSp i { animation:gfly 1.3s ease-out var(--del) forwards; }
+  #gFx.go #gOne { animation:gone 1.7s ease-in-out both; }
+  #gCard.warp { animation:warp 1s cubic-bezier(.2,.9,.3,1.1) 1.2s both; }
+  @keyframes gbloom { 0%{opacity:0;transform:scale(.2)} 12%{opacity:1;transform:scale(.8)} 45%{opacity:.5;transform:scale(1)} 58%{opacity:1;transform:scale(1.15)} 100%{opacity:0;transform:scale(1.5)} }
+  @keyframes grays { 0%{opacity:0;transform:rotate(0) scale(.3)} 15%{opacity:1} 60%{opacity:.9} 100%{opacity:0;transform:rotate(70deg) scale(1.1)} }
+  @keyframes gring { 0%{opacity:.9;transform:scale(.2)} 100%{opacity:0;transform:scale(9)} }
+  @keyframes gfly { 0%{transform:translate(0,0) scale(1);opacity:1} 100%{transform:translate(var(--x),var(--y)) scale(.2);opacity:0} }
+  @keyframes gone {
+    0%{opacity:0;transform:perspective(700px) scale(.1,.1) rotateY(0) rotateZ(-180deg) skewX(0);filter:blur(6px)}
+    16%{opacity:1;transform:perspective(700px) scale(1.15,1.15) rotateY(0) rotateZ(0) skewX(0);filter:blur(0)}
+    50%{opacity:1;transform:perspective(700px) scale(1,1) rotateY(360deg) rotateZ(6deg) skewX(-10deg)}
+    78%{opacity:1;transform:perspective(700px) scale(1.25,.8) rotateY(720deg) rotateZ(-8deg) skewX(-22deg)}
+    100%{opacity:0;transform:perspective(700px) scale(5,.4) rotateY(900deg) rotateZ(0) skewX(-22deg);filter:blur(10px)} }
+  @keyframes warp {
+    0%{opacity:0;transform:perspective(900px) scale(.12,.45) rotateY(-540deg) skewX(30deg);filter:blur(14px) brightness(3)}
+    60%{opacity:1;filter:blur(2px) brightness(1.8)}
+    100%{opacity:1;transform:perspective(900px) scale(1,1) rotateY(0) skewX(0);filter:blur(0) brightness(1)} }
   @keyframes bump { 0%{transform:scale(1.35);filter:brightness(2)} 100%{transform:none;filter:none} }
   @keyframes shine { from{transform:translateX(-100%)} to{transform:translateX(100%)} }
   @keyframes plus { 0%{opacity:1;transform:translateY(20px) scale(1.4)} 100%{opacity:0;transform:translateY(-40px)} }
@@ -84,7 +115,7 @@
   #rP i { position:absolute; left:50%; top:50%; width:12px; height:12px; opacity:0; }
   .play #rP i { animation:fly 2.2s ease-out var(--del) forwards; }
   @keyframes fly { 0%{transform:translate(0,0) rotate(0);opacity:1} 100%{transform:translate(var(--x),var(--y)) rotate(540deg) scale(.2);opacity:0} }
-  @media (prefers-reduced-motion:reduce){ .score.pop,.gn.bump,#gPlus.go,.gbar i::after,#gTip.go,#gFill.surge,#goal .gn.spin{animation:none} .pg{transition:none} }
+  @media (prefers-reduced-motion:reduce){ .score.pop,.gn.bump,#gPlus.go,.gbar i::after,#gTip.go,#gFill.surge,#goal .gn.spin,#gCard.warp{animation:none} #gFx{display:none} .pg{transition:none} }
 </style>
 </head>
 <body>
@@ -96,7 +127,9 @@
 <div id="timer" class="pg top"><div class="t" id="tBig">0:00</div></div>
 <div id="soon" class="pg"><div class="h" id="soonH"></div><div class="s" id="soonS"></div><div class="t" id="soonT"></div></div>
 <div id="lower" class="pg"><div class="n" id="lowN"></div><div class="r" id="lowR"></div></div>
-<div id="goal" class="pg"><div class="gh"><span id="gLabel"></span><span class="gn" id="gNum"></span></div><div class="gw"><div class="gbar"><i id="gFill"></i></div><b id="gTip"></b></div><div class="gd">GOAL REACHED!</div><div id="gPlus"></div></div>
+<div id="goal" class="pg">
+<div id="gFx"><div id="gBloom"></div><div id="gRays"></div><b class="gring"></b><b class="gring" style="animation-delay:.18s"></b><div id="gSp"></div><div id="gOne"></div></div>
+<div id="gCard"><div class="gh"><span id="gLabel"></span><span class="gn" id="gNum"></span></div><div class="gw"><div class="gbar"><i id="gFill"></i></div><b id="gTip"></b></div><div class="gd">GOAL REACHED!</div><div id="gPlus"></div></div></div>
 <div id="raid"><div class="rflash"></div><b class="ring"></b><b class="ring" style="animation-delay:.25s;border-color:var(--r2)"></b><b class="ring" style="animation-delay:.5s"></b><div id="rP"></div>
 <div class="rt" id="rHead"></div><div class="rt" id="rName" style="animation-delay:.35s"></div><div class="rt" id="rCount" style="animation-delay:.7s"></div><div class="rt" id="rMsg" style="animation-delay:1s"></div></div>
 
@@ -148,20 +181,58 @@ function poll() {
   }).catch(() => {});
 }
 setInterval(poll, 20000);
-function goal() {
-  const r = document.documentElement.style, cur = (d.gAuto && autoN !== null) ? autoN : (d.gCur || 0), tot = Math.max(1, d.gGoal || 100);
-  r.setProperty('--gf', d.cGF || '#19e3ff'); r.setProperty('--gt', d.cGT || '#1a2440'); r.setProperty('--gk', d.cGK || '#eaf9ff'); r.setProperty('--gg', rgba(d.cGB || '#060a18', .82));
-  $('gLabel').textContent = d.gLabel || 'FOLLOWER GOAL'; $('gNum').textContent = cur + ' / ' + tot;
-  $('gFill').style.width = Math.min(100, cur / tot * 100) + '%'; $('gTip').style.left = Math.min(100, cur / tot * 100) + '%';
-  const g = $('goal'); g.classList.toggle('on', !!d.gOn); g.classList.toggle('nobar', !!d.gNoBar); g.classList.toggle('done', cur >= tot);
-  g.classList.toggle('pbl', d.gPos === 'bl'); g.classList.toggle('pc', d.gPos === 'c'); g.style.setProperty('--gs', Math.min(2, Math.max(.1, d.gScale || 1)));
-  if (gLast !== undefined && cur > gLast) {
-    const p = $('gPlus'), n = $('gNum'), t = $('gTip'), f = $('gFill'); p.textContent = t.textContent = '+' + (cur - gLast);
+let shown = null, pendT = null, holdT, popOn = false, pendD = 0, tLast, tFirst = true;
+const curNow = () => (d.gAuto && autoN !== null) ? autoN : (d.gCur || 0), totNow = () => Math.max(1, d.gGoal || 100);
+function updOn() { $('goal').classList.toggle('on', !!d.gOn && (d.gMode === 'always' || popOn)); }
+function showFor(ms) {
+  popOn = true; $('goal').classList.add('inst'); updOn(); clearTimeout(holdT);
+  holdT = setTimeout(() => { $('goal').classList.remove('inst'); popOn = false; updOn(); }, ms);
+}
+function sparks() {
+  const P = $('gSp'); P.innerHTML = '';
+  for (let i = 0; i < 40; i++) {
+    const e = document.createElement('i'), a = Math.random() * 6.283, m = 160 + Math.random() * 420, late = i % 2;
+    e.style.cssText = `--x:${Math.cos(a)*m}px;--y:${Math.sin(a)*m*.6}px;--del:${(late ? 1.15 : 0) + Math.random() * .25}s;background:var(${i % 3 ? '--gf' : '--gk'})`;
+    P.appendChild(e);
+  }
+}
+function intro(delta) {
+  const f = $('gFx'), c = $('gCard'); $('gOne').textContent = '+' + delta; sparks();
+  [f, c].forEach(e => e.classList.remove('go', 'warp')); void f.offsetWidth; f.classList.add('go'); c.classList.add('warp');
+}
+function render(cur, tot, delta) {
+  const pct = Math.min(100, cur / tot * 100) + '%', n = $('gNum');
+  n.textContent = cur + ' / ' + tot; $('gFill').style.width = pct; $('gTip').style.left = pct;
+  $('goal').classList.toggle('done', cur >= tot); shown = cur;
+  if (delta > 0) {
+    const p = $('gPlus'), t = $('gTip'), f = $('gFill'); p.textContent = t.textContent = '+' + delta;
     [p, n, t, f].forEach(e => e.classList.remove('go', 'bump', 'spin', 'surge')); void p.offsetWidth;
     p.classList.add('go'); t.classList.add('go'); f.classList.add('surge'); n.classList.add('bump');
     clearTimeout(spinT); spinT = setTimeout(() => { n.classList.remove('bump'); n.classList.add('spin'); }, 2000);
   }
-  gLast = cur;
+}
+function pop(delta) {
+  const hold = Math.min(120, Math.max(7, d.gHold || 12)) * 1000;
+  if (pendT) { pendD += delta; showFor(hold); return; }
+  if (popOn) { render(curNow(), totNow(), delta); showFor(hold); return; }
+  pendD = delta; intro(delta); showFor(hold);
+  pendT = setTimeout(() => { pendT = null; render(curNow(), totNow(), pendD); pendD = 0; }, 2300);
+}
+function goal() {
+  const r = document.documentElement.style, g = $('goal'), cur = curNow(), tot = totNow(), gf = d.cGF || '#19e3ff', gk = d.cGK || '#eaf9ff';
+  r.setProperty('--gf', gf); r.setProperty('--gt', d.cGT || '#1a2440'); r.setProperty('--gk', gk); r.setProperty('--gg', rgba(d.cGB || '#060a18', .82));
+  r.setProperty('--gl0', rgba(gk, .35)); r.setProperty('--gl1', rgba(gf, .55)); r.setProperty('--gl2', rgba(gf, .3));
+  $('gLabel').textContent = d.gLabel || 'FOLLOWER GOAL';
+  g.classList.toggle('nobar', !!d.gNoBar); g.classList.toggle('pbl', d.gPos === 'bl'); g.classList.toggle('pc', d.gPos === 'c');
+  g.style.setProperty('--gs', Math.min(2, Math.max(.1, d.gScale || 1)));
+  const rose = gLast !== undefined && cur > gLast, delta = rose ? cur - gLast : 0; gLast = cur;
+  if (rose && d.gOn) { if (d.gMode === 'always') render(cur, tot, delta); else pop(delta); }
+  else if (!pendT) render(cur, tot, 0);
+  updOn();
+}
+function trigCheck() {
+  if (tFirst) { tFirst = false; tLast = d.gTrig; return; }
+  if (d.gTrig && d.gTrig !== tLast) { tLast = d.gTrig; if (d.gOn) { if (d.gMode === 'always') render(curNow(), totNow(), 1); else pop(1); } }
 }
 function raidCheck() {
   if (rFirst) { rFirst = false; rLast = d.rTrig; return; }
@@ -197,7 +268,7 @@ firebase.database().ref('board').on('value', snap => {
   $('timer').classList.toggle('on', p === 'timer');
   $('soon').classList.toggle('on', p === 'soon');
   $('lower').classList.toggle('on', !!d.lowOn && !!d.lowN);
-  goal(); raidCheck(); tick();
+  goal(); trigCheck(); raidCheck(); tick();
   const pk = [d.gAuto, d.gChan, d.gWorker].join('|'); if (pk !== pollKey) { pollKey = pk; autoN = null; poll(); }
 });
 </script>
