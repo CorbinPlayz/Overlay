@@ -112,6 +112,13 @@
   <div class="panel" data-tab="goal"><h2>Goal colors</h2><div class="colors">
     <label>Bar / numbers<input type="color" id="cGF" value="#19e3ff"></label><label>Bar background<input type="color" id="cGT" value="#1a2440"></label>
     <label>Panel<input type="color" id="cGB" value="#060a18"></label><label>Text<input type="color" id="cGK" value="#eaf9ff"></label></div></div>
+  <div class="panel" data-tab="goal"><h2>Goal reached celebration</h2>
+    <div><button id="wBtn" onclick="save({gWinOff:!state.gWinOff})">Celebration on</button><button onclick="winTest()">Test celebration</button></div>
+    <input type="text" id="wHead" placeholder="Headline (default GOAL REACHED)">
+    <input type="text" id="wSub" placeholder="Subline - {N} becomes the goal number">
+    <label class="f">Length (sec) <input type="number" id="wLen" min="6" max="20" value="10"></label><label class="f">Intensity 1-10 <input type="number" id="wInt" min="1" max="10" value="10"></label><button onclick="winSave()">Save text</button>
+    <div class="colors"><label>Main color<input type="color" id="cW1" value="#19e3ff"></label><label>Accent color<input type="color" id="cW2" value="#ff2e88"></label></div>
+    <p class="hint">Plays full screen when the follower count reaches the goal. Test celebration plays it right now.</p></div>
   <div class="panel" data-tab="raid">
     <h2>Raid animation</h2>
     <input type="text" id="rName" placeholder="Raider channel name">
@@ -170,14 +177,14 @@ firebase.auth().onAuthStateChanged(u => {
   $('uid').textContent = u ? u.uid : 'sign in first';
 });
 
-const colorIds = ['cA','cB','cAcc','cBg','cText','cGF','cGT','cGB','cGK','cR1','cR2'];
+const colorIds = ['cA','cB','cAcc','cBg','cText','cGF','cGT','cGB','cGK','cR1','cR2','cW1','cW2'];
 colorIds.forEach(id => $(id).addEventListener('change', e => save({ [id]: e.target.value })));
 function preset(a,b,c){ save({ cA:a, cB:b, cAcc:c }); }
 
 ref.on('value', s => {
   const d = s.val(); if (!d) return;
   state = Object.assign(state, d);
-  if (!window.filled) { window.filled = 1; ['gLabel','gCur','gGoal','gHold','gChan','gWorker','rName','rCount','rHead','rMsg','rDur'].forEach(k => { if (state[k] != null) $(k).value = state[k]; }); }
+  if (!window.filled) { window.filled = 1; ['gLabel','gCur','gGoal','gHold','gChan','gWorker','rName','rCount','rHead','rMsg','rDur','wHead','wSub','wLen','wInt'].forEach(k => { if (state[k] != null) $(k).value = state[k]; }); }
   $('sA').textContent = state.scoreA || 0; $('sB').textContent = state.scoreB || 0;
   $('nameA').placeholder = state.nameA || 'Left team name'; $('nameB').placeholder = state.nameB || 'Right team name';
   colorIds.forEach(id => { if (state[id]) $(id).value = state[id]; });
@@ -187,7 +194,7 @@ ref.on('value', s => {
   $('gShow').textContent = (state.gCur || 0) + ' / ' + (state.gGoal || 100);
   $('gScale').value = Math.round((state.gScale || 1) * 100); $('gScaleV').textContent = $('gScale').value + '%';
   document.querySelectorAll('[data-gpos]').forEach(b => b.classList.toggle('on', b.dataset.gpos === (state.gPos || 'br')));
-  $('gAutoBtn').classList.toggle('on', !!state.gAuto);
+  $('gAutoBtn').classList.toggle('on', !!state.gAuto); $('wBtn').classList.toggle('on', !state.gWinOff);
   document.querySelectorAll('[data-gmode]').forEach(b => b.classList.toggle('on', b.dataset.gmode === (state.gMode === 'always' ? 'always' : 'pop')));
 }, e => say('Cannot read database: ' + e.message));
 
@@ -219,6 +226,8 @@ function gSet(){ const c=$('gCur').value, g=$('gGoal').value;
   save({ gCur: c==='' ? (state.gCur||0) : Math.max(0,+c), gGoal: g==='' ? (state.gGoal||100) : Math.max(1,+g), gLabel: $('gLabel').value.trim().toUpperCase() || 'FOLLOWER GOAL' }); }
 function gAdd(n){ save({ gCur: Math.max(0,(state.gCur||0)+n) }); $('gCur').value = state.gCur; }
 function gToggle(){ save({ gOn: !state.gOn }); }
+  function winSave(){ save({ wHead:$('wHead').value.trim().toUpperCase()||'GOAL REACHED', wSub:$('wSub').value.trim().toUpperCase(), wLen:Math.min(20,Math.max(6,+$('wLen').value||10)), wInt:Math.min(10,Math.max(1,+$('wInt').value||10)) }); say('Saved.'); }
+function winTest(){ winSave(); save({ gWinTrig:firebase.database.ServerValue.TIMESTAMP }); }
 function playRaid(){ save({ rName:$('rName').value.trim().toUpperCase(), rHead:$('rHead').value.trim().toUpperCase() || 'INCOMING RAID', rMsg:$('rMsg').value.trim(),
   rCount:+$('rCount').value||0, rDur:Math.min(30,Math.max(4,+$('rDur').value||8)), rTrig:firebase.database.ServerValue.TIMESTAMP }); }
 $('gScale').addEventListener('input', e => $('gScaleV').textContent = e.target.value + '%');
