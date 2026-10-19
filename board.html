@@ -132,9 +132,16 @@ function tick() {
 }
 setInterval(tick, 200);
 
-let gLast, rLast, rFirst = true, rT, rI;
+let gLast, rLast, rFirst = true, rT, rI, autoN = null, pollKey = '';
+function poll() {
+  if (!(d.gAuto && d.gChan && d.gWorker)) return;
+  fetch(d.gWorker.replace(/\/+$/, '') + '?login=' + encodeURIComponent(d.gChan)).then(r => r.json()).then(j => {
+    if (typeof j.total === 'number' && j.total !== autoN) { if (autoN === null) gLast = undefined; autoN = j.total; goal(); }
+  }).catch(() => {});
+}
+setInterval(poll, 20000);
 function goal() {
-  const r = document.documentElement.style, cur = d.gCur || 0, tot = Math.max(1, d.gGoal || 100);
+  const r = document.documentElement.style, cur = (d.gAuto && autoN !== null) ? autoN : (d.gCur || 0), tot = Math.max(1, d.gGoal || 100);
   r.setProperty('--gf', d.cGF || '#19e3ff'); r.setProperty('--gt', d.cGT || '#1a2440'); r.setProperty('--gk', d.cGK || '#eaf9ff'); r.setProperty('--gg', rgba(d.cGB || '#060a18', .82));
   $('gLabel').textContent = d.gLabel || 'FOLLOWER GOAL'; $('gNum').textContent = cur + ' / ' + tot;
   $('gFill').style.width = Math.min(100, cur / tot * 100) + '%';
@@ -181,6 +188,7 @@ firebase.database().ref('board').on('value', snap => {
   $('soon').classList.toggle('on', p === 'soon');
   $('lower').classList.toggle('on', !!d.lowOn && !!d.lowN);
   goal(); raidCheck(); tick();
+  const pk = [d.gAuto, d.gChan, d.gWorker].join('|'); if (pk !== pollKey) { pollKey = pk; autoN = null; poll(); }
 });
 </script>
 </body>
