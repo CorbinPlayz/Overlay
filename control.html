@@ -99,6 +99,13 @@
     <div><button data-gpos="br" onclick="save({gPos:'br'})">Bottom right</button><button data-gpos="bl" onclick="save({gPos:'bl'})">Bottom left</button><button data-gpos="c" onclick="save({gPos:'c'})">Center</button></div>
     <p class="hint">Bottom left shares a spot with the lower third, so don't show both at once.</p>
   </div>
+  <div class="panel" data-tab="goal">
+    <h2>Automatic follower count</h2>
+    <input type="text" id="gChan" placeholder="Twitch channel name (e.g. caleb)">
+    <input type="text" id="gWorker" placeholder="Worker URL (https://...workers.dev)">
+    <button onclick="gAutoSave()">Save</button><button onclick="gTest()">Test connection</button><button id="gAutoBtn" onclick="gAutoToggle()">Auto mode</button>
+    <p class="hint">Auto mode on: the goal follows Twitch every 20 seconds. Off: it uses the number you type.</p>
+  </div>
   <div class="panel" data-tab="goal"><h2>Goal colors</h2><div class="colors">
     <label>Bar / numbers<input type="color" id="cGF" value="#19e3ff"></label><label>Bar background<input type="color" id="cGT" value="#1a2440"></label>
     <label>Panel<input type="color" id="cGB" value="#060a18"></label><label>Text<input type="color" id="cGK" value="#eaf9ff"></label></div></div>
@@ -167,7 +174,7 @@ function preset(a,b,c){ save({ cA:a, cB:b, cAcc:c }); }
 ref.on('value', s => {
   const d = s.val(); if (!d) return;
   state = Object.assign(state, d);
-  if (!window.filled) { window.filled = 1; ['gLabel','gCur','gGoal','rName','rCount','rHead','rMsg','rDur'].forEach(k => { if (state[k] != null) $(k).value = state[k]; }); }
+  if (!window.filled) { window.filled = 1; ['gLabel','gCur','gGoal','gChan','gWorker','rName','rCount','rHead','rMsg','rDur'].forEach(k => { if (state[k] != null) $(k).value = state[k]; }); }
   $('sA').textContent = state.scoreA || 0; $('sB').textContent = state.scoreB || 0;
   $('nameA').placeholder = state.nameA || 'Left team name'; $('nameB').placeholder = state.nameB || 'Right team name';
   colorIds.forEach(id => { if (state[id]) $(id).value = state[id]; });
@@ -177,6 +184,7 @@ ref.on('value', s => {
   $('gShow').textContent = (state.gCur || 0) + ' / ' + (state.gGoal || 100);
   $('gScale').value = Math.round((state.gScale || 1) * 100); $('gScaleV').textContent = $('gScale').value + '%';
   document.querySelectorAll('[data-gpos]').forEach(b => b.classList.toggle('on', b.dataset.gpos === (state.gPos || 'br')));
+  $('gAutoBtn').classList.toggle('on', !!state.gAuto);
 }, e => say('Cannot read database: ' + e.message));
 
 function page(p){ save({ page:p }); }
@@ -211,6 +219,13 @@ function playRaid(){ save({ rName:$('rName').value.trim().toUpperCase(), rHead:$
   rCount:+$('rCount').value||0, rDur:Math.min(30,Math.max(4,+$('rDur').value||8)), rTrig:firebase.database.ServerValue.TIMESTAMP }); }
 $('gScale').addEventListener('input', e => $('gScaleV').textContent = e.target.value + '%');
 $('gScale').addEventListener('change', e => save({ gScale: e.target.value / 100 }));
+function gClean(){ return { w: $('gWorker').value.trim().replace(/\/+$/, ''), ch: $('gChan').value.trim().toLowerCase().replace(/^@/, '') }; }
+function gAutoSave(){ const o = gClean(); if (o.w && !/^https:\/\//.test(o.w)) return say('Worker URL must start with https://'); save({ gChan:o.ch, gWorker:o.w }); say('Saved.'); }
+function gAutoToggle(){ if (!state.gAuto && !(state.gChan && state.gWorker)) return say('Save a channel name and Worker URL first.'); say(''); save({ gAuto: !state.gAuto }); }
+async function gTest(){ const o = gClean(); if (!o.w || !o.ch) return say('Enter a channel and Worker URL first.'); say('Testing...');
+  try { const r = await fetch(o.w + '?login=' + encodeURIComponent(o.ch)), j = await r.json();
+    say(j.total != null ? 'Connected. ' + o.ch + ' has ' + j.total + ' followers.' : 'The Worker replied with an error: ' + (j.error || r.status)); }
+  catch (e) { say('Could not reach the Worker: ' + e.message); } }
 </script>
 </body>
 </html>
