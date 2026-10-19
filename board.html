@@ -150,7 +150,7 @@ function raid() {
   const el = $('raid'), r = document.documentElement.style, dur = Math.min(30, Math.max(4, d.rDur || 8)), name = d.rName || 'A FRIEND';
   r.setProperty('--r1', d.cR1 || '#ff2e88'); r.setProperty('--r2', d.cR2 || '#19e3ff'); r.setProperty('--d', dur + 's');
   $('rHead').textContent = d.rHead || 'INCOMING RAID'; $('rMsg').textContent = d.rMsg || ''; $('rName').textContent = name;
-  $('rName').style.fontSize = Math.max(90, Math.min(240, Math.floor(1700 / (name.length * .62)))) + 'px';
+  $('rName').style.fontSize = Math.max(90, Math.min(240, Math.floor(1600 / (name.length * .8)))) + 'px';
   const P = $('rP'); P.innerHTML = '';
   for (let i = 0; i < 80; i++) {
     const e = document.createElement('i'), a = Math.random() * 6.283, m = 300 + Math.random() * 900;
