@@ -34,8 +34,11 @@
   #lower.on { transform:none; }
   #lower .n { font-size:56px; font-weight:800; } #lower .r { font-size:30px; font-weight:500; color:var(--acc); }
   #goal { right:80px; bottom:90px; width:640px; padding:18px 34px 22px; background:var(--gg); border-bottom:4px solid var(--gf); color:var(--gk);
-    clip-path:polygon(24px 0,100% 0,100% 100%,0 100%); transform:translateY(40px); }
-  #goal.on { transform:none; }
+    clip-path:polygon(24px 0,100% 0,100% 100%,0 100%); transform-origin:right bottom;
+    transform:translate(var(--gx,0),var(--gy,0)) translateY(40px) scale(var(--gs,1)); }
+  #goal.on { transform:translate(var(--gx,0),var(--gy,0)) scale(var(--gs,1)); }
+  #goal.pbl { right:auto; left:80px; transform-origin:left bottom; }
+  #goal.pc { right:auto; bottom:auto; left:50%; top:50%; --gx:-50%; --gy:-50%; transform-origin:center; }
   #goal .gh { display:flex; justify-content:space-between; align-items:baseline; font-size:30px; font-weight:700; letter-spacing:.08em; }
   #goal .gn { font-size:52px; font-weight:800; color:var(--gf); text-shadow:0 0 20px currentColor; font-variant-numeric:tabular-nums; }
   #goal .gn.bump { animation:bump .5s ease-out; }
@@ -136,6 +139,7 @@ function goal() {
   $('gLabel').textContent = d.gLabel || 'FOLLOWER GOAL'; $('gNum').textContent = cur + ' / ' + tot;
   $('gFill').style.width = Math.min(100, cur / tot * 100) + '%';
   const g = $('goal'); g.classList.toggle('on', !!d.gOn); g.classList.toggle('nobar', !!d.gNoBar); g.classList.toggle('done', cur >= tot);
+  g.classList.toggle('pbl', d.gPos === 'bl'); g.classList.toggle('pc', d.gPos === 'c'); g.style.setProperty('--gs', Math.min(2, Math.max(.1, d.gScale || 1)));
   if (gLast !== undefined && cur > gLast) {
     const p = $('gPlus'), n = $('gNum'); p.textContent = '+' + (cur - gLast);
     [p, n].forEach(e => e.classList.remove('go', 'bump')); void p.offsetWidth; p.classList.add('go'); n.classList.add('bump');
@@ -150,7 +154,7 @@ function raid() {
   const el = $('raid'), r = document.documentElement.style, dur = Math.min(30, Math.max(4, d.rDur || 8)), name = d.rName || 'A FRIEND';
   r.setProperty('--r1', d.cR1 || '#ff2e88'); r.setProperty('--r2', d.cR2 || '#19e3ff'); r.setProperty('--d', dur + 's');
   $('rHead').textContent = d.rHead || 'INCOMING RAID'; $('rMsg').textContent = d.rMsg || ''; $('rName').textContent = name;
-  $('rName').style.fontSize = Math.max(90, Math.min(240, Math.floor(1700 / (name.length * .62)))) + 'px';
+  $('rName').style.fontSize = Math.max(90, Math.min(240, Math.floor(1600 / (name.length * .8)))) + 'px';
   const P = $('rP'); P.innerHTML = '';
   for (let i = 0; i < 80; i++) {
     const e = document.createElement('i'), a = Math.random() * 6.283, m = 300 + Math.random() * 900;
