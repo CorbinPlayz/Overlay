@@ -94,6 +94,72 @@
   @keyframes plus { 0%{opacity:1;transform:translateY(20px) scale(1.4)} 100%{opacity:0;transform:translateY(-40px)} }
   @keyframes gdp { from{opacity:.45} to{opacity:1} }
   @keyframes gpulse { 50%{filter:brightness(1.35)} }
+  /* ---- GOAL REACHED celebration ---- */
+  #gWin { position:absolute; inset:0; z-index:55; display:none; opacity:0; transition:opacity 1.2s; pointer-events:none; overflow:hidden; }
+  #gWin.show { display:block; } #gWin.on { opacity:1; transition:none; }
+  #gWin > *, #gwStage > * { position:absolute; }
+  #gwDim { inset:0; background:radial-gradient(ellipse at 50% 44%,rgba(5,10,28,.3) 0,rgba(2,4,14,.82) 100%); opacity:0; }
+  .go #gwDim { animation:gwFade .8s ease-out both; }
+  #gwGrid { left:-50%; width:200%; bottom:0; height:55%; transform:perspective(500px) rotateX(62deg); transform-origin:50% 100%; opacity:0;
+    background:linear-gradient(var(--w1) 2px,transparent 2px) 0 0/100% 90px,linear-gradient(90deg,var(--w1) 2px,transparent 2px) 0 0/90px 100%;
+    -webkit-mask:linear-gradient(transparent,#000 85%); mask:linear-gradient(transparent,#000 85%); }
+  .go #gwGrid { animation:gwGridIn 1s ease-out .3s both, gwGridMove 1.4s linear infinite; }
+  @keyframes gwGridIn { from{opacity:0} to{opacity:.55} }
+  @keyframes gwGridMove { from{background-position:0 0,0 0} to{background-position:0 90px,0 0} }
+  .gwB { top:0; bottom:0; width:150px; background:linear-gradient(90deg,transparent,var(--w1a),transparent); opacity:0; }
+  .go .gwB { animation:gwBeam 1.6s ease-in-out .3s infinite alternate; }
+  @keyframes gwBeam { from{opacity:.15} to{opacity:.9} }
+  #gwScan { left:0; right:0; top:0; height:4px; opacity:0; background:linear-gradient(90deg,transparent,var(--w1),#fff,var(--w1),transparent); box-shadow:0 0 30px 6px var(--w1); }
+  .go #gwScan { animation:gwScan 2.4s linear .4s infinite; }
+  @keyframes gwScan { 0%{top:-10px;opacity:0} 8%{opacity:.9} 92%{opacity:.9} 100%{top:1080px;opacity:0} }
+  #gwStage { left:50%; top:44%; width:0; height:0; z-index:3; }
+  .go #gwStage { animation:gwShake .8s linear 1.1s both; }
+  @keyframes gwShake { 0%,100%{transform:none} 10%{transform:translate(-14px,8px)} 25%{transform:translate(12px,-10px)} 40%{transform:translate(-9px,-6px)} 55%{transform:translate(8px,7px)} 70%{transform:translate(-5px,3px)} 85%{transform:translate(3px,-2px)} }
+  #gwRays, #gwRays2 { width:2600px; height:2600px; left:-1300px; top:-1300px; opacity:0; -webkit-mask:radial-gradient(circle,#000 0,transparent 55%); mask:radial-gradient(circle,#000 0,transparent 55%); }
+  #gwRays { background:repeating-conic-gradient(var(--w1a) 0 4deg,transparent 4deg 14deg); }
+  #gwRays2 { background:repeating-conic-gradient(var(--w2a) 0 3deg,transparent 3deg 20deg); }
+  .go #gwRays { animation:gwFade 1.5s ease-out both, gwRot 45s linear infinite; }
+  .go #gwRays2 { animation:gwFade 1.5s ease-out .3s both, gwRotR 30s linear infinite; }
+  #gwRings { left:0; top:0; }
+  .gwR { position:absolute; left:-150px; top:-150px; width:300px; height:300px; box-sizing:border-box; border-radius:50%; border:6px solid var(--rc); box-shadow:0 0 30px var(--rc),inset 0 0 30px var(--rc); opacity:0; }
+  .go .gwR { animation:gwR 2.2s ease-out var(--d) 3 both; }
+  @keyframes gwR { 0%{opacity:.9;transform:scale(.2)} 100%{opacity:0;transform:scale(9)} }
+  #gwHud { left:-450px; top:-450px; width:900px; height:900px; opacity:0; filter:drop-shadow(0 0 12px var(--w1)); }
+  .go #gwHud { animation:gwHud 1.2s cubic-bezier(.2,.9,.3,1.1) .15s both; }
+  @keyframes gwHud { 0%{opacity:0;transform:scale(.2) rotate(-200deg)} 100%{opacity:1;transform:none} }
+  #gwHud circle { fill:none; }
+  #gwHud .h1 { stroke:var(--w1); stroke-width:3; stroke-dasharray:120 40 8 40; animation:gwRot 16s linear infinite; }
+  #gwHud .h2 { stroke:var(--w2); stroke-width:14; stroke-dasharray:2 17.78; animation:gwRotR 24s linear infinite; }
+  #gwHud .h3 { stroke:var(--w1); stroke-width:6; stroke-dasharray:260 90 40 90; animation:gwRotR 10s linear infinite; }
+  #gwHud .h4 { stroke:var(--w2); stroke-width:2; stroke-dasharray:6 10; animation:gwRot 30s linear infinite; }
+  #gwNum { left:-450px; top:-120px; width:900px; height:240px; line-height:240px; text-align:center; font-size:230px; font-weight:800; color:var(--gk); font-variant-numeric:tabular-nums; text-shadow:0 0 30px var(--w1); opacity:0; }
+  .go #gwNum { animation:gwNum 1s cubic-bezier(.2,1.3,.4,1) .5s both, gwPulse 1.4s ease-in-out 1.6s infinite alternate; }
+  @keyframes gwNum { 0%{opacity:0;transform:perspective(800px) scale(.1) rotateY(-540deg);filter:blur(12px)} 100%{opacity:1;transform:none;filter:none} }
+  @keyframes gwPulse { from{text-shadow:0 0 25px var(--w1),0 0 60px var(--w1)} to{text-shadow:0 0 45px var(--w2),0 0 110px var(--w1)} }
+  #gwBand { left:-900px; top:150px; width:1800px; height:170px; transform:scaleX(0); border-top:3px solid var(--w1); border-bottom:3px solid var(--w2); box-shadow:0 0 40px var(--w1a);
+    background:linear-gradient(90deg,transparent,rgba(6,10,24,.9) 10%,rgba(6,10,24,.9) 90%,transparent); }
+  .go #gwBand { animation:gwBand .7s cubic-bezier(.2,.9,.3,1) .8s both; }
+  @keyframes gwBand { to{transform:scaleX(1)} }
+  #gwHead { left:-900px; top:150px; width:1800px; height:170px; line-height:170px; text-align:center; font-weight:800; letter-spacing:.1em; color:#fff; white-space:nowrap; text-shadow:0 0 30px var(--w1),0 0 80px var(--w1); perspective:800px; }
+  #gwHead i { display:inline-block; font-style:normal; opacity:0; }
+  .go #gwHead i { animation:gwLet .8s cubic-bezier(.2,1.3,.4,1) calc(1.1s + var(--i) * .07s) both; }
+  .go #gwHead { animation:gwGl 3.4s steps(1) 3.5s infinite; }
+  @keyframes gwLet { 0%{opacity:0;transform:translateY(-260px) scale(3.2) rotateX(80deg);filter:blur(14px)} 60%{opacity:1;filter:blur(0)} 100%{opacity:1;transform:none;filter:none} }
+  @keyframes gwGl { 0%,88%,100%{transform:none;text-shadow:0 0 30px var(--w1),0 0 80px var(--w1)} 90%{transform:translateX(7px) skewX(-8deg);text-shadow:-9px 0 0 var(--w2),9px 0 0 var(--w1),0 0 40px var(--w1)} 94%{transform:translateX(-6px);text-shadow:9px 0 0 var(--w2),-9px 0 0 var(--w1),0 0 40px var(--w2)} 97%{transform:translateX(3px) skewX(5deg)} }
+  #gwSub { left:-900px; top:335px; width:1800px; text-align:center; font-size:52px; font-weight:700; letter-spacing:.3em; color:var(--gk); text-shadow:0 0 20px var(--w2); opacity:0; }
+  .go #gwSub { animation:gwSub 1s ease-out 2.5s both; }
+  @keyframes gwSub { from{opacity:0;letter-spacing:.9em;filter:blur(8px)} to{opacity:1;letter-spacing:.3em;filter:none} }
+  #gwTL, #gwTR { z-index:3; top:60px; font-size:26px; font-weight:700; letter-spacing:.3em; color:var(--w1); text-shadow:0 0 12px var(--w1); padding:6px 16px; border-left:5px solid var(--w2); background:rgba(6,10,24,.6); opacity:0; }
+  #gwTL { left:70px; } #gwTR { right:70px; }
+  .go #gwTL, .go #gwTR { animation:gwFade .5s ease-out 1.2s both, gwBlink 1.1s steps(2) 2s infinite; }
+  @keyframes gwBlink { 50%{opacity:.5} }
+  #gwFlash { inset:0; z-index:4; opacity:0; background:radial-gradient(circle at 50% 44%,#fff 0,var(--w1) 38%,transparent 78%); }
+  .go #gwFlash { animation:gwFl 1.1s ease-out both; }
+  @keyframes gwFl { 0%{opacity:1} 100%{opacity:0} }
+  #gWin canvas { left:0; top:0; z-index:5; }
+  @keyframes gwFade { from{opacity:0} to{opacity:1} }
+  @keyframes gwRot { to{transform:rotate(360deg)} }
+  @keyframes gwRotR { to{transform:rotate(-360deg)} }
   #raid { position:absolute; inset:0; display:none; z-index:50; overflow:hidden; opacity:0; background:radial-gradient(circle,var(--glass) 0,var(--solid) 75%); }
   #raid::after { content:""; position:absolute; inset:0; background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 2px,transparent 2px 6px); }
   #raid.play { display:block; animation:rIn var(--d,8s) linear forwards; }
@@ -132,7 +198,10 @@
 <div id="raid"><div class="rflash"></div><b class="ring"></b><b class="ring" style="animation-delay:.25s;border-color:var(--r2)"></b><b class="ring" style="animation-delay:.5s"></b><div id="rP"></div>
 <div class="rt" id="rHead"></div><div class="rt" id="rName" style="animation-delay:.35s"></div><div class="rt" id="rCount" style="animation-delay:.7s"></div><div class="rt" id="rMsg" style="animation-delay:1s"></div></div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<div id="gWin"><div id="gwDim"></div><div id="gwGrid"></div><i class="gwB" style="left:7%"></i><i class="gwB" style="right:7%"></i><div id="gwScan"></div>
+<div id="gwStage"><div id="gwRays"></div><div id="gwRays2"></div><div id="gwRings"></div><svg id="gwHud" viewBox="-400 -400 800 800"><circle class="h1" r="380"/><circle class="h2" r="340"/><circle class="h3" r="300"/><circle class="h4" r="250"/></svg><div id="gwNum"></div><div id="gwBand"></div><div id="gwHead"></div><div id="gwSub"></div></div>
+<div id="gwTL">SYSTEM // OBJECTIVE COMPLETE</div><div id="gwTR">STATUS // 100% SYNCED</div><div id="gwFlash"></div><canvas id="gwC" width="1920" height="1080"></canvas></div>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 <script>
 firebase.initializeApp({
@@ -235,13 +304,60 @@ function goal() {
   $('gLabel').textContent = d.gLabel || 'FOLLOWER GOAL';
   g.classList.toggle('nobar', !!d.gNoBar); g.classList.toggle('pbl', d.gPos === 'bl'); g.classList.toggle('pc', d.gPos === 'c');
   g.style.setProperty('--gs', Math.min(2, Math.max(.1, d.gScale || 1)));
-  const rose = gLast !== undefined && cur > gLast, delta = rose ? cur - gLast : 0; gLast = cur;
+  const rose = gLast !== undefined && cur > gLast, delta = rose ? cur - gLast : 0; gLast = cur; if (rose && d.gOn && d.gWinOff !== true && cur >= tot && cur - delta < tot) winSoon(d.gMode === 'always' ? 1300 : 3300);
   if (rose && d.gOn) { if (d.gMode === 'always') render(cur, tot, delta); else pop(delta); }
   else if (!pendT) render(cur, tot, 0);
   updOn();
 }
-function trigCheck() {
-  if (tFirst) { tFirst = false; tLast = d.gTrig; return; }
+let wFirst = true, wLast, winSoonT, winEndT, winOffT, winRaf, winI;
+function winSoon(ms) { clearTimeout(winSoonT); winSoonT = setTimeout(win, ms); }
+function winFx(L, k, cols) {
+  const cv = $('gwC'), x = cv.getContext('2d'), P = [], t0 = performance.now(), end = (L - 1.4) * 1000;
+  let last = t0, nb = 250, nc = 0, hb = false;
+  const col = () => cols[(Math.random() * cols.length) | 0];
+  const burst = (cx, cy, n, sp) => { for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, v = sp * (.25 + Math.random() * .75); P.push({ x:cx, y:cy, vx:Math.cos(a) * v, vy:Math.sin(a) * v, l:1, dc:.45 + Math.random() * .6, c:col(), g:300, sh:0 }); } };
+  const frame = now => {
+    const dt = Math.min(.05, (now - last) / 1000), el = now - t0; last = now;
+    if (!hb && el > 1150) { hb = true; burst(960, 710, 80 + Math.round(160 * k), 800 + 300 * k); }
+    if (el < end) {
+      if (el > nb) { nb = el + 650 - 400 * k + Math.random() * 250; burst(200 + Math.random() * 1520, 120 + Math.random() * 460, 50 + Math.round(90 * k), 480 + 260 * k); }
+      if (el > nc) { nc = el + 90 - 50 * k; for (let i = 0, m = 1 + Math.round(2 * k); i < m; i++) P.push({ x:Math.random() * 1920, y:-30, vx:(Math.random() - .5) * 200, vy:140 + Math.random() * 280, l:1, dc:.14, c:col(), g:90, sh:1, r:Math.random() * 6.28, vr:(Math.random() - .5) * 14, w:10 + Math.random() * 14 }); }
+      if (Math.random() < .3 + .5 * k) P.push({ x:Math.random() * 1920, y:1090, vx:(Math.random() - .5) * 60, vy:-(120 + Math.random() * 260), l:1, dc:.28, c:col(), g:-20, sh:0 });
+    }
+    x.clearRect(0, 0, 1920, 1080); x.globalCompositeOperation = 'lighter';
+    for (let i = P.length - 1; i >= 0; i--) {
+      const p = P[i]; p.vy += p.g * dt; p.vx *= 1 - .9 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.l -= p.dc * dt;
+      if (p.l <= 0 || p.y > 1120) { P.splice(i, 1); continue; }
+      x.globalAlpha = Math.min(1, p.l * 1.5);
+      if (p.sh) { p.r += p.vr * dt; x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.scale(1, Math.abs(Math.cos(p.r * .7)) + .15); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.w / 4, p.w, p.w / 2); x.restore(); }
+      else { x.strokeStyle = p.c; x.lineWidth = 3.5; x.beginPath(); x.moveTo(p.x - p.vx * .04, p.y - p.vy * .04); x.lineTo(p.x, p.y); x.stroke(); }
+    }
+    if (el < end + 1600 || P.length) winRaf = requestAnimationFrame(frame); else x.clearRect(0, 0, 1920, 1080);
+  };
+  burst(960, 475, 120 + Math.round(240 * k), 1000 + 400 * k);
+  winRaf = requestAnimationFrame(frame);
+}
+function win() {
+  const w = $('gWin'), s = w.style, tot = totNow(), L = Math.min(20, Math.max(6, +d.wLen || 10)), k = (Math.min(10, Math.max(1, +d.wInt || 10)) - 1) / 9,
+    c1 = d.cW1 || '#19e3ff', c2 = d.cW2 || '#ff2e88', ck = d.cGK || '#eaf9ff', head = d.wHead || 'GOAL REACHED', sub = d.wSub == null ? '{N} FOLLOWERS UNLOCKED' : d.wSub;
+  clearTimeout(winEndT); clearTimeout(winOffT); cancelAnimationFrame(winRaf); clearInterval(winI);
+  w.classList.remove('on', 'go'); w.classList.add('show'); void w.offsetWidth;
+  s.setProperty('--w1', c1); s.setProperty('--w2', c2); s.setProperty('--w1a', rgba(c1, .3)); s.setProperty('--w2a', rgba(c2, .24));
+  const H = $('gwHead'); H.innerHTML = '';
+  [...head].forEach((ch, i) => { const e = document.createElement('i'); e.style.setProperty('--i', i); e.textContent = ch === ' ' ? '\u00a0' : ch; H.appendChild(e); });
+  H.style.fontSize = Math.round(Math.max(70, Math.min(150, 1600 / (head.length * .72)))) + 'px';
+  $('gwSub').textContent = sub.replace(/\{N\}/g, tot); $('gwNum').textContent = '0';
+  const R = $('gwRings'); R.innerHTML = '';
+  for (let i = 0, n = 3 + Math.round(3 * k); i < n; i++) { const e = document.createElement('b'); e.className = 'gwR'; e.style.cssText = `--d:${.15 + i * .22}s;--rc:var(${i % 2 ? '--w2' : '--w1'})`; R.appendChild(e); }
+  w.classList.add('on', 'go');
+  const t0 = Date.now();
+  winI = setInterval(() => { const p = Math.min(1, Math.max(0, (Date.now() - t0 - 700) / 1600)); $('gwNum').textContent = Math.round(tot * (1 - Math.pow(1 - p, 3))); if (p >= 1) clearInterval(winI); }, 40);
+  winFx(L, k, [c1, c2, ck, '#ffffff']);
+  winEndT = setTimeout(() => w.classList.remove('on'), (L - 1.2) * 1000);
+  winOffT = setTimeout(() => w.classList.remove('show', 'go'), L * 1000);
+}
+  function trigCheck() {
+  if (wFirst) { wFirst = false; wLast = d.gWinTrig; } else if (d.gWinTrig && d.gWinTrig !== wLast) { wLast = d.gWinTrig; win(); } if (tFirst) { tFirst = false; tLast = d.gTrig; return; }
   if (d.gTrig && d.gTrig !== tLast) { tLast = d.gTrig; if (d.gOn) { const n = Math.max(1, +d.gTrigN || 1); if (d.gMode === 'always') render(curNow(), totNow(), n); else pop(n); } }
 }
 function raidCheck() {
