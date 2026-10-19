@@ -98,6 +98,9 @@
     <div style="margin-top:10px"><label class="f">Size <b id="gScaleV">100%</b></label><input type="range" id="gScale" min="10" max="200" step="5" value="100" style="width:60%;vertical-align:middle"><button onclick="save({gScale:1})">1x</button></div>
     <div><button data-gpos="br" onclick="save({gPos:'br'})">Bottom right</button><button data-gpos="bl" onclick="save({gPos:'bl'})">Bottom left</button><button data-gpos="c" onclick="save({gPos:'c'})">Center</button></div>
     <p class="hint">Bottom left shares a spot with the lower third, so don't show both at once.</p>
+    <div style="margin-top:10px"><button data-gmode="pop" onclick="save({gMode:'pop'})">Pop up on new follower</button><button data-gmode="always" onclick="save({gMode:'always'})">Always visible</button>
+    <label class="f">Stay on screen (sec) <input type="number" id="gHold" min="7" max="120" value="12"></label><button onclick="save({gTrig:firebase.database.ServerValue.TIMESTAMP})">Test animation</button></div>
+    <p class="hint">Pop-up mode keeps the goal hidden until the count goes up. Turn on Show goal first, then Test animation plays it once.</p>
   </div>
   <div class="panel" data-tab="goal">
     <h2>Automatic follower count</h2>
@@ -174,7 +177,7 @@ function preset(a,b,c){ save({ cA:a, cB:b, cAcc:c }); }
 ref.on('value', s => {
   const d = s.val(); if (!d) return;
   state = Object.assign(state, d);
-  if (!window.filled) { window.filled = 1; ['gLabel','gCur','gGoal','gChan','gWorker','rName','rCount','rHead','rMsg','rDur'].forEach(k => { if (state[k] != null) $(k).value = state[k]; }); }
+  if (!window.filled) { window.filled = 1; ['gLabel','gCur','gGoal','gHold','gChan','gWorker','rName','rCount','rHead','rMsg','rDur'].forEach(k => { if (state[k] != null) $(k).value = state[k]; }); }
   $('sA').textContent = state.scoreA || 0; $('sB').textContent = state.scoreB || 0;
   $('nameA').placeholder = state.nameA || 'Left team name'; $('nameB').placeholder = state.nameB || 'Right team name';
   colorIds.forEach(id => { if (state[id]) $(id).value = state[id]; });
@@ -185,6 +188,7 @@ ref.on('value', s => {
   $('gScale').value = Math.round((state.gScale || 1) * 100); $('gScaleV').textContent = $('gScale').value + '%';
   document.querySelectorAll('[data-gpos]').forEach(b => b.classList.toggle('on', b.dataset.gpos === (state.gPos || 'br')));
   $('gAutoBtn').classList.toggle('on', !!state.gAuto);
+  document.querySelectorAll('[data-gmode]').forEach(b => b.classList.toggle('on', b.dataset.gmode === (state.gMode === 'always' ? 'always' : 'pop')));
 }, e => say('Cannot read database: ' + e.message));
 
 function page(p){ save({ page:p }); }
@@ -218,6 +222,7 @@ function gToggle(){ save({ gOn: !state.gOn }); }
 function playRaid(){ save({ rName:$('rName').value.trim().toUpperCase(), rHead:$('rHead').value.trim().toUpperCase() || 'INCOMING RAID', rMsg:$('rMsg').value.trim(),
   rCount:+$('rCount').value||0, rDur:Math.min(30,Math.max(4,+$('rDur').value||8)), rTrig:firebase.database.ServerValue.TIMESTAMP }); }
 $('gScale').addEventListener('input', e => $('gScaleV').textContent = e.target.value + '%');
+$('gHold').addEventListener('change', e => save({ gHold: Math.min(120, Math.max(7, +e.target.value || 12)) }));
 $('gScale').addEventListener('change', e => save({ gScale: e.target.value / 100 }));
 function gClean(){ return { w: $('gWorker').value.trim().replace(/\/+$/, ''), ch: $('gChan').value.trim().toLowerCase().replace(/^@/, '') }; }
 function gAutoSave(){ const o = gClean(); if (o.w && !/^https:\/\//.test(o.w)) return say('Worker URL must start with https://'); save({ gChan:o.ch, gWorker:o.w }); say('Saved.'); }
