@@ -99,7 +99,7 @@
     <div><button data-gpos="br" onclick="save({gPos:'br'})">Bottom right</button><button data-gpos="bl" onclick="save({gPos:'bl'})">Bottom left</button><button data-gpos="c" onclick="save({gPos:'c'})">Center</button></div>
     <p class="hint">Bottom left shares a spot with the lower third, so don't show both at once.</p>
     <div style="margin-top:10px"><button data-gmode="pop" onclick="save({gMode:'pop'})">Pop up on new follower</button><button data-gmode="always" onclick="save({gMode:'always'})">Always visible</button>
-    <label class="f">Stay on screen (sec) <input type="number" id="gHold" min="7" max="120" value="12"></label><button onclick="save({gTrig:firebase.database.ServerValue.TIMESTAMP})">Test animation</button></div>
+    <label class="f">Stay on screen (sec) <input type="number" id="gHold" min="7" max="120" value="12"></label><label class="f">Test +<input type="number" id="gTestN" min="1" max="10" value="1"></label><button onclick="save({gTrigN:Math.min(10,Math.max(1,+$('gTestN').value||1)),gTrig:firebase.database.ServerValue.TIMESTAMP})">Test animation</button></div>
     <p class="hint">Pop-up mode keeps the goal hidden until the count goes up. Turn on Show goal first, then Test animation plays it once.</p>
   </div>
   <div class="panel" data-tab="goal">
