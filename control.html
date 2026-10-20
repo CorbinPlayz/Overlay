@@ -3,155 +3,314 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Scoreboard control</title>
+<title>Overlay Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#0a0f1e; --panel:#121a30; --line:#243252; --ink:#e6f4fb; --cyan:#19e3ff; --pink:#ff2e88; }
-  * { box-sizing:border-box; }
-  body { margin:0; padding:24px; background:var(--bg); color:var(--ink); font-family:'Segoe UI',Arial,sans-serif; }
-  h1 { font-size:22px; margin:0 0 16px; } h2 { font-size:16px; margin:0 0 10px; }
-  .wrap { max-width:900px; } .row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-top:16px; }
-  .row .panel { margin-top:0; } .panel.a { border-top:4px solid var(--cyan); } .panel.b { border-top:4px solid var(--pink); }
-  .big { font-size:64px; font-weight:700; text-align:center; margin:4px 0 12px; }
-  input[type=text], input[type=number], select { width:100%; padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid var(--line); background:#0a1226; color:var(--ink); font-size:16px; }
-  input[type=number] { width:90px; display:inline-block; }
-  input[type=color] { width:56px; height:38px; border:1px solid var(--line); border-radius:6px; background:none; padding:2px; }
-  button { padding:10px 14px; margin:3px; border-radius:6px; border:1px solid var(--line); background:#1b2745; color:var(--ink); font-size:16px; cursor:pointer; }
-  button:hover { background:#27386a; } button:focus-visible { outline:2px solid var(--cyan); }
-  button.on { background:var(--cyan); color:#04121a; border-color:var(--cyan); font-weight:700; }
-  .colors { display:flex; flex-wrap:wrap; gap:18px; align-items:end; } .colors label { font-size:13px; display:flex; flex-direction:column; gap:4px; }
-  #login { } #app { display:none; } code { background:#0a1226; padding:2px 6px; border-radius:4px; user-select:all; }
-  #msg { margin-top:12px; color:#ffb86b; min-height:20px; }
-  .tabs { display:flex; flex-wrap:wrap; margin-top:16px; border-bottom:1px solid var(--line); }
-  .tabs button { border-radius:6px 6px 0 0; margin:0 3px 0 0; }
-  label.f { font-size:13px; margin-right:12px; } .hint { font-size:13px; opacity:.7; margin:6px 0 0; }
-  #playRaid { width:100%; font-size:20px; padding:16px; background:var(--pink); border-color:var(--pink); color:#fff; font-weight:700; margin:8px 0 0; }
-  @media (max-width:640px){ .row{grid-template-columns:1fr} }
+:root{--bg:#050914;--panel:rgba(12,20,42,.78);--line:rgba(70,110,170,.32);--ink:#e8f6ff;--dim:#8ea4c2;--cyan:#19e3ff;--pink:#ff2e88;--green:#2dff9a;--amber:#ffb84d;--red:#ff4d5e}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:radial-gradient(1200px 700px at 12% -10%,rgba(25,227,255,.11),transparent 60%),radial-gradient(1000px 700px at 100% 110%,rgba(255,46,136,.11),transparent 60%),var(--bg);color:var(--ink);font-family:'Oxanium','Segoe UI',Arial,sans-serif;font-size:15px;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(25,227,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(25,227,255,.05) 1px,transparent 1px);background-size:48px 48px;-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 85%);mask-image:radial-gradient(ellipse at center,#000 30%,transparent 85%);animation:gridDrift 30s linear infinite}
+@keyframes gridDrift{to{background-position:48px 48px,48px 48px}}
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+.corner{position:fixed;width:46px;height:46px;z-index:1;pointer-events:none;border:2px solid var(--cyan);opacity:.55;animation:cornerP 3s ease-in-out infinite}
+.corner.tl{top:10px;left:10px;border-right:0;border-bottom:0}.corner.tr{top:10px;right:10px;border-left:0;border-bottom:0;border-color:var(--pink)}
+.corner.bl{bottom:10px;left:10px;border-right:0;border-top:0;border-color:var(--pink)}.corner.br{bottom:10px;right:10px;border-left:0;border-top:0}
+@keyframes cornerP{50%{opacity:1;filter:drop-shadow(0 0 6px currentColor)}}
+.rail{position:fixed;top:0;bottom:0;width:150px;z-index:1;pointer-events:none;display:none;overflow:hidden}
+.rail.l{left:0}.rail.r{right:0}
+@media(min-width:1560px){.rail{display:block}}
+.rail .vt{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-90deg);white-space:nowrap;letter-spacing:.55em;font-size:12px;color:var(--cyan);opacity:.5}
+.rail.r .vt{transform:translate(-50%,-50%) rotate(90deg);color:var(--pink)}
+.rail .tk{position:absolute;top:0;bottom:0;left:34px;width:12px;background:repeating-linear-gradient(180deg,rgba(25,227,255,.55) 0 2px,transparent 2px 14px);animation:tick 6s linear infinite;-webkit-mask-image:linear-gradient(transparent,#000 20%,#000 80%,transparent);mask-image:linear-gradient(transparent,#000 20%,#000 80%,transparent)}
+.rail.r .tk{left:auto;right:34px;background:repeating-linear-gradient(180deg,rgba(255,46,136,.55) 0 2px,transparent 2px 14px);animation-direction:reverse}
+@keyframes tick{to{background-position:0 56px}}
+.rail .ring{position:absolute;left:50%;width:96px;height:96px;margin-left:-48px;border-radius:50%;border:1px dashed rgba(25,227,255,.4);animation:spin 24s linear infinite}
+.rail .ring.a{top:11%}.rail .ring.b{bottom:11%;animation-direction:reverse;border-color:rgba(255,46,136,.4)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.grow{flex:1}
+#shell{position:relative;z-index:2;max-width:1240px;margin:0 auto;padding:18px 18px 70px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;background:var(--panel);border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(8px);position:relative;overflow:hidden}
+.top::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:40%;background:linear-gradient(90deg,transparent,var(--cyan),var(--pink),transparent);animation:sweep 5s linear infinite}
+@keyframes sweep{from{transform:translateX(-100%)}to{transform:translateX(260%)}}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2em;font-size:15px}
+.logo svg{width:26px;height:26px;stroke:var(--cyan);fill:none;stroke-width:1.6;filter:drop-shadow(0 0 6px var(--cyan))}
+.logo svg .hx{stroke-dasharray:60;animation:dash 4s ease-in-out infinite}
+@keyframes dash{50%{stroke-dashoffset:60}}
+.chip{padding:4px 10px;border:1px solid var(--line);border-radius:99px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.chip b{color:var(--cyan)}
+.led{width:9px;height:9px;border-radius:50%;background:var(--red);box-shadow:0 0 10px var(--red);display:inline-block}
+.led.ok{background:var(--green);box-shadow:0 0 10px var(--green);animation:ledp 2s infinite}
+@keyframes ledp{50%{opacity:.45}}
+.avatar{width:34px;height:34px;border-radius:50%;border:1px solid var(--cyan);object-fit:cover;background:#0a1226}
+.avatar.lg{width:42px;height:42px}
+.onair{position:sticky;top:8px;z-index:20;margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 14px;background:rgba(7,12,28,.9);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px}
+.onair .lbl{font-size:12px;letter-spacing:.25em;color:var(--dim);display:flex;align-items:center;gap:8px;margin-right:4px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;border-radius:0;margin:0;background:transparent;box-shadow:none}
+.seg button:hover{transform:none}
+.seg button.on{box-shadow:none}
+.onair button{margin:0}
+.main{display:grid;grid-template-columns:190px 1fr;gap:16px;margin-top:14px;align-items:start}
+.nav{display:flex;flex-direction:column;gap:6px;position:sticky;top:84px}
+.navbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;margin:0;padding:10px 12px;background:rgba(10,18,38,.7);position:relative}
+.navbtn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.navbtn::before{content:"";position:absolute;left:0;top:20%;bottom:20%;width:3px;border-radius:3px;background:var(--cyan);transform:scaleY(0);transition:transform .25s}
+.navbtn.on::before{transform:scaleY(1)}
+.navbtn.on{background:linear-gradient(90deg,rgba(25,227,255,.22),rgba(10,18,38,.7));color:var(--cyan);border-color:rgba(25,227,255,.5);box-shadow:0 0 16px rgba(25,227,255,.18)}
+.navbtn:hover{transform:translateX(3px)}
+.navbtn.adm{border-color:rgba(255,46,136,.45);color:#ff7ab5}
+.navbtn.adm.on{color:#fff;background:linear-gradient(90deg,rgba(255,46,136,.3),rgba(10,18,38,.7));box-shadow:0 0 16px rgba(255,46,136,.25)}
+@media(max-width:860px){.main{grid-template-columns:1fr}.nav{flex-direction:row;overflow-x:auto;position:static;padding-bottom:4px}.navbtn{width:auto;white-space:nowrap;flex:none}.navbtn:hover{transform:none}}
+.pane{display:none}.pane.show{display:block}
+.pane.show>*{animation:rise .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 55ms)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+.panel{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;backdrop-filter:blur(6px);transition:border-color .25s,box-shadow .25s}
+.panel:hover{border-color:rgba(25,227,255,.45);box-shadow:0 0 24px rgba(25,227,255,.08)}
+.panel::before,.panel::after{content:"";position:absolute;width:14px;height:14px;pointer-events:none}
+.panel::before{top:-1px;left:-1px;border-top:2px solid var(--cyan);border-left:2px solid var(--cyan);border-top-left-radius:12px}
+.panel::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--pink);border-right:2px solid var(--pink);border-bottom-right-radius:12px}
+.panel h2{margin:0 0 12px;font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.panel h2 small{color:var(--ink);letter-spacing:.04em;font-size:15px;text-transform:none;font-variant-numeric:tabular-nums}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid2>.panel{margin-bottom:14px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+input[type=text],input[type=number],input[type=password],select,textarea{width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:rgba(4,9,22,.8);color:var(--ink);font:inherit;transition:border-color .2s,box-shadow .2s}
+textarea{min-height:84px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(25,227,255,.16)}
+.fld{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.fld>span{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+.inl{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}.inl .fld{margin-bottom:0;flex:1;min-width:110px}.inl>input{flex:1;min-width:140px}.inl button{margin:0}
+button{position:relative;overflow:hidden;font:inherit;font-weight:600;padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(32,48,88,.9),rgba(18,28,56,.9));color:var(--ink);cursor:pointer;transition:transform .12s,border-color .2s,box-shadow .2s,background .2s;margin:0 6px 6px 0}
+button:hover{border-color:var(--cyan);box-shadow:0 0 14px rgba(25,227,255,.25);transform:translateY(-1px)}
+button:active{transform:translateY(1px) scale(.98)}
+button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+button.on{background:linear-gradient(180deg,#2cecff,#12c4de);color:#02131a;border-color:var(--cyan);box-shadow:0 0 18px rgba(25,227,255,.45)}
+button.pri{border-color:var(--cyan);color:var(--cyan)}
+button.pink{background:linear-gradient(180deg,#ff4d9c,#d81f6e);border-color:var(--pink);color:#fff}
+button.danger{border-color:rgba(255,77,94,.5);color:#ff8a96}
+button.sm{padding:5px 10px;font-size:13px}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.rip{position:absolute;border-radius:50%;background:rgba(255,255,255,.35);transform:scale(0);animation:rip .55s ease-out forwards;pointer-events:none;width:30px;height:30px;margin:-15px 0 0 -15px}
+@keyframes rip{to{transform:scale(5);opacity:0}}
+.score{text-align:center}
+.score .nm{font-size:14px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;min-height:20px}
+.big{font-size:86px;font-weight:800;line-height:1;margin:6px 0 14px;font-variant-numeric:tabular-nums;text-shadow:0 0 26px currentColor}
+.big.pop{animation:pop .35s}
+@keyframes pop{40%{transform:scale(1.18)}}
+.score.a .big{color:var(--cyan)}.score.b .big{color:var(--pink)}
+.score.a h2{justify-content:center}.score.b h2{justify-content:center;color:var(--pink)}
+details.adv{margin-top:8px;border-top:1px dashed var(--line);padding-top:10px}
+.adv summary{cursor:pointer;list-style:none;color:var(--dim);font-size:12px;letter-spacing:.2em;text-transform:uppercase;display:flex;gap:8px;align-items:center;user-select:none}
+.adv summary::-webkit-details-marker{display:none}
+.adv summary::before{content:"\25B8";transition:transform .2s;color:var(--cyan)}
+.adv[open] summary::before{transform:rotate(90deg)}
+.adv[open]>.advin{animation:rise .3s both;margin-top:10px}
+.colors{display:flex;flex-wrap:wrap;gap:16px}
+.colors label{display:flex;flex-direction:column;gap:5px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+input[type=color]{width:56px;height:38px;border-radius:9px;border:1px solid var(--line);background:none;padding:2px;cursor:pointer}
+input[type=range]{accent-color:var(--cyan);vertical-align:middle}
+.hint{font-size:13px;color:var(--dim);margin:8px 0 0;line-height:1.5}
+.big-btn{width:100%;font-size:19px;padding:16px;letter-spacing:.14em;margin:8px 0 0}
+.srow{display:grid;grid-template-columns:1fr 1.3fr 56px;gap:8px;align-items:center;margin-top:8px}.srow select,.srow button{margin:0}
+.card{display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:rgba(4,9,22,.5);flex-wrap:wrap}
+.card .meta{flex:1;min-width:160px}.card .meta b{display:block}.card .meta span{font-size:12px;color:var(--dim)}
+.card .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.card .acts button,.card .acts input{margin:0}
+.card .acts input{width:150px;padding:7px 9px}
+.badge{padding:2px 9px;border-radius:99px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line);color:var(--dim)}
+.badge.open{border-color:var(--amber);color:var(--amber)}.badge.planned{border-color:var(--cyan);color:var(--cyan)}.badge.done{border-color:var(--green);color:var(--green)}
+.badge.approved{border-color:var(--green);color:var(--green)}.badge.paused{border-color:var(--amber);color:var(--amber)}.badge.denied{border-color:var(--red);color:var(--red)}
+.step{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px}
+.step .n{flex:none;width:34px;height:34px;border-radius:50%;border:2px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--cyan);box-shadow:0 0 14px rgba(25,227,255,.3)}
+.step p{margin:2px 0 0;color:var(--dim);line-height:1.5}.step b{display:block}
+.copybox{display:flex;gap:8px;flex-wrap:wrap}.copybox input{flex:1;min-width:200px}.copybox button{margin:0}
+#gate{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:20px}
+.gatecard{display:none;width:min(470px,100%);text-align:center;padding:34px 28px;background:var(--panel);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(10px);position:relative;animation:rise .6s both}
+.gatecard.show{display:block}
+.gatecard::before,.gatecard::after{content:"";position:absolute;width:22px;height:22px}
+.gatecard::before{top:-1px;left:-1px;border-top:3px solid var(--cyan);border-left:3px solid var(--cyan);border-top-left-radius:16px}
+.gatecard::after{bottom:-1px;right:-1px;border-bottom:3px solid var(--pink);border-right:3px solid var(--pink);border-bottom-right-radius:16px}
+.gatecard h1{margin:6px 0 8px;font-size:22px;letter-spacing:.18em}
+.gatecard p{color:var(--dim);line-height:1.6;margin:0 0 18px}
+.hero{width:120px;height:120px;margin:0 auto 14px;position:relative}
+.hero i{position:absolute;inset:0;border-radius:50%;border:2px dashed var(--cyan);animation:spin 10s linear infinite}
+.hero i:nth-child(2){inset:14px;border-color:var(--pink);animation-direction:reverse;animation-duration:7s}
+.hero i:nth-child(3){inset:30px;border-style:solid;border-width:1px;opacity:.7;animation:none;box-shadow:0 0 24px var(--cyan) inset}
+.hero.warn i{border-color:var(--amber)}.hero.bad i{border-color:var(--red)}
+.dots::after{content:"";animation:dots 1.4s steps(4) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+#toasts{position:fixed;right:16px;bottom:16px;z-index:120;display:flex;flex-direction:column;gap:8px}
+.toast{padding:10px 14px;border-radius:10px;background:rgba(8,14,30,.96);border:1px solid var(--cyan);box-shadow:0 0 18px rgba(25,227,255,.2);animation:toastIn .3s both;max-width:340px}
+.toast.err{border-color:var(--red);box-shadow:0 0 18px rgba(255,77,94,.25)}
+.toast.out{animation:toastOut .3s both}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}}
+@keyframes toastOut{to{opacity:0;transform:translateX(30px)}}
+#modal{position:fixed;inset:0;z-index:110;background:rgba(2,5,14,.72);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
+.mbox{width:min(380px,100%);background:#0a1226;border:1px solid var(--cyan);border-radius:14px;padding:22px;box-shadow:0 0 40px rgba(25,227,255,.25);animation:rise .3s both}
+.mbox h3{margin:0 0 14px;font-size:15px;letter-spacing:.1em}.mrow{margin-top:12px}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.vote{min-width:58px}
+.nob .pane.needs>*{display:none!important}
+#noBoard{display:none}
+.ctr{text-align:center}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
-<h1>Scoreboard control</h1>
-<div id="login"><button id="signin">Sign in with Google</button></div>
+<canvas id="bg"></canvas>
+<div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+<div class="rail l"><div class="tk"></div><div class="ring a"></div><div class="ring b"></div><div class="vt">SYSTEM ONLINE // OVERLAY CONTROL // SYSTEM ONLINE</div></div>
+<div class="rail r"><div class="tk"></div><div class="ring a"></div><div class="ring b"></div><div class="vt">NEON GRID // STREAM TOOLS // NEON GRID</div></div>
 
-<div id="app">
-  <div class="panel" style="margin-top:0">
-    <h2>On air</h2>
-    <button data-page="score" onclick="page('score')">Scoreboard</button>
-    <button data-page="timer" onclick="page('timer')">Timer</button>
-    <button data-page="soon" onclick="page('soon')">Starting / BRB</button>
-    <button data-page="off" onclick="page('off')">Hide all</button>
-    <button id="lowBtn" onclick="toggleLower()">Lower third</button><button class="gb" onclick="gToggle()">Goal bar</button>
-  </div>
+<div id="gate">
+  <div class="gatecard" id="g-load"><div class="hero"><i></i><i></i><i></i></div><h1>BOOTING</h1><p class="dots">Connecting to the grid</p></div>
+  <div class="gatecard" id="g-out"><div class="hero"><i></i><i></i><i></i></div><h1>OVERLAY CONTROL</h1><p>Run your stream overlay from one clean panel. Access is by approval.</p><button class="pri big-btn" id="signin" style="margin-top:0">SIGN IN WITH GOOGLE</button></div>
+  <div class="gatecard" id="g-pending"><div class="hero warn"><i></i><i></i><i></i></div><h1>WAITING FOR APPROVAL</h1><p>Your request was sent. Once the admin approves you, this page unlocks by itself. You can leave it open.</p><button onclick="signOut()">Sign out</button></div>
+  <div class="gatecard" id="g-paused"><div class="hero warn"><i></i><i></i><i></i></div><h1>ACCESS PAUSED</h1><p>Your access is paused for now. Contact the admin.</p><button onclick="signOut()">Sign out</button></div>
+  <div class="gatecard" id="g-denied"><div class="hero bad"><i></i><i></i><i></i></div><h1>NO ACCESS</h1><p>This account is not approved. Contact the admin if you think this is a mistake.</p><button onclick="signOut()">Sign out</button></div>
+</div>
 
-  <div class="tabs">
-    <button data-go="score" onclick="tab('score')">Scoreboard</button><button data-go="timer" onclick="tab('timer')">Timer</button>
-    <button data-go="screens" onclick="tab('screens')">Screens</button><button data-go="goal" onclick="tab('goal')">Goal</button>
-    <button data-go="raid" onclick="tab('raid')">Raid</button><button data-go="colors" onclick="tab('colors')">Colors</button><button data-go="sound" onclick="tab('sound')">Sound</button>
-  </div>
-  <div class="row" data-tab="score" style="margin-top:16px">
-    <div class="panel a">
-      <input type="text" id="nameA" placeholder="Left team name"><button onclick="setName('A')">Set name</button>
-      <div class="big" id="sA">0</div>
-      <button onclick="add('A',1)">+1</button><button onclick="add('A',2)">+2</button><button onclick="add('A',3)">+3</button><button onclick="add('A',-1)">-1</button>
+<div id="shell" style="display:none">
+  <header class="top">
+    <div class="logo"><svg viewBox="0 0 24 24"><path class="hx" d="M12 2 21 7v10l-9 5-9-5V7z"/><circle cx="12" cy="12" r="2.5"/></svg>OVERLAY CONTROL</div>
+    <span class="chip">Board <b id="boardChip">-</b></span>
+    <select id="boardSel" style="display:none;width:auto;min-width:160px"></select>
+    <span class="grow"></span>
+    <span class="led" id="led"></span><span class="chip" id="ledT">connecting</span>
+    <img class="avatar" id="uav" alt="" referrerpolicy="no-referrer"><span id="uname" class="chip"></span>
+    <button id="uiSndBtn" class="sm" data-snd="toggle" onclick="toggleUiSound()" style="margin:0">UI sound</button>
+    <button class="sm" onclick="signOut()" style="margin:0">Sign out</button>
+  </header>
+
+  <div class="onair">
+    <span class="lbl"><span class="led ok"></span>ON AIR</span>
+    <div class="seg">
+      <button data-page="score" onclick="page('score')">Scoreboard</button><button data-page="timer" onclick="page('timer')">Timer</button><button data-page="soon" onclick="page('soon')">Starting / BRB</button><button data-page="off" onclick="page('off')">Hide all</button>
     </div>
-    <div class="panel b">
-      <input type="text" id="nameB" placeholder="Right team name"><button onclick="setName('B')">Set name</button>
-      <div class="big" id="sB">0</div>
-      <button onclick="add('B',1)">+1</button><button onclick="add('B',2)">+2</button><button onclick="add('B',3)">+3</button><button onclick="add('B',-1)">-1</button>
-    </div>
-  </div>
-  <div class="panel" data-tab="score">
-    <input type="text" id="label" placeholder="Middle text (e.g. ROUND 1)">
-    <button onclick="setLabel()">Set middle text</button><button onclick="swap()">Swap sides</button><button onclick="resetScores()">Reset scores</button>
+    <button class="low" data-snd="toggle" onclick="toggleLower()">Lower third</button>
+    <button class="gb" data-snd="toggle" onclick="gToggle()">Goal bar</button>
   </div>
 
-  <div class="panel" data-tab="timer">
-    <h2>Timer <span id="tNow" style="float:right;font-variant-numeric:tabular-nums"></span></h2>
-    <input type="number" id="tm" min="0" value="5"> min <input type="number" id="ts" min="0" max="59" value="0"> sec
-    <select id="tmode" style="width:auto;margin-left:8px"><option value="down">Countdown</option><option value="up">Stopwatch</option></select>
-    <div><button onclick="setTimer()">Set</button><button onclick="startT()">Start</button><button onclick="pauseT()">Pause</button><button onclick="resetT()">Reset</button><button onclick="clearT()">Clear</button>
-    <button id="tbBtn" onclick="save({timerOnBoard:!state.timerOnBoard})">Show timer in scoreboard</button></div>
-  </div>
+  <div class="main">
+    <nav class="nav" id="nav"></nav>
+    <div id="content">
+      <div class="panel" id="noBoard"><h2>No board selected</h2><p class="hint">Open the Admin tab and create a board (or import Caleb's old one), then pick it in the menu at the top.</p></div>
 
-  <div class="panel" data-tab="screens">
-    <h2>Starting / BRB screen</h2>
-    <input type="text" id="soonH" placeholder="Big text"><input type="text" id="soonS" placeholder="Small text (optional)">
-    <button onclick="setSoon()">Update screen</button>
-    <button onclick="page('score')">Back to scoreboard</button><button onclick="clearSoon()">Clear text</button>
-    <button onclick="quick('STARTING SOON')">Starting soon</button><button onclick="quick('BE RIGHT BACK')">BRB</button><button onclick="quick('THANKS FOR WATCHING')">Thanks</button>
-  </div>
+      <section class="pane needs" data-pane="live">
+        <div class="grid2">
+          <div class="panel score a"><h2>Left team</h2><div class="nm" data-name="A">TEAM A</div><div class="big" data-s="A">0</div>
+            <button onclick="add('A',1)">+1</button><button onclick="add('A',2)">+2</button><button onclick="add('A',3)">+3</button><button class="danger" onclick="add('A',-1)">-1</button></div>
+          <div class="panel score b"><h2>Right team</h2><div class="nm" data-name="B">TEAM B</div><div class="big" data-s="B">0</div>
+            <button onclick="add('B',1)">+1</button><button onclick="add('B',2)">+2</button><button onclick="add('B',3)">+3</button><button class="danger" onclick="add('B',-1)">-1</button></div>
+        </div>
+        <div class="panel"><h2>Timer <small data-tnow>0:00</small></h2>
+          <button class="pri" onclick="startT()">Start</button><button onclick="pauseT()">Pause</button><button onclick="resetT()">Reset</button><button class="tb" data-snd="toggle" onclick="save({timerOnBoard:!state.timerOnBoard})">Show in scoreboard</button>
+          <p class="hint">Quick times:</p>
+          <button class="sm" onclick="quickT(60)">1:00</button><button class="sm" onclick="quickT(180)">3:00</button><button class="sm" onclick="quickT(300)">5:00</button><button class="sm" onclick="quickT(600)">10:00</button><button class="sm" onclick="quickT(900)">15:00</button>
+        </div>
+      </section>
 
-  <div class="panel" data-tab="screens">
-    <h2>Lower third</h2>
-    <input type="text" id="lowN" placeholder="Name"><input type="text" id="lowR" placeholder="Title or role">
-    <button onclick="setLower()">Update and show</button>
-  </div>
+      <section class="pane needs" data-pane="score">
+        <div class="grid2">
+          <div class="panel"><h2>Left team</h2><div class="inl"><input type="text" id="nameA" placeholder="TEAM A" maxlength="24" data-enter="#setA"><button id="setA" onclick="setName('A')">Set name</button></div></div>
+          <div class="panel"><h2>Right team</h2><div class="inl"><input type="text" id="nameB" placeholder="TEAM B" maxlength="24" data-enter="#setB"><button id="setB" onclick="setName('B')">Set name</button></div></div>
+        </div>
+        <div class="panel"><h2>Middle text and tools</h2>
+          <div class="inl"><input type="text" id="label" placeholder="Middle text (e.g. ROUND 1)" maxlength="24" data-enter="#setL"><button id="setL" onclick="setLabel()">Set text</button></div>
+          <div style="margin-top:10px"><button onclick="swap()">Swap sides</button><button class="danger" onclick="resetScores()">Reset scores</button></div></div>
+        <div class="panel"><h2>Timer <small data-tnow>0:00</small></h2>
+          <div class="inl"><label class="fld"><span>Minutes</span><input type="number" id="tm" min="0" value="5"></label><label class="fld"><span>Seconds</span><input type="number" id="ts" min="0" max="59" value="0"></label>
+            <label class="fld"><span>Mode</span><select id="tmode"><option value="down">Countdown</option><option value="up">Stopwatch</option></select></label></div>
+          <div style="margin-top:12px"><button onclick="setTimer()">Set</button><button class="pri" onclick="startT()">Start</button><button onclick="pauseT()">Pause</button><button onclick="resetT()">Reset</button><button class="danger" onclick="clearT()">Clear</button></div>
+          <button class="tb" data-snd="toggle" onclick="save({timerOnBoard:!state.timerOnBoard})">Show timer in the scoreboard middle</button></div>
+      </section>
 
-  <div class="panel" data-tab="goal">
-    <h2>Follower goal <span id="gShow" style="float:right"></span></h2>
-    <input type="text" id="gLabel" placeholder="Goal title (e.g. FOLLOWER GOAL)">
-    <label class="f">Followers now <input type="number" id="gCur" min="0"></label>
-    <label class="f">Goal <input type="number" id="gGoal" min="1"></label><button onclick="gSet()">Update</button>
-    <div><button onclick="gAdd(1)">+1</button><button onclick="gAdd(5)">+5</button><button onclick="gAdd(10)">+10</button><button onclick="gAdd(-1)">-1</button></div>
-    <div><button class="gb" onclick="gToggle()">Show goal</button><button id="gbBtn" onclick="save({gNoBar:!state.gNoBar})">Progress bar</button></div>
-    <div style="margin-top:10px"><label class="f">Size <b id="gScaleV">100%</b></label><input type="range" id="gScale" min="10" max="200" step="5" value="100" style="width:60%;vertical-align:middle"><button onclick="save({gScale:1})">1x</button></div>
-    <div><button data-gpos="br" onclick="save({gPos:'br'})">Bottom right</button><button data-gpos="bl" onclick="save({gPos:'bl'})">Bottom left</button><button data-gpos="c" onclick="save({gPos:'c'})">Center</button></div>
-    <p class="hint">Bottom left shares a spot with the lower third, so don't show both at once.</p>
-    <div style="margin-top:10px"><button data-gmode="pop" onclick="save({gMode:'pop'})">Pop up on new follower</button><button data-gmode="always" onclick="save({gMode:'always'})">Always visible</button>
-    <label class="f">Stay on screen (sec) <input type="number" id="gHold" min="7" max="120" value="12"></label><label class="f">Test +<input type="number" id="gTestN" min="1" max="10" value="1"></label><button onclick="save({gTrigN:Math.min(10,Math.max(1,+$('gTestN').value||1)),gTrig:firebase.database.ServerValue.TIMESTAMP})">Test animation</button></div>
-    <p class="hint">Pop-up mode keeps the goal hidden until the count goes up. Turn on Show goal first, then Test animation plays it once.</p>
-  </div>
-  <div class="panel" data-tab="goal">
-    <h2>Automatic follower count</h2>
-    <input type="text" id="gChan" placeholder="Twitch channel name (e.g. caleb)">
-    <input type="text" id="gWorker" placeholder="Worker URL (https://...workers.dev)">
-    <button onclick="gAutoSave()">Save</button><button onclick="gTest()">Test connection</button><button id="gAutoBtn" onclick="gAutoToggle()">Auto mode</button>
-    <p class="hint">Auto mode on: the goal follows Twitch every 20 seconds. Off: it uses the number you type.</p>
-  </div>
-  <div class="panel" data-tab="goal"><h2>Goal colors</h2><div class="colors">
-    <label>Bar / numbers<input type="color" id="cGF" value="#19e3ff"></label><label>Bar background<input type="color" id="cGT" value="#1a2440"></label>
-    <label>Panel<input type="color" id="cGB" value="#060a18"></label><label>Text<input type="color" id="cGK" value="#eaf9ff"></label></div></div>
-<div class="panel" data-tab="goal"><h2>Goal reached celebration</h2>
-    <div><button id="wBtn" onclick="save({gWinOff:!state.gWinOff})">Celebration on</button><button onclick="winTest()">Test celebration</button></div>
-    <input type="text" id="wHead" placeholder="Headline (default GOAL REACHED)">
-    <input type="text" id="wSub" placeholder="Subline - {N} becomes the goal number">
-    <label class="f">Length (sec) <input type="number" id="wLen" min="6" max="20" value="10"></label><label class="f">Intensity 1-10 <input type="number" id="wInt" min="1" max="10" value="10"></label><button onclick="winSave()">Save text</button>
-    <div class="colors"><label>Main color<input type="color" id="cW1" value="#19e3ff"></label><label>Accent color<input type="color" id="cW2" value="#ff2e88"></label></div>
-    <p class="hint">Plays full screen when the follower count reaches the goal. Test celebration plays it right now.</p></div>
-  <div class="panel" data-tab="raid">
-    <h2>Raid animation</h2>
-    <input type="text" id="rName" placeholder="Raider channel name">
-    <input type="text" id="rHead" placeholder="Headline (default: INCOMING RAID)">
-    <input type="text" id="rMsg" placeholder="Message (e.g. Welcome raiders!)">
-    <label class="f">Viewers <input type="number" id="rCount" min="0"></label><label class="f">Length (seconds) <input type="number" id="rDur" min="4" max="30" value="8"></label>
-    <button id="playRaid" onclick="playRaid()">PLAY RAID ANIMATION</button>
-    <p class="hint">It plays on the stream only, so you won't see it on this page.</p>
-  </div>
-  <div class="panel" data-tab="raid"><h2>Raid colors</h2><div class="colors">
-    <label>Headline / rings<input type="color" id="cR1" value="#ff2e88"></label><label>Name / accents<input type="color" id="cR2" value="#19e3ff"></label></div></div>
-  <div class="panel" data-tab="colors">
-    <h2>Colors</h2>
-    <div class="colors">
-      <label>Left team<input type="color" id="cA" value="#19e3ff"></label>
-      <label>Right team<input type="color" id="cB" value="#ff2e88"></label>
-      <label>Accent<input type="color" id="cAcc" value="#19e3ff"></label>
-      <label>Panels<input type="color" id="cBg" value="#060a18"></label>
-      <label>Text<input type="color" id="cText" value="#eaf9ff"></label>
-    </div>
-    <div style="margin-top:10px">
-      <button onclick="preset('#19e3ff','#ff2e88','#19e3ff')">Neon</button>
-      <button onclick="preset('#ff3b3b','#3b82ff','#ffd23b')">Red / Blue</button>
-      <button onclick="preset('#39ff88','#b84dff','#39ff88')">Toxic</button>
-      <button onclick="preset('#ffb020','#20c8ff','#ffb020')">Gold</button>
+      <section class="pane needs" data-pane="screens">
+        <div class="panel"><h2>Starting / BRB screen</h2>
+          <div class="fld"><span>Big text</span><input type="text" id="soonH" placeholder="STARTING SOON" maxlength="40" data-enter="#setSoon"></div>
+          <div class="fld"><span>Small text (optional)</span><input type="text" id="soonS" maxlength="80" data-enter="#setSoon"></div>
+          <button class="pri" id="setSoon" onclick="setSoon()">Update screen</button><button onclick="page('score')">Back to scoreboard</button><button onclick="clearSoon()">Clear text</button>
+          <p class="hint">One-tap screens:</p>
+          <button class="sm" onclick="quick('STARTING SOON')">Starting soon</button><button class="sm" onclick="quick('BE RIGHT BACK')">BRB</button><button class="sm" onclick="quick('THANKS FOR WATCHING')">Thanks</button></div>
+        <div class="panel"><h2>Lower third</h2>
+          <div class="grid2" style="gap:10px"><div class="fld"><span>Name</span><input type="text" id="lowN" maxlength="40" data-enter="#setLow"></div><div class="fld"><span>Title or role</span><input type="text" id="lowR" maxlength="60" data-enter="#setLow"></div></div>
+          <button class="pri" id="setLow" onclick="setLower()">Update and show</button><button class="low" data-snd="toggle" onclick="toggleLower()">Show / hide</button></div>
+      </section>
+
+      <section class="pane needs" data-pane="goal">
+        <div class="panel"><h2>Follower goal <small id="gShow">0 / 100</small></h2>
+          <div class="fld"><span>Title</span><input type="text" id="gLabel" placeholder="FOLLOWER GOAL" maxlength="30" data-enter="#gUp"></div>
+          <div class="inl"><label class="fld"><span>Followers now</span><input type="number" id="gCur" min="0"></label><label class="fld"><span>Goal</span><input type="number" id="gGoal" min="1"></label><button class="pri" id="gUp" onclick="gSet()">Update</button></div>
+          <div style="margin-top:10px"><button onclick="gAdd(1)">+1</button><button onclick="gAdd(5)">+5</button><button onclick="gAdd(10)">+10</button><button class="danger" onclick="gAdd(-1)">-1</button></div>
+          <div><button class="gb" data-snd="toggle" onclick="gToggle()">Show goal</button><button class="gbar" data-snd="toggle" onclick="save({gNoBar:!state.gNoBar})">Progress bar</button></div></div>
+        <div class="panel"><h2>Twitch auto-count</h2>
+          <div class="inl"><input type="text" id="gChan" placeholder="Twitch channel name" maxlength="30" data-enter="#gSave"><button id="gSave" onclick="gAutoSave()">Save</button><button class="gauto" data-snd="toggle" onclick="gAutoToggle()">Auto mode</button></div>
+          <p class="hint">Auto mode follows the real Twitch count every 20 seconds. Off, it uses the number you type above.</p>
+          <details class="adv"><summary>Advanced</summary><div class="advin"><div class="fld"><span>Custom Worker URL (leave empty to use the default)</span><input type="text" id="gWorker" placeholder="https://follower-goal.clayton-fifer.workers.dev"></div><button onclick="gTest()">Test connection</button></div></details></div>
+        <div class="panel"><h2>Show it your way</h2>
+          <div class="fld"><span>When to show</span><div><button data-gmode="pop" onclick="save({gMode:'pop'})">Pop up on new follower</button><button data-gmode="always" onclick="save({gMode:'always'})">Always visible</button></div></div>
+          <div class="fld"><span>Size</span><div><button data-gscale=".7" onclick="save({gScale:.7})">Small</button><button data-gscale="1" onclick="save({gScale:1})">Normal</button><button data-gscale="1.4" onclick="save({gScale:1.4})">Large</button><button data-gscale="1.8" onclick="save({gScale:1.8})">Huge</button></div></div>
+          <div class="fld"><span>Position</span><div><button data-gpos="br" onclick="save({gPos:'br'})">Bottom right</button><button data-gpos="bl" onclick="save({gPos:'bl'})">Bottom left</button><button data-gpos="c" onclick="save({gPos:'c'})">Center</button></div></div>
+          <p class="hint">Bottom left shares a spot with the lower third, so don't show both at once.</p>
+          <div><button class="pri" onclick="save({gTrigN:Math.min(10,Math.max(1,+$('gTestN').value||1)),gTrig:firebase.database.ServerValue.TIMESTAMP})">Test follower animation</button><span class="hint"> for </span><input type="number" id="gTestN" min="1" max="10" value="1" style="width:70px;display:inline-block"><span class="hint"> new followers</span></div>
+          <details class="adv"><summary>Advanced</summary><div class="advin"><div class="inl"><label class="fld"><span>Exact size <b id="gScaleV">100%</b></span><input type="range" id="gScale" min="10" max="200" step="5" value="100"></label><label class="fld"><span>Stay on screen (sec)</span><input type="number" id="gHold" min="7" max="120" value="12"></label></div></div></details></div>
+        <div class="panel"><h2>Goal reached celebration</h2>
+          <button class="wb" data-snd="toggle" onclick="save({gWinOff:!state.gWinOff})">Celebration on</button><button class="pink" onclick="winTest()">Test celebration</button>
+          <div class="fld" style="margin-top:10px"><span>Headline</span><input type="text" id="wHead" placeholder="GOAL REACHED" maxlength="24" data-enter="#wSv"></div>
+          <button id="wSv" onclick="winSave()">Save text</button>
+          <details class="adv"><summary>Advanced</summary><div class="advin"><div class="fld"><span>Subline ({N} becomes the goal number)</span><input type="text" id="wSub" placeholder="{N} FOLLOWERS UNLOCKED" maxlength="60"></div>
+            <div class="inl"><label class="fld"><span>Length (sec)</span><input type="number" id="wLen" min="6" max="20" value="10"></label><label class="fld"><span>Intensity 1-10</span><input type="number" id="wInt" min="1" max="10" value="10"></label></div></div></details></div>
+      </section>
+
+      <section class="pane needs" data-pane="raid">
+        <div class="panel"><h2>Raid animation</h2>
+          <div class="grid2" style="gap:10px"><div class="fld"><span>Raider channel</span><input type="text" id="rName" maxlength="30"></div><div class="fld"><span>Viewers</span><input type="number" id="rCount" min="0"></div></div>
+          <button class="pink big-btn" onclick="playRaid()">PLAY RAID ANIMATION</button>
+          <p class="hint">It plays on the stream only, so you won't see it on this page.</p>
+          <details class="adv"><summary>Advanced</summary><div class="advin"><div class="fld"><span>Headline</span><input type="text" id="rHead" placeholder="INCOMING RAID" maxlength="30"></div><div class="fld"><span>Message</span><input type="text" id="rMsg" placeholder="Welcome raiders!" maxlength="80"></div><div class="fld"><span>Length (seconds)</span><input type="number" id="rDur" min="4" max="30" value="8"></div></div></details></div>
+      </section>
+
+      <section class="pane needs" data-pane="style">
+        <div class="panel"><h2>One-tap themes</h2><p class="hint" style="margin:0 0 10px">Changes the scoreboard, goal, celebration and raid colors together.</p>
+          <button onclick="theme('#19e3ff','#ff2e88','#19e3ff')">Neon</button><button onclick="theme('#ff3b3b','#3b82ff','#ffd23b')">Red / Blue</button><button onclick="theme('#39ff88','#b84dff','#39ff88')">Toxic</button><button onclick="theme('#ffb020','#20c8ff','#ffb020')">Gold</button></div>
+        <div class="panel"><h2>Scoreboard colors</h2><div class="colors">
+          <label>Left team<input type="color" id="cA"></label><label>Right team<input type="color" id="cB"></label><label>Accent<input type="color" id="cAcc"></label><label>Panels<input type="color" id="cBg"></label><label>Text<input type="color" id="cText"></label></div></div>
+        <div class="panel"><h2>Goal colors</h2><div class="colors">
+          <label>Bar / numbers<input type="color" id="cGF"></label><label>Bar background<input type="color" id="cGT"></label><label>Panel<input type="color" id="cGB"></label><label>Text<input type="color" id="cGK"></label></div></div>
+        <div class="panel"><h2>Celebration and raid colors</h2><div class="colors">
+          <label>Celebration main<input type="color" id="cW1"></label><label>Celebration accent<input type="color" id="cW2"></label><label>Raid headline<input type="color" id="cR1"></label><label>Raid name<input type="color" id="cR2"></label></div></div>
+      </section>
+
+      <section class="pane needs" data-pane="sound">
+        <div class="panel"><h2>Master sound</h2>
+          <div class="inl"><label class="fld"><span>Volume <b id="sVolV">60%</b></span><input type="range" id="sVolR" min="0" max="100" value="60"></label><button class="mute" data-snd="toggle" onclick="save({sMute:!state.sMute})">Mute everything</button></div>
+          <p class="hint">Stream sounds are made by the board page, so nothing to download. The play buttons preview on this computer. For sounds to reach the stream, the streamer must tick "Control audio via OBS" on the board browser source.</p>
+          <div style="margin-top:8px"><button onclick="sndPreset('def')">Default set</button><button class="pink" onclick="sndPreset('hype')">Hype set</button><button onclick="sndPreset('off')">All off</button></div></div>
+        <div id="soundHost"></div>
+      </section>
+
+      <section class="pane" data-pane="guide">
+        <div class="panel"><h2>Get live in 5 steps</h2>
+          <div class="step"><div class="n">1</div><div style="flex:1"><b>Copy your overlay link</b><div class="copybox" style="margin-top:8px"><input type="text" id="boardLink" readonly><button class="pri" onclick="copyLink()">Copy</button><button onclick="openLink()">Open</button></div></div></div>
+          <div class="step"><div class="n">2</div><div><b>Add it to OBS</b><p>Sources, then + , then Browser. Paste the link in the URL box. Set Width 1920 and Height 1080. Keep the background transparent.</p></div></div>
+          <div class="step"><div class="n">3</div><div><b>Turn on sound</b><p>On that same browser source, tick "Control audio via OBS". You'll then see it in the Audio Mixer.</p></div></div>
+          <div class="step"><div class="n">4</div><div><b>Connect your follower goal</b><p>Goal tab, then Twitch auto-count: type your channel name, press Save, then Auto mode.</p></div></div>
+          <div class="step"><div class="n">5</div><div><b>Test everything</b><p>Live tab: tap +1. Goal tab: Test follower animation and Test celebration. After a site update, right-click the source in OBS and press Refresh cache of current page.</p></div></div></div>
+        <div class="panel"><h2>Need something else?</h2><p class="hint" style="margin:0">Open the Requests tab and tell us what you want to see next. You can also vote on other people's ideas.</p></div>
+      </section>
+
+      <section class="pane" data-pane="req">
+        <div class="panel"><h2>Request a feature</h2>
+          <div class="fld"><span>Title</span><input type="text" id="rqT" maxlength="100" placeholder="Short and clear"></div>
+          <div class="fld"><span>Details (optional)</span><textarea id="rqB" maxlength="1000" placeholder="What should it do?"></textarea></div>
+          <button class="pri" onclick="sendReq()">Send request</button></div>
+        <div class="panel"><h2>All requests <small id="rqN"></small></h2><div id="rqList"></div></div>
+      </section>
     </div>
   </div>
 </div>
-
-<div id="msg"></div>
-<p style="opacity:.7;font-size:14px">Your user ID: <code id="uid">sign in first</code></p>
-</div>
-
+<div id="modal"></div><div id="toasts"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
@@ -165,18 +324,197 @@ firebase.initializeApp({
   messagingSenderId: "898885184342",
   appId: "1:898885184342:web:1434e53e5af35b18d4c4f7"
 });
-const ref = firebase.database().ref('board'), $ = id => document.getElementById(id);
-let state = { page:'score', scoreA:0, scoreB:0 }, off = 0;
-firebase.database().ref('.info/serverTimeOffset').on('value', s => off = s.val() || 0);
-const say = t => $('msg').textContent = t;
-function save(p){ Object.assign(state, p); ref.update(p).catch(e => say('Save failed: ' + e.message + ' (check database rules)')); }
+const db = firebase.database(), auth = firebase.auth(), $ = id => document.getElementById(id), $$ = s => [...document.querySelectorAll(s)];
+const ADMIN_UID = 'f79YRm3DYdXp65GscuKB0MHJQvH2', WORKER = 'https://follower-goal.clayton-fifer.workers.dev';
+const SITE = location.origin + location.pathname.replace(/[^/]*$/, ''), TS = firebase.database.ServerValue.TIMESTAMP;
+let state = { page:'score', scoreA:0, scoreB:0 }, off = 0, ref = null, offBoard = null, BID = null, me = null, role = 'out', subs = [], pinHash, BL = {}, USERS = {}, REQ = {}, filled = false;
+const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const slug = s => String(s || '').toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24);
+db.ref('.info/serverTimeOffset').on('value', s => off = s.val() || 0);
+db.ref('.info/connected').on('value', s => { $('led').classList.toggle('ok', !!s.val()); $('ledT').textContent = s.val() ? 'linked' : 'offline'; });
 
-$('signin').onclick = () => firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => say('Sign-in failed: ' + e.message));
-firebase.auth().onAuthStateChanged(u => {
-  $('login').style.display = u ? 'none' : 'block'; $('app').style.display = u ? 'block' : 'none';
-  $('uid').textContent = u ? u.uid : 'sign in first';
+/* ---------- control panel sounds (clicks, hovers, tabs) ---------- */
+const UIS = (() => {
+  let c, g, on = store.get('uisnd') !== '0';
+  const ctx = () => { if (!c) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; c = new C(); g = c.createGain(); g.gain.value = .5; g.connect(c.destination); } if (c.state === 'suspended') c.resume(); return c; };
+  const tone = (type, f0, f1, d, v, at) => { const x = ctx(); if (!x) return; const t = x.currentTime + (at || 0), o = x.createOscillator(), e = x.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t); if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + d); e.gain.setValueAtTime(.0001, t); e.gain.exponentialRampToValueAtTime(v, t + .008); e.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(e); e.connect(g); o.start(t); o.stop(t + d + .02); };
+  const S = {
+    click: () => { tone('sine', 1100, 700, .07, .12); tone('square', 2200, 1800, .03, .02); },
+    hover: () => tone('sine', 2600, 2600, .03, .02),
+    tab: () => { tone('sine', 500, 1000, .12, .12); tone('triangle', 1000, 1500, .1, .06, .05); },
+    on: () => { tone('sine', 700, 700, .08, .12); tone('sine', 1050, 1050, .12, .12, .07); },
+    off: () => { tone('sine', 1050, 1050, .08, .12); tone('sine', 700, 700, .12, .12, .07); },
+    ok: () => [880, 1110, 1320].forEach((f, i) => tone('triangle', f, f, .16, .12, i * .07)),
+    err: () => { tone('sawtooth', 160, 120, .22, .1); tone('square', 120, 100, .22, .06, .08); },
+    open: () => tone('sine', 400, 1300, .18, .1)
+  };
+  return { play: n => { if (on && S[n]) S[n](); }, get on() { return on; }, set: v => { on = v; store.set('uisnd', v ? '1' : '0'); } };
+})();
+function toggleUiSound() { UIS.set(!UIS.on); $('uiSndBtn').classList.toggle('on', UIS.on); if (UIS.on) UIS.play('on'); }
+function toast(t, kind) {
+  const e = document.createElement('div'); e.className = 'toast' + (kind === 'err' ? ' err' : ''); e.textContent = t; $('toasts').appendChild(e);
+  UIS.play(kind === 'err' ? 'err' : kind === 'ok' ? 'ok' : 'click');
+  setTimeout(() => { e.classList.add('out'); setTimeout(() => e.remove(), 300); }, 3800);
+}
+const say = t => toast(t);
+let lastHover = null;
+document.addEventListener('click', e => {
+  const b = e.target.closest('button, .navbtn, summary'); if (!b) return;
+  if (b.tagName === 'BUTTON') { const r = b.getBoundingClientRect(), s = document.createElement('span'); s.className = 'rip'; s.style.left = (e.clientX - r.left) + 'px'; s.style.top = (e.clientY - r.top) + 'px'; b.appendChild(s); setTimeout(() => s.remove(), 600); }
+  const g = e.target.closest('[data-go]'); if (g) tab(g.dataset.go);
+  UIS.play(b.dataset.snd === 'toggle' ? (b.classList.contains('on') ? 'off' : 'on') : b.classList.contains('navbtn') ? 'tab' : 'click');
+}, true);
+document.addEventListener('mouseover', e => { const b = e.target.closest('button, .navbtn'); if (b && b !== lastHover) { lastHover = b; UIS.play('hover'); } else if (!b) lastHover = null; });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.dataset && e.target.dataset.enter) { const b = document.querySelector(e.target.dataset.enter); if (b) b.click(); } });
+
+/* ---------- animated background ---------- */
+(function () {
+  const cv = $('bg'), x = cv.getContext('2d'); let W, H, N = [];
+  const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function size() { W = cv.width = innerWidth; H = cv.height = innerHeight; N = []; for (let i = 0, n = Math.min(70, Math.floor(W * H / 24000)); i < n; i++) N.push({ x:Math.random() * W, y:Math.random() * H, vx:(Math.random() - .5) * .28, vy:(Math.random() - .5) * .28, c:Math.random() < .7 ? '25,227,255' : '255,46,136' }); }
+  function frame() {
+    if (!document.hidden) {
+      x.clearRect(0, 0, W, H);
+      for (const p of N) { if (!calm) { p.x += p.vx; p.y += p.vy; } if (p.x < 0 || p.x > W) p.vx *= -1; if (p.y < 0 || p.y > H) p.vy *= -1; x.fillStyle = 'rgba(' + p.c + ',.75)'; x.fillRect(p.x - 1, p.y - 1, 2.2, 2.2); }
+      for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) { const a = N[i], b = N[j], d = Math.hypot(a.x - b.x, a.y - b.y); if (d < 150) { x.strokeStyle = 'rgba(' + a.c + ',' + (1 - d / 150) * .2 + ')'; x.lineWidth = 1; x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.stroke(); } }
+    }
+    if (!calm) requestAnimationFrame(frame);
+  }
+  size(); addEventListener('resize', size); frame();
+})();
+
+/* ---------- sign-in, approval and access ---------- */
+const ICON = {
+  live:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M6.3 6.3a8 8 0 0 0 0 11.4M17.7 6.3a8 8 0 0 1 0 11.4M3.5 3.5a12 12 0 0 0 0 17M20.5 3.5a12 12 0 0 1 0 17"/></svg>',
+  score:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M12 6v12M7 12h.01M17 12h.01"/></svg>',
+  screens:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+  goal:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>',
+  raid:'<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
+  style:'<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4c0-4.5-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="11" r="1"/></svg>',
+  sound:'<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>',
+  guide:'<svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M8 7h6M8 11h6"/></svg>',
+  req:'<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-5.4A8 8 0 1 1 21 12z"/></svg>',
+  admin:'<svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z"/><path d="m9 12 2 2 4-4"/></svg>'
+};
+const NAV = [['live','Live'], ['score','Scoreboard'], ['screens','Screens'], ['goal','Goal'], ['raid','Raid'], ['style','Style'], ['sound','Sound'], ['guide','Setup guide'], ['req','Requests']];
+function buildNav() {
+  const n = $('nav'); n.innerHTML = '';
+  NAV.concat(role === 'admin' ? [['admin', 'Admin']] : []).forEach(([id, label]) => { const b = document.createElement('button'); b.className = 'navbtn' + (id === 'admin' ? ' adm' : ''); b.dataset.go = id; b.innerHTML = ICON[id] + '<span>' + esc(label) + '</span>'; n.appendChild(b); });
+}
+function tab(t) {
+  const p = document.querySelector('.pane[data-pane="' + t + '"]'); if (!p) return;
+  $$('.pane').forEach(e => e.classList.remove('show')); p.classList.add('show');
+  [...p.children].forEach((c, i) => c.style.setProperty('--i', i));
+  $$('.navbtn').forEach(b => b.classList.toggle('on', b.dataset.go === t));
+  $('noBoard').style.display = (!BID && p.classList.contains('needs')) ? 'block' : 'none';
+  store.set('tab', t);
+}
+function showGate(n) { $('gate').style.display = n ? 'flex' : 'none'; $$('.gatecard').forEach(c => c.classList.toggle('show', c.id === 'g-' + n)); $('shell').style.display = n ? 'none' : 'block'; }
+function clearSubs() { subs.forEach(f => f()); subs = []; }
+function leaveApp() { clearSubs(); if (offBoard) { offBoard(); offBoard = null; } ref = null; BID = null; $$('[data-pane="admin"]').forEach(e => e.remove()); $('boardSel').style.display = 'none'; }
+function signOut() { auth.signOut(); }
+$('signin').onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => toast('Sign-in failed: ' + e.message, 'err'));
+function listen(path, cb, label) { const r = db.ref(path), f = s => cb(s.val()), off = () => r.off('value', f); r.on('value', f, e => toast((label || path) + ' unavailable: ' + e.message, 'err')); subs.push(off); return off; }
+let reqOff = null;
+function enterApp(board) {
+  showGate(null); buildNav(); $('uname').textContent = me.displayName || me.email || 'User'; $('uav').src = me.photoURL || ''; $('uav').style.display = me.photoURL ? '' : 'none'; $('uiSndBtn').classList.toggle('on', UIS.on);
+  reqOff = listen('requests', v => { REQ = v || {}; renderReq(); }, 'Requests');
+  if (role === 'admin') buildAdmin(); else loadBoard(board);
+  const want = store.get('tab'); tab(want && document.querySelector('.pane[data-pane="' + want + '"]') ? want : 'live');
+}
+function watchUser(u) {
+  let live = false;
+  listen('users/' + u.uid, v => {
+    v = v || {};
+    if (v.status === 'approved' && v.board) { if (!live) { live = true; role = 'user'; enterApp(v.board); } else if (v.board !== BID) loadBoard(v.board); return; }
+    if (live) { live = false; if (reqOff) reqOff(); if (offBoard) { offBoard(); offBoard = null; } ref = null; BID = null; }
+    role = v.status || 'pending'; showGate(v.status === 'paused' ? 'paused' : v.status === 'denied' ? 'denied' : 'pending');
+  }, 'Account');
+}
+auth.onAuthStateChanged(u => {
+  leaveApp(); me = u;
+  if (!u) { role = 'out'; return showGate('out'); }
+  if (u.uid === ADMIN_UID) { role = 'admin'; return enterApp(); }
+  role = 'pending'; showGate('pending');
+  db.ref('users/' + u.uid + '/info').set({ name:(u.displayName || 'Unknown').slice(0, 70), email:(u.email || '').slice(0, 110), photo:(u.photoURL || '').slice(0, 380), ts:TS }).catch(e => toast('Could not send your request: ' + e.message, 'err'));
+  watchUser(u);
 });
 
+/* ---------- board data ---------- */
+const FILL = { gLabel:'', gCur:'', gGoal:'', gHold:12, gChan:'', gWorker:'', rName:'', rCount:'', rHead:'', rMsg:'', rDur:8, wHead:'', wSub:'', wLen:10, wInt:10 };
+const COLORDEF = { cA:'#19e3ff', cB:'#ff2e88', cAcc:'#19e3ff', cBg:'#060a18', cText:'#eaf9ff', cGF:'#19e3ff', cGT:'#1a2440', cGB:'#060a18', cGK:'#eaf9ff', cR1:'#ff2e88', cR2:'#19e3ff', cW1:'#19e3ff', cW2:'#ff2e88' };
+const colorIds = Object.keys(COLORDEF);
+function save(p) {
+  if (!ref) return toast('Pick a board first (Admin tab).', 'err');
+  Object.assign(state, p); ref.update(p).catch(e => toast('Save failed: ' + e.message, 'err'));
+}
+function loadBoard(id) {
+  if (offBoard) { offBoard(); offBoard = null; }
+  BID = id || null; state = { page:'score', scoreA:0, scoreB:0 }; filled = false;
+  $('boardChip').textContent = BID || 'none'; document.body.classList.toggle('nob', !BID);
+  $('boardLink').value = BID ? SITE + 'board.html?id=' + BID : '';
+  const cur = document.querySelector('.pane.show'); if (cur) tab(cur.dataset.pane);
+  if (!BID) { ref = null; return; }
+  const r = db.ref('boards/' + BID), f = s => { state = Object.assign({ page:'score', scoreA:0, scoreB:0 }, s.val() || {}); render(); };
+  ref = r; r.on('value', f, e => toast('Cannot read this board: ' + e.message, 'err')); offBoard = () => r.off('value', f);
+}
+function setScore(sel, v) { $$(sel).forEach(e => { if (e.textContent !== String(v)) { e.textContent = v; e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop'); } }); }
+function render() {
+  const s = state;
+  if (!filled) { filled = true; Object.keys(FILL).forEach(k => $(k).value = s[k] != null ? s[k] : FILL[k]); }
+  ['A', 'B'].forEach(t => { setScore('[data-s="' + t + '"]', s['score' + t] || 0); const n = s['name' + t] || 'TEAM ' + t; $$('[data-name="' + t + '"]').forEach(e => e.textContent = n); $('name' + t).placeholder = n; });
+  colorIds.forEach(id => $(id).value = s[id] || COLORDEF[id]);
+  $$('[data-page]').forEach(b => b.classList.toggle('on', b.dataset.page === (s.page || 'score')));
+  const t = (sel, on) => $$(sel).forEach(b => b.classList.toggle('on', !!on));
+  t('.low', s.lowOn); t('.tb', s.timerOnBoard); t('.gb', s.gOn); t('.gbar', !s.gNoBar); t('.gauto', s.gAuto); t('.wb', !s.gWinOff); t('.mute', s.sMute);
+  $('gShow').textContent = (s.gCur || 0) + ' / ' + (s.gGoal || 100);
+  $('gScale').value = Math.round((s.gScale || 1) * 100); $('gScaleV').textContent = $('gScale').value + '%';
+  $$('[data-gscale]').forEach(b => b.classList.toggle('on', Math.abs((s.gScale || 1) - +b.dataset.gscale) < .01));
+  $$('[data-gpos]').forEach(b => b.classList.toggle('on', b.dataset.gpos === (s.gPos || 'br')));
+  $$('[data-gmode]').forEach(b => b.classList.toggle('on', b.dataset.gmode === (s.gMode === 'always' ? 'always' : 'pop')));
+  sndSync();
+}
+
+/* ---------- scoreboard, timer, screens ---------- */
+function page(p) { save({ page:p }); }
+function add(t, n) { const k = 'score' + t; save({ [k]: Math.max(0, (state[k] || 0) + n) }); }
+function setName(t) { const v = $('name' + t).value.trim(); if (v) { save({ ['name' + t]: v.toUpperCase() }); $('name' + t).value = ''; toast('Name set', 'ok'); } }
+function setLabel() { const v = $('label').value.trim(); save({ label: v ? v.toUpperCase() : 'VS' }); $('label').value = ''; toast('Middle text set', 'ok'); }
+function swap() { save({ nameA:state.nameB, nameB:state.nameA, scoreA:state.scoreB, scoreB:state.scoreA }); }
+function resetScores() { if (confirm('Reset both scores to 0?')) save({ scoreA:0, scoreB:0 }); }
+function cur() { const base = state.tBase || 0; if (!state.tRun || !state.tStart) return base; const el = Date.now() + off - state.tStart; return state.tMode === 'up' ? base + el : Math.max(0, base - el); }
+function setTimer() { const t = ((+$('tm').value || 0) * 60 + (+$('ts').value || 0)) * 1000, m = $('tmode').value; save({ tMode:m, tInit:m === 'up' ? 0 : t, tBase:m === 'up' ? 0 : t, tRun:false, tStart:null }); toast('Timer set', 'ok'); }
+function quickT(sec) { $('tm').value = Math.floor(sec / 60); $('ts').value = sec % 60; $('tmode').value = 'down'; save({ tMode:'down', tInit:sec * 1000, tBase:sec * 1000, tRun:false, tStart:null }); }
+function startT() { if (!state.tRun) save({ tRun:true, tStart:TS }); }
+function pauseT() { if (state.tRun) save({ tBase:cur(), tRun:false, tStart:null }); }
+function resetT() { save({ tBase:state.tMode === 'up' ? 0 : (state.tInit || 0), tRun:false, tStart:null }); }
+function clearT() { save({ tBase:0, tInit:0, tRun:false, tStart:null }); }
+setInterval(() => { const t = Math.ceil(cur() / 1000), s = Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); $$('[data-tnow]').forEach(e => e.textContent = s); }, 250);
+function setSoon() { save({ soonH:$('soonH').value.trim().toUpperCase() || 'STARTING SOON', soonS:$('soonS').value.trim() }); toast('Screen updated', 'ok'); }
+function clearSoon() { $('soonH').value = ''; $('soonS').value = ''; save({ soonH:'STARTING SOON', soonS:'' }); }
+function quick(t) { save({ soonH:t, page:'soon' }); }
+function setLower() { save({ lowN:$('lowN').value.trim(), lowR:$('lowR').value.trim(), lowOn:true }); }
+function toggleLower() { save({ lowOn:!state.lowOn }); }
+
+/* ---------- follower goal, celebration, raid, colors ---------- */
+function gSet() { const c = $('gCur').value, g = $('gGoal').value; save({ gCur:c === '' ? (state.gCur || 0) : Math.max(0, +c), gGoal:g === '' ? (state.gGoal || 100) : Math.max(1, +g), gLabel:$('gLabel').value.trim().toUpperCase() || 'FOLLOWER GOAL' }); toast('Goal updated', 'ok'); }
+function gAdd(n) { save({ gCur:Math.max(0, (state.gCur || 0) + n) }); $('gCur').value = state.gCur; }
+function gToggle() { save({ gOn:!state.gOn }); }
+function winSave() { save({ wHead:$('wHead').value.trim().toUpperCase() || 'GOAL REACHED', wSub:$('wSub').value.trim().toUpperCase(), wLen:Math.min(20, Math.max(6, +$('wLen').value || 10)), wInt:Math.min(10, Math.max(1, +$('wInt').value || 10)) }); toast('Saved', 'ok'); }
+function winTest() { winSave(); save({ gWinTrig:TS }); }
+function playRaid() { save({ rName:$('rName').value.trim().toUpperCase(), rHead:$('rHead').value.trim().toUpperCase() || 'INCOMING RAID', rMsg:$('rMsg').value.trim(), rCount:+$('rCount').value || 0, rDur:Math.min(30, Math.max(4, +$('rDur').value || 8)), rTrig:TS }); }
+$('gScale').addEventListener('input', e => $('gScaleV').textContent = e.target.value + '%');
+$('gScale').addEventListener('change', e => save({ gScale:e.target.value / 100 }));
+$('gHold').addEventListener('change', e => save({ gHold:Math.min(120, Math.max(7, +e.target.value || 12)) }));
+function gClean() { return { w:($('gWorker').value.trim() || WORKER).replace(/\/+$/, ''), ch:$('gChan').value.trim().toLowerCase().replace(/^@/, '') }; }
+function gAutoSave() { const o = gClean(); if (!/^https:\/\//.test(o.w)) return toast('Worker URL must start with https://', 'err'); save({ gChan:o.ch, gWorker:o.w === WORKER ? null : o.w }); toast('Saved', 'ok'); }
+function gAutoToggle() { if (!state.gAuto && !state.gChan) return toast('Save your Twitch channel name first.', 'err'); save({ gAuto:!state.gAuto }); }
+async function gTest() { const o = gClean(); if (!o.ch) return toast('Enter your Twitch channel first.', 'err'); toast('Testing...');
+  try { const r = await fetch(o.w + '?login=' + encodeURIComponent(o.ch)), j = await r.json(); j.total != null ? toast('Connected. ' + o.ch + ' has ' + j.total + ' followers.', 'ok') : toast('The Worker replied with an error: ' + (j.error || r.status), 'err'); }
+  catch (e) { toast('Could not reach the Worker: ' + e.message, 'err'); } }
+colorIds.forEach(id => $(id).addEventListener('change', e => save({ [id]:e.target.value })));
+function theme(a, b, c) { save({ cA:a, cB:b, cAcc:c, cGF:c, cW1:c, cW2:b, cR1:b, cR2:c }); toast('Theme applied', 'ok'); }
 const SFX = (() => {
   let c, out;
   const N = n => 440 * Math.pow(2, (n - 69) / 12);
@@ -329,91 +667,182 @@ const SFX = (() => {
   };
   return { D, play, dv: id => id === 'timerTick' ? 0 : 1 };
 })();
+
+/* ---------- sound tab ---------- */
 const SND_PREV = { followPop:.6, goalWin:8, raidIn:8 };
+const HYPE = { scoreUp:6, scoreDown:4, timerEnd:4, timerTick:0, pageChange:4, lowerIn:4, followPop:4, followFill:5, goalWin:5, raidIn:4 };
 (function () {
   const g = {};
   Object.keys(SFX.D).forEach(id => { const e = SFX.D[id]; (g[e[1]] = g[e[1]] || []).push(id); });
-  let h = '<style>.srow{display:grid;grid-template-columns:1fr 1.3fr 56px;gap:8px;align-items:center;margin-top:8px}.srow select,.srow button{margin:0}</style>';
-  h += '<div class="panel" data-tab="sound"><h2>Master sound</h2><label class="f">Volume <b id="sVolV">60%</b></label><input type="range" id="sVolR" min="0" max="100" value="60" style="width:55%;vertical-align:middle"><button id="sMuteB" onclick="save({sMute:!state.sMute})">Mute everything</button><p class="hint">Sounds are generated by the board page, so there is nothing to download or upload. The play buttons preview on this computer. For sounds to reach the stream, Caleb must tick "Control audio via OBS" on the board.html browser source.</p></div>';
+  let h = '';
   Object.keys(g).forEach(k => {
-    h += '<div class="panel" data-tab="sound"><h2>' + k + ' sounds</h2>';
-    g[k].forEach(id => { const e = SFX.D[id]; h += '<div class="srow"><span>' + e[0] + '</span><select id="s_' + id + '" onchange="sndPick(\'' + id + '\')"><option value="0">Off</option>' + e[2].map((v, i) => '<option value="' + (i + 1) + '">' + (i + 1) + ' - ' + v[0] + '</option>').join('') + '</select><button onclick="sndPrev(\'' + id + '\')">&#9654;</button></div>'; });
+    h += '<div class="panel"><h2>' + esc(k) + ' sounds</h2>';
+    g[k].forEach(id => { const e = SFX.D[id]; h += '<div class="srow"><span>' + esc(e[0]) + '</span><select id="s_' + id + '" onchange="sndPick(\'' + id + '\')"><option value="0">Off</option>' + e[2].map((v, i) => '<option value="' + (i + 1) + '">' + (i + 1) + ' - ' + esc(v[0]) + '</option>').join('') + '</select><button onclick="sndPrev(\'' + id + '\')">&#9654;</button></div>'; });
     h += '</div>';
   });
-  const a = document.querySelectorAll('[data-tab="colors"]'); a[a.length - 1].insertAdjacentHTML('afterend', h);
+  $('soundHost').innerHTML = h;
   $('sVolR').addEventListener('input', e => $('sVolV').textContent = e.target.value + '%');
-  $('sVolR').addEventListener('change', e => save({ sVol: +e.target.value }));
+  $('sVolR').addEventListener('change', e => save({ sVol:+e.target.value }));
 })();
 function sndPrev(id) { const v = +$('s_' + id).value; if (v) SFX.play(id, v, SND_PREV[id], (+$('sVolR').value) / 100); }
-function sndPick(id) { save({ ['s_' + id]: +$('s_' + id).value }); sndPrev(id); }
+function sndPick(id) { save({ ['s_' + id]:+$('s_' + id).value }); sndPrev(id); }
+function sndPreset(n) { const p = {}; Object.keys(SFX.D).forEach(id => p['s_' + id] = n === 'hype' ? HYPE[id] : n === 'off' ? 0 : SFX.dv(id)); save(p); toast(n === 'hype' ? 'Hype set applied' : n === 'off' ? 'All sounds off' : 'Default set applied', 'ok'); }
 function sndSync() {
   Object.keys(SFX.D).forEach(id => { const v = state['s_' + id]; $('s_' + id).value = v == null ? SFX.dv(id) : v; });
-  $('sVolR').value = state.sVol == null ? 60 : state.sVol; $('sVolV').textContent = $('sVolR').value + '%'; $('sMuteB').classList.toggle('on', !!state.sMute);
+  $('sVolR').value = state.sVol == null ? 60 : state.sVol; $('sVolV').textContent = $('sVolR').value + '%';
 }
-const colorIds = ['cA','cB','cAcc','cBg','cText','cGF','cGT','cGB','cGK','cR1','cR2','cW1','cW2'];
-colorIds.forEach(id => $(id).addEventListener('change', e => save({ [id]: e.target.value })));
-function preset(a,b,c){ save({ cA:a, cB:b, cAcc:c }); }
 
-ref.on('value', s => {
-  const d = s.val(); if (!d) return;
-  state = Object.assign(state, d);
-  if (!window.filled) { window.filled = 1; ['gLabel','gCur','gGoal','gHold','gChan','gWorker','rName','rCount','rHead','rMsg','rDur','wHead','wSub','wLen','wInt'].forEach(k => { if (state[k] != null) $(k).value = state[k]; }); }
-  $('sA').textContent = state.scoreA || 0; $('sB').textContent = state.scoreB || 0;
-  $('nameA').placeholder = state.nameA || 'Left team name'; $('nameB').placeholder = state.nameB || 'Right team name';
-  colorIds.forEach(id => { if (state[id]) $(id).value = state[id]; });
-  document.querySelectorAll('[data-page]').forEach(b => b.classList.toggle('on', b.dataset.page === (state.page || 'score')));
-  $('lowBtn').classList.toggle('on', !!state.lowOn); $('tbBtn').classList.toggle('on', !!state.timerOnBoard);
-  document.querySelectorAll('.gb').forEach(b => b.classList.toggle('on', !!state.gOn)); $('gbBtn').classList.toggle('on', !state.gNoBar);
-  $('gShow').textContent = (state.gCur || 0) + ' / ' + (state.gGoal || 100);
-  $('gScale').value = Math.round((state.gScale || 1) * 100); $('gScaleV').textContent = $('gScale').value + '%';
-  document.querySelectorAll('[data-gpos]').forEach(b => b.classList.toggle('on', b.dataset.gpos === (state.gPos || 'br')));
-  $('gAutoBtn').classList.toggle('on', !!state.gAuto); $('wBtn').classList.toggle('on', !state.gWinOff);
-  document.querySelectorAll('[data-gmode]').forEach(b => b.classList.toggle('on', b.dataset.gmode === (state.gMode === 'always' ? 'always' : 'pop')));
-sndSync();
-}, e => say('Cannot read database: ' + e.message));
+/* ---------- setup guide helpers ---------- */
+function copyText(t) { if (navigator.clipboard) navigator.clipboard.writeText(t).then(() => toast('Copied', 'ok'), () => toast('Could not copy. Select the text and press Ctrl+C.', 'err')); else toast('Select the text and press Ctrl+C.', 'err'); }
+function copyLink() { if (!$('boardLink').value) return toast('No board yet.', 'err'); copyText($('boardLink').value); }
+function openLink() { if ($('boardLink').value) window.open($('boardLink').value, '_blank'); }
 
-function page(p){ save({ page:p }); }
-function add(t,n){ const k='score'+t; save({ [k]: Math.max(0,(state[k]||0)+n) }); }
-function setName(t){ const v=$('name'+t).value.trim(); if(v){ save({ ['name'+t]: v.toUpperCase() }); $('name'+t).value=''; } }
-function setLabel(){ const v=$('label').value.trim(); save({ label: v ? v.toUpperCase() : 'VS' }); $('label').value=''; }
-function swap(){ save({ nameA:state.nameB, nameB:state.nameA, scoreA:state.scoreB, scoreB:state.scoreA }); }
-function resetScores(){ if(confirm('Reset both scores to 0?')) save({ scoreA:0, scoreB:0 }); }
+/* ---------- feature requests ---------- */
+const votes = r => r && r.votes ? Object.keys(r.votes).length : 0;
+let lastReq = 0;
+function sendReq() {
+  const t = $('rqT').value.trim(), b = $('rqB').value.trim();
+  if (t.length < 3) return toast('Give your idea a short title first.', 'err');
+  if (Date.now() - lastReq < 8000) return toast('Easy there, wait a few seconds.', 'err');
+  lastReq = Date.now();
+  db.ref('requests').push({ uid:me.uid, name:(me.displayName || 'User').slice(0, 70), title:t.slice(0, 100), body:b.slice(0, 1000), status:'open', ts:TS })
+    .then(() => { $('rqT').value = ''; $('rqB').value = ''; toast('Request sent. Thank you!', 'ok'); }).catch(e => toast('Could not send: ' + e.message, 'err'));
+}
+function renderReq() {
+  const el = $('rqList'); if (!el) return;
+  const ids = Object.keys(REQ).sort((a, b) => votes(REQ[b]) - votes(REQ[a]) || (REQ[b].ts || 0) - (REQ[a].ts || 0));
+  $('rqN').textContent = ids.length ? ids.length + ' total' : '';
+  el.innerHTML = ids.length ? ids.map(id => {
+    const r = REQ[id], mine = me && r.votes && r.votes[me.uid], st = ['open', 'planned', 'done'].includes(r.status) ? r.status : 'open';
+    const adm = role === 'admin' ? '<div class="acts"><button class="sm" data-act="rs" data-st="open" data-id="' + esc(id) + '">Open</button><button class="sm" data-act="rs" data-st="planned" data-id="' + esc(id) + '">Planned</button><button class="sm" data-act="rs" data-st="done" data-id="' + esc(id) + '">Done</button><button class="sm danger" data-act="rdel" data-id="' + esc(id) + '">Delete</button></div>' : '';
+    return '<div class="card"><button class="vote sm' + (mine ? ' on' : '') + '" data-act="vote" data-id="' + esc(id) + '" style="margin:0">&#9650; ' + votes(r) + '</button><div class="meta"><b>' + esc(r.title) + '</b>' + (r.body ? '<span>' + esc(r.body) + '</span>' : '') + '<span>' + esc(r.name) + ' &middot; ' + new Date(r.ts || 0).toLocaleDateString() + '</span></div><span class="badge ' + st + '">' + st + '</span>' + adm + '</div>';
+  }).join('') : '<p class="hint">No requests yet. Be the first!</p>';
+}
+$('rqList').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || !me) return; const id = b.dataset.id, a = b.dataset.act;
+  if (a === 'vote') { const mine = REQ[id] && REQ[id].votes && REQ[id].votes[me.uid]; db.ref('requests/' + id + '/votes/' + me.uid).set(mine ? null : true).catch(er => toast(er.message, 'err')); }
+  else if (a === 'rs' && role === 'admin') db.ref('requests/' + id + '/status').set(b.dataset.st);
+  else if (a === 'rdel' && role === 'admin' && confirm('Delete this request?')) db.ref('requests/' + id).remove();
+});
 
-function cur(){ const base = state.tBase||0; if(!state.tRun||!state.tStart) return base;
-  const el = Date.now()+off-state.tStart; return state.tMode==='up' ? base+el : Math.max(0, base-el); }
-function setTimer(){ const t=((+$('tm').value||0)*60+(+$('ts').value||0))*1000, m=$('tmode').value;
-  save({ tMode:m, tInit:m==='up'?0:t, tBase:m==='up'?0:t, tRun:false, tStart:null }); }
-function startT(){ if(!state.tRun) save({ tRun:true, tStart:firebase.database.ServerValue.TIMESTAMP }); }
-function pauseT(){ if(state.tRun) save({ tBase:cur(), tRun:false, tStart:null }); }
-function resetT(){ save({ tBase: state.tMode==='up' ? 0 : (state.tInit||0), tRun:false, tStart:null }); }
-setInterval(() => { const t=Math.ceil(cur()/1000); $('tNow').textContent = Math.floor(t/60) + ':' + String(t%60).padStart(2,'0'); }, 250);
-
-function setSoon(){ save({ soonH: $('soonH').value.trim().toUpperCase() || 'STARTING SOON', soonS: $('soonS').value.trim() }); }
-function clearT(){ save({ tBase:0, tInit:0, tRun:false, tStart:null }); }
-function clearSoon(){ $('soonH').value=''; $('soonS').value=''; save({ soonH:'STARTING SOON', soonS:'' }); }
-function quick(t){ save({ soonH:t, page:'soon' }); }
-function setLower(){ save({ lowN:$('lowN').value.trim(), lowR:$('lowR').value.trim(), lowOn:true }); }
-function toggleLower(){ save({ lowOn: !state.lowOn }); }
-function tab(t){ document.querySelectorAll('[data-tab]').forEach(e => e.style.display = e.dataset.tab === t ? '' : 'none'); document.querySelectorAll('[data-go]').forEach(b => b.classList.toggle('on', b.dataset.go === t)); }
-tab('score');
-function gSet(){ const c=$('gCur').value, g=$('gGoal').value;
-  save({ gCur: c==='' ? (state.gCur||0) : Math.max(0,+c), gGoal: g==='' ? (state.gGoal||100) : Math.max(1,+g), gLabel: $('gLabel').value.trim().toUpperCase() || 'FOLLOWER GOAL' }); }
-function gAdd(n){ save({ gCur: Math.max(0,(state.gCur||0)+n) }); $('gCur').value = state.gCur; }
-function gToggle(){ save({ gOn: !state.gOn }); }
-function winSave(){ save({ wHead:$('wHead').value.trim().toUpperCase()||'GOAL REACHED', wSub:$('wSub').value.trim().toUpperCase(), wLen:Math.min(20,Math.max(6,+$('wLen').value||10)), wInt:Math.min(10,Math.max(1,+$('wInt').value||10)) }); say('Saved.'); }
-function winTest(){ winSave(); save({ gWinTrig:firebase.database.ServerValue.TIMESTAMP }); }
-function playRaid(){ save({ rName:$('rName').value.trim().toUpperCase(), rHead:$('rHead').value.trim().toUpperCase() || 'INCOMING RAID', rMsg:$('rMsg').value.trim(),
-  rCount:+$('rCount').value||0, rDur:Math.min(30,Math.max(4,+$('rDur').value||8)), rTrig:firebase.database.ServerValue.TIMESTAMP }); }
-$('gScale').addEventListener('input', e => $('gScaleV').textContent = e.target.value + '%');
-$('gHold').addEventListener('change', e => save({ gHold: Math.min(120, Math.max(7, +e.target.value || 12)) }));
-$('gScale').addEventListener('change', e => save({ gScale: e.target.value / 100 }));
-function gClean(){ return { w: $('gWorker').value.trim().replace(/\/+$/, ''), ch: $('gChan').value.trim().toLowerCase().replace(/^@/, '') }; }
-function gAutoSave(){ const o = gClean(); if (o.w && !/^https:\/\//.test(o.w)) return say('Worker URL must start with https://'); save({ gChan:o.ch, gWorker:o.w }); say('Saved.'); }
-function gAutoToggle(){ if (!state.gAuto && !(state.gChan && state.gWorker)) return say('Save a channel name and Worker URL first.'); say(''); save({ gAuto: !state.gAuto }); }
-async function gTest(){ const o = gClean(); if (!o.w || !o.ch) return say('Enter a channel and Worker URL first.'); say('Testing...');
-  try { const r = await fetch(o.w + '?login=' + encodeURIComponent(o.ch)), j = await r.json();
-    say(j.total != null ? 'Connected. ' + o.ch + ' has ' + j.total + ' followers.' : 'The Worker replied with an error: ' + (j.error || r.status)); }
-  catch (e) { say('Could not reach the Worker: ' + e.message); } }
+/* ---------- admin: approvals, PIN, boards (only built for the admin account) ---------- */
+async function sha(pin) { const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ADMIN_UID + ':' + pin)); return [...new Uint8Array(h)].map(x => x.toString(16).padStart(2, '0')).join(''); }
+let pinTries = 0, pinLock = 0;
+function askPin(msg) {
+  return new Promise(res => {
+    if (pinHash === undefined) { toast('Still loading, try again in a second.', 'err'); return res(false); }
+    if (pinHash === null) { toast('Set your PIN first (PIN card at the top of Admin).', 'err'); return res(false); }
+    if (Date.now() < pinLock) { toast('Too many wrong tries. Wait a minute.', 'err'); return res(false); }
+    const m = $('modal'); m.innerHTML = '<div class="mbox"><h3>' + esc(msg) + '</h3><input type="password" id="pinIn" inputmode="numeric" autocomplete="off" placeholder="PIN"><div class="mrow"><button class="pri" id="pinOk">Confirm</button><button id="pinNo">Cancel</button></div></div>';
+    m.style.display = 'flex'; UIS.play('open'); const inp = $('pinIn'), box = m.firstChild; inp.focus();
+    const done = v => { m.style.display = 'none'; m.innerHTML = ''; res(v); };
+    const go = async () => {
+      if (await sha(inp.value.trim()) === pinHash) { pinTries = 0; return done(true); }
+      if (++pinTries >= 5) { pinTries = 0; pinLock = Date.now() + 60000; done(false); return toast('Locked for 60 seconds.', 'err'); }
+      inp.value = ''; box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake'); toast('Wrong PIN', 'err');
+    };
+    $('pinOk').onclick = go; $('pinNo').onclick = () => done(false);
+    inp.onkeydown = e => { if (e.key === 'Enter') go(); if (e.key === 'Escape') done(false); };
+  });
+}
+function buildAdmin() {
+  if ($$('[data-pane="admin"]').length) return;
+  const p = document.createElement('section'); p.className = 'pane'; p.dataset.pane = 'admin';
+  p.innerHTML = '<div class="panel"><h2>Approval PIN <small id="pinSt"></small></h2><div id="pinBox"></div></div>'
+    + '<div class="panel"><h2>Access requests <small id="usN"></small></h2><div id="admUsers"></div></div>'
+    + '<div class="panel"><h2>Boards</h2><div id="admBoards"></div><div class="inl" style="margin-top:12px"><label class="fld"><span>New board id</span><input type="text" id="nbId" maxlength="24" placeholder="e.g. caleb"></label><label class="fld"><span>Display name</span><input type="text" id="nbLabel" maxlength="40" placeholder="e.g. Caleb"></label><button class="pri" data-act="mkboard">Create board</button></div>'
+    + '<div style="margin-top:12px"><button data-act="import">Import Caleb\'s old board (one time)</button></div><p class="hint">Import copies the old single board into the new system as board "caleb". After that, add <b>?id=caleb</b> to Caleb\'s OBS link.</p></div>';
+  $('content').appendChild(p); p.addEventListener('click', adminClick);
+  const sel = $('boardSel'); sel.style.display = '';
+  sel.onchange = () => { store.set('lastBoard', sel.value); loadBoard(sel.value || null); };
+  listen('admin/pin', v => { pinHash = v || null; renderPin(); }, 'PIN');
+  listen('users', v => { USERS = v || {}; renderUsers(); renderBoards(); }, 'Users');
+  listen('boardList', v => {
+    BL = v || {}; const ids = Object.keys(BL);
+    sel.innerHTML = ids.map(i => '<option value="' + esc(i) + '">' + esc(BL[i].label || i) + ' (' + esc(i) + ')</option>').join('') || '<option value="">No boards yet</option>';
+    const last = store.get('lastBoard'), want = BID && BL[BID] ? BID : last && BL[last] ? last : ids[0] || null;
+    sel.value = want || ''; if (want !== BID) loadBoard(want); renderBoards();
+  }, 'Boards');
+  buildNav();
+}
+function renderPin() {
+  const b = $('pinBox'); if (!b) return; $('pinSt').textContent = pinHash === undefined ? 'loading' : pinHash ? 'set' : 'not set yet';
+  b.innerHTML = (pinHash ? '<div class="fld"><span>Current PIN</span><input type="password" id="pinOld" inputmode="numeric" autocomplete="off"></div>' : '')
+    + '<div class="inl"><label class="fld"><span>' + (pinHash ? 'New PIN' : 'Choose a PIN') + ' (6-12 digits)</span><input type="password" id="pinNew" inputmode="numeric" autocomplete="off"></label><label class="fld"><span>Repeat PIN</span><input type="password" id="pinNew2" inputmode="numeric" autocomplete="off"></label><button class="pri" data-act="setpin">' + (pinHash ? 'Change PIN' : 'Save PIN') + '</button></div>'
+    + '<p class="hint">Every approval asks for this PIN. It is stored as a one-way hash that only your account can read.</p>';
+}
+async function setPin() {
+  const n = $('pinNew').value.trim(), n2 = $('pinNew2').value.trim();
+  if (!/^\d{6,12}$/.test(n)) return toast('Use 6 to 12 digits.', 'err');
+  if (n !== n2) return toast('The two PINs do not match.', 'err');
+  if (pinHash && await sha($('pinOld').value.trim()) !== pinHash) return toast('Current PIN is wrong.', 'err');
+  try { await db.ref('admin/pin').set(await sha(n)); toast('PIN saved.', 'ok'); } catch (e) { toast('Could not save: ' + e.message, 'err'); }
+}
+function renderUsers() {
+  const el = $('admUsers'); if (!el) return;
+  const rank = { pending:0, approved:1, paused:2, denied:3 }, st = u => USERS[u].status || 'pending';
+  const ids = Object.keys(USERS).filter(u => USERS[u].info).sort((a, b) => rank[st(a)] - rank[st(b)] || (USERS[b].info.ts || 0) - (USERS[a].info.ts || 0));
+  const w = ids.filter(u => st(u) === 'pending').length; $('usN').textContent = w ? w + ' waiting' : ids.length ? 'none waiting' : '';
+  el.innerHTML = ids.length ? ids.map(uid => {
+    const u = USERS[uid], i = u.info, s = st(uid), ph = /^https:\/\//.test(i.photo || '') ? '<img class="avatar lg" referrerpolicy="no-referrer" src="' + esc(i.photo) + '" alt="">' : '<div class="avatar lg"></div>';
+    const ask = '<input type="text" id="bn_' + esc(uid) + '" value="' + esc(slug(i.name)) + '" maxlength="24" placeholder="board id"><button class="pri sm" data-act="approve" data-uid="' + esc(uid) + '">Approve</button>';
+    const acts = s === 'pending' ? ask + '<button class="danger sm" data-act="deny" data-uid="' + esc(uid) + '">Deny</button>'
+      : s === 'approved' ? '<button class="sm" data-act="pause" data-uid="' + esc(uid) + '">Pause</button><button class="danger sm" data-act="remove" data-uid="' + esc(uid) + '">Remove</button>'
+      : s === 'paused' ? '<button class="pri sm" data-act="resume" data-uid="' + esc(uid) + '">Resume</button><button class="danger sm" data-act="remove" data-uid="' + esc(uid) + '">Remove</button>' : ask;
+    return '<div class="card">' + ph + '<div class="meta"><b>' + esc(i.name) + ' <span class="badge ' + s + '">' + s + '</span></b><span>' + esc(i.email) + (i.ts ? ' &middot; ' + esc(new Date(i.ts).toLocaleString()) : '') + '</span>' + (u.board ? '<span>board: ' + esc(u.board) + '</span>' : '') + '</div><div class="acts">' + acts + '</div></div>';
+  }).join('') : '<p class="hint">Nobody has asked for access yet.</p>';
+}
+function renderBoards() {
+  const el = $('admBoards'); if (!el) return; const ids = Object.keys(BL);
+  el.innerHTML = ids.length ? ids.map(id => { const b = BL[id], o = b.uid && USERS[b.uid] && USERS[b.uid].info ? USERS[b.uid].info.name : (b.uid ? 'user' : 'no account'); return '<div class="card"><div class="meta"><b>' + esc(b.label || id) + '</b><span>id: ' + esc(id) + ' &middot; owner: ' + esc(o) + '</span></div><div class="acts"><button class="sm" data-act="copy" data-id="' + esc(id) + '">Copy link</button><button class="sm pri" data-act="edit" data-id="' + esc(id) + '">Edit</button><button class="sm danger" data-act="del" data-id="' + esc(id) + '">Delete</button></div></div>'; }).join('') : '<p class="hint">No boards yet. Create one below, or import Caleb\'s.</p>';
+}
+function adminClick(e) {
+  const b = e.target.closest('[data-act]'); if (!b) return; const u = b.dataset.uid, id = b.dataset.id;
+  ({ setpin:setPin, approve:() => approve(u), deny:() => setStatus(u, 'denied'), pause:() => setStatus(u, 'paused'), resume:() => approve(u, true), remove:() => removeUser(u), mkboard:createBoard, import:importCaleb,
+    copy:() => copyText(SITE + 'board.html?id=' + id), edit:() => { $('boardSel').value = id; $('boardSel').onchange(); toast('Now editing ' + id, 'ok'); }, del:() => delBoard(id) }[b.dataset.act] || (() => {}))();
+}
+async function approve(uid, resume) {
+  const u = USERS[uid]; if (!u) return;
+  const b = resume ? u.board : slug(($('bn_' + uid) || {}).value);
+  if (!b) return toast('Type a board id first.', 'err');
+  const ex = BL[b]; if (ex && ex.uid && ex.uid !== uid) return toast('That board id belongs to someone else.', 'err');
+  if (!await askPin('PIN to approve ' + ((u.info && u.info.name) || 'this user'))) return;
+  const up = {}; up['users/' + uid + '/status'] = 'approved'; up['users/' + uid + '/board'] = b;
+  up['boardList/' + b + '/label'] = (ex && ex.label) || (u.info && u.info.name) || b; up['boardList/' + b + '/uid'] = uid; up['boardList/' + b + '/created'] = (ex && ex.created) || TS;
+  try {
+    if (!(await db.ref('boards/' + b).once('value')).exists()) { up['boards/' + b + '/page'] = 'score'; up['boards/' + b + '/scoreA'] = 0; up['boards/' + b + '/scoreB'] = 0; }
+    await db.ref().update(up); toast('Approved. Board: ' + b, 'ok');
+  } catch (er) { toast('Failed: ' + er.message, 'err'); }
+}
+function setStatus(uid, s) { db.ref('users/' + uid + '/status').set(s).catch(er => toast(er.message, 'err')); }
+function removeUser(uid) {
+  const u = USERS[uid]; if (!u || !confirm('Remove this person\'s access? Their board data stays.')) return;
+  const up = { ['users/' + uid + '/status']:'denied' }; if (u.board) up['boardList/' + u.board + '/uid'] = null;
+  db.ref().update(up).catch(er => toast(er.message, 'err'));
+}
+async function createBoard() {
+  const id = slug($('nbId').value), label = $('nbLabel').value.trim() || id;
+  if (!id) return toast('Type a board id (letters, numbers, dashes).', 'err');
+  if (BL[id]) return toast('That board already exists.', 'err');
+  try { await db.ref().update({ ['boardList/' + id + '/label']:label, ['boardList/' + id + '/created']:TS, ['boards/' + id + '/page']:'score', ['boards/' + id + '/scoreA']:0, ['boards/' + id + '/scoreB']:0 }); $('nbId').value = ''; $('nbLabel').value = ''; toast('Board created.', 'ok'); }
+  catch (er) { toast('Failed: ' + er.message, 'err'); }
+}
+async function importCaleb() {
+  if (!confirm('Copy the old Caleb board into the new system? This overwrites board "caleb" if it already exists.')) return;
+  try {
+    const s = await db.ref('board').once('value');
+    await db.ref('boards/caleb').set(s.val() || { page:'score', scoreA:0, scoreB:0 });
+    await db.ref('boardList/caleb').update({ label:'Caleb', created:TS });
+    toast('Imported. Use ?id=caleb on the OBS link.', 'ok');
+  } catch (er) { toast('Import failed: ' + er.message, 'err'); }
+}
+async function delBoard(id) {
+  if (!BL[id] || !confirm('Delete board "' + id + '" and all its settings? This cannot be undone.')) return;
+  if (!await askPin('PIN to delete board ' + id)) return;
+  const up = { ['boardList/' + id]:null, ['boards/' + id]:null }, o = BL[id].uid; if (o) { up['users/' + o + '/board'] = null; up['users/' + o + '/status'] = 'paused'; }
+  db.ref().update(up).then(() => toast('Board deleted.', 'ok'), er => toast(er.message, 'err'));
+}
+showGate('load');
 </script>
 </body>
 </html>
