@@ -269,6 +269,10 @@ input[type=range]{accent-color:var(--cyan);vertical-align:middle}
           <button class="pink big-btn" onclick="playRaid()">PLAY RAID ANIMATION</button>
           <p class="hint">It plays on the stream only, so you won't see it on this page.</p>
           <details class="adv"><summary>Advanced</summary><div class="advin"><div class="fld"><span>Headline</span><input type="text" id="rHead" placeholder="INCOMING RAID" maxlength="30"></div><div class="fld"><span>Message</span><input type="text" id="rMsg" placeholder="Welcome raiders!" maxlength="80"></div><div class="fld"><span>Length (seconds)</span><input type="number" id="rDur" min="4" max="30" value="8"></div></div></details></div>
+        <div class="panel"><h2>Automatic raids <small data-chan>not set</small></h2>
+          <button class="rauto" data-snd="toggle" onclick="rAutoToggle()">Auto raids</button><button class="pink" onclick="rAutoTest()">Test auto raid</button>
+          <p class="hint">When another streamer raids your channel, the raid animation plays by itself with their name and viewer count. It follows the Twitch channel from the Goal tab and only works while your overlay is open in OBS. The headline, message and length come from the settings above.</p>
+          <details class="adv"><summary>Advanced</summary><div class="advin"><div class="fld"><span>Ignore raids smaller than (viewers)</span><input type="number" id="rMin" min="1" value="1"></div></div></details></div>
       </section>
 
       <section class="pane needs" data-pane="style">
@@ -295,7 +299,7 @@ input[type=range]{accent-color:var(--cyan);vertical-align:middle}
           <div class="step"><div class="n">1</div><div style="flex:1"><b>Copy your overlay link</b><div class="copybox" style="margin-top:8px"><input type="text" id="boardLink" readonly><button class="pri" onclick="copyLink()">Copy</button><button onclick="openLink()">Open</button></div></div></div>
           <div class="step"><div class="n">2</div><div><b>Add it to OBS</b><p>Sources, then + , then Browser. Paste the link in the URL box. Set Width 1920 and Height 1080. Keep the background transparent.</p></div></div>
           <div class="step"><div class="n">3</div><div><b>Turn on sound</b><p>On that same browser source, tick "Control audio via OBS". You'll then see it in the Audio Mixer.</p></div></div>
-          <div class="step"><div class="n">4</div><div><b>Connect your follower goal</b><p>Goal tab, then Twitch auto-count: type your channel name, press Save, then Auto mode.</p></div></div>
+          <div class="step"><div class="n">4</div><div><b>Connect your follower goal</b><p>Goal tab, then Twitch auto-count: type your channel name, press Save, then Auto mode. In the Raid tab, turn on Auto raids so raids play by themselves.</p></div></div>
           <div class="step"><div class="n">5</div><div><b>Test everything</b><p>Live tab: tap +1. Goal tab: Test follower animation and Test celebration. After a site update, right-click the source in OBS and press Refresh cache of current page.</p></div></div></div>
         <div class="panel"><h2>Need something else?</h2><p class="hint" style="margin:0">Open the Requests tab and tell us what you want to see next. You can also vote on other people's ideas.</p></div>
       </section>
@@ -442,7 +446,7 @@ auth.onAuthStateChanged(u => {
 });
 
 /* ---------- board data ---------- */
-const FILL = { gLabel:'', gCur:'', gGoal:'', gHold:12, gChan:'', gWorker:'', rName:'', rCount:'', rHead:'', rMsg:'', rDur:8, wHead:'', wSub:'', wLen:10, wInt:10 };
+const FILL = { gLabel:'', gCur:'', gGoal:'', gHold:12, gChan:'', gWorker:'', rName:'', rCount:'', rHead:'', rMsg:'', rDur:8, wHead:'', wSub:'', wLen:10, wInt:10, rMin:1 };
 const COLORDEF = { cA:'#19e3ff', cB:'#ff2e88', cAcc:'#19e3ff', cBg:'#060a18', cText:'#eaf9ff', cGF:'#19e3ff', cGT:'#1a2440', cGB:'#060a18', cGK:'#eaf9ff', cR1:'#ff2e88', cR2:'#19e3ff', cW1:'#19e3ff', cW2:'#ff2e88' };
 const colorIds = Object.keys(COLORDEF);
 function save(p) {
@@ -467,7 +471,7 @@ function render() {
   colorIds.forEach(id => $(id).value = s[id] || COLORDEF[id]);
   $$('[data-page]').forEach(b => b.classList.toggle('on', b.dataset.page === (s.page || 'score')));
   const t = (sel, on) => $$(sel).forEach(b => b.classList.toggle('on', !!on));
-  t('.low', s.lowOn); t('.tb', s.timerOnBoard); t('.gb', s.gOn); t('.gbar', !s.gNoBar); t('.gauto', s.gAuto); t('.wb', !s.gWinOff); t('.mute', s.sMute);
+  t('.low', s.lowOn); t('.tb', s.timerOnBoard); t('.gb', s.gOn); t('.gbar', !s.gNoBar); t('.gauto', s.gAuto); t('.wb', !s.gWinOff); t('.mute', s.sMute); t('.rauto', s.rAuto); $$('[data-chan]').forEach(e => e.textContent = s.gChan || 'not set');
   $('gShow').textContent = (s.gCur || 0) + ' / ' + (s.gGoal || 100);
   $('gScale').value = Math.round((s.gScale || 1) * 100); $('gScaleV').textContent = $('gScale').value + '%';
   $$('[data-gscale]').forEach(b => b.classList.toggle('on', Math.abs((s.gScale || 1) - +b.dataset.gscale) < .01));
@@ -504,6 +508,9 @@ function gToggle() { save({ gOn:!state.gOn }); }
 function winSave() { save({ wHead:$('wHead').value.trim().toUpperCase() || 'GOAL REACHED', wSub:$('wSub').value.trim().toUpperCase(), wLen:Math.min(20, Math.max(6, +$('wLen').value || 10)), wInt:Math.min(10, Math.max(1, +$('wInt').value || 10)) }); toast('Saved', 'ok'); }
 function winTest() { winSave(); save({ gWinTrig:TS }); }
 function playRaid() { save({ rName:$('rName').value.trim().toUpperCase(), rHead:$('rHead').value.trim().toUpperCase() || 'INCOMING RAID', rMsg:$('rMsg').value.trim(), rCount:+$('rCount').value || 0, rDur:Math.min(30, Math.max(4, +$('rDur').value || 8)), rTrig:TS }); }
+function rAutoToggle() { if (!state.rAuto && !state.gChan) return toast('Save your Twitch channel in the Goal tab first.', 'err'); save({ rAuto:!state.rAuto }); }
+function rAutoTest() { save({ rSimName:'TEST RAIDER', rSimCount:25, rSimTrig:TS }); toast('Test raid sent to the overlay', 'ok'); }
+$('rMin').addEventListener('change', e => save({ rMin:Math.max(1, +e.target.value || 1) }));
 $('gScale').addEventListener('input', e => $('gScaleV').textContent = e.target.value + '%');
 $('gScale').addEventListener('change', e => save({ gScale:e.target.value / 100 }));
 $('gHold').addEventListener('change', e => save({ gHold:Math.min(120, Math.max(7, +e.target.value || 12)) }));
