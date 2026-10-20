@@ -245,8 +245,8 @@ setInterval(tick, 200);
 
 let spinT, gLast, rLast, rFirst = true, rT, rI, autoN = null, pollKey = '';
 function poll() {
-  if (!(d.gAuto && d.gChan && d.gWorker)) return;
-  fetch(d.gWorker.replace(/\/+$/, '') + '?login=' + encodeURIComponent(d.gChan)).then(r => r.json()).then(j => {
+  if (!(d.gAuto && d.gChan)) return;
+  fetch((d.gWorker || DEFAULT_WORKER).replace(/\/+$/, '') + '?login=' + encodeURIComponent(d.gChan)).then(r => r.json()).then(j => {
     if (typeof j.total === 'number' && j.total !== autoN) { if (autoN === null) gLast = undefined; autoN = j.total; goal(); }
   }).catch(() => {});
 }
@@ -542,7 +542,9 @@ function raid() {
   if (n > 0) rI = setInterval(() => { const k = Math.min(1, (Date.now() - t0) / 2000); c.textContent = '+' + Math.round(n * k) + ' VIEWERS'; if (k >= 1) clearInterval(rI); }, 40);
   rT = setTimeout(() => el.classList.remove('play'), dur * 1000);
 }
-firebase.database().ref('board').on('value', snap => {
+const DEFAULT_WORKER = 'https://follower-goal.clayton-fifer.workers.dev';
+const BID = (new URLSearchParams(location.search).get('id') || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
+firebase.database().ref(BID ? 'boards/' + BID : 'board').on('value', snap => {
   d = snap.val() || {};
   const r = document.documentElement.style;
   r.setProperty('--a', d.cA || '#19e3ff'); r.setProperty('--b', d.cB || '#ff2e88');
