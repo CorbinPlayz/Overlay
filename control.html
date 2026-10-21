@@ -154,6 +154,67 @@ input[type=range]{accent-color:var(--cyan);vertical-align:middle}
 .nob .pane.needs>*{display:none!important}
 #noBoard{display:none}
 .ctr{text-align:center}
+.gmbig{font-size:46px;letter-spacing:.22em;text-align:center;font-weight:800;color:var(--cyan);text-shadow:0 0 24px currentColor;margin:6px 0;word-break:break-all}
+
+/* ---- boot / access scenes ---- */
+body.red{--cyan:#ff3b4d;--pink:#ff1f3d;--green:#ff3b4d;--amber:#ff6a3d;--line:rgba(255,70,90,.38);background:radial-gradient(1200px 700px at 12% -10%,rgba(255,40,60,.17),transparent 60%),radial-gradient(1000px 700px at 100% 110%,rgba(255,20,40,.15),transparent 60%),#0a0306}
+body.red::before{background-image:linear-gradient(rgba(255,60,80,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,60,80,.08) 1px,transparent 1px)}
+body.red button.on{background:linear-gradient(180deg,#ff5a68,#d4202f);color:#2a0007;border-color:#ff3b4d;box-shadow:0 0 18px rgba(255,59,77,.5)}
+body.red button.pink{background:linear-gradient(180deg,#ff4d5e,#c4182a)}
+#boot{position:fixed;inset:0;z-index:200;background:#02040a;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;--lc:#19e3ff;--lca:rgba(25,227,255,.3);--lcb:rgba(25,227,255,.12);--lit:0;--bright:1}
+#boot.fade{animation:bootOut .5s forwards}
+@keyframes bootOut{to{opacity:0}}
+.b-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 28%,var(--lca),transparent 62%),radial-gradient(ellipse at 50% 100%,var(--lcb),transparent 55%);opacity:var(--lit);transition:opacity .8s}
+.b-floor{position:absolute;left:-25%;right:-25%;bottom:0;height:48%;pointer-events:none;transform:perspective(520px) rotateX(58deg);transform-origin:50% 100%;background:linear-gradient(var(--lc) 2px,transparent 2px) 0 0/100% 70px,linear-gradient(90deg,var(--lc) 2px,transparent 2px) 0 0/70px 100%;opacity:calc(var(--lit) * .35);transition:opacity .8s;-webkit-mask:linear-gradient(transparent,#000 85%);mask:linear-gradient(transparent,#000 85%);animation:bFloor 1.6s linear infinite}
+@keyframes bFloor{to{background-position:0 70px,0 0}}
+.b-ceil{position:absolute;inset:0;pointer-events:none}
+.lamp{position:absolute;transform:translateX(-50%);background:#1a2230;border-radius:3px;opacity:.5}
+.lamp::after{content:"";position:absolute;left:-30%;right:-30%;top:100%;height:var(--bh,30vh);background:linear-gradient(var(--lca),transparent);clip-path:polygon(25% 0,75% 0,100% 100%,0 100%);opacity:0;transition:opacity .4s}
+.lamp.on{background:var(--lc);opacity:1;box-shadow:0 0 calc(24px * var(--bright)) calc(6px * var(--bright)) var(--lc),0 0 80px 20px var(--lcb);animation:lampOn .8s both}
+.lamp.on::after{opacity:calc(.7 * var(--bright))}
+@keyframes lampOn{0%{opacity:.15}8%{opacity:1}12%{opacity:.1}26%{opacity:.95}32%{opacity:.2}46%{opacity:1}52%{opacity:.4}70%{opacity:1}100%{opacity:1}}
+.st-alarm .lamp.on{animation:lampAlarm .6s steps(1) infinite;animation-delay:calc(var(--r) * .1s)}
+@keyframes lampAlarm{0%,49%{opacity:1}50%,100%{opacity:.15}}
+.st-pulse .lamp.on{animation:lampOn .8s both,lampPulse 2.4s ease-in-out .9s infinite}
+@keyframes lampPulse{50%{opacity:.45}}
+.b-beam{position:absolute;left:50%;top:40%;width:260vmax;height:260vmax;margin:-130vmax 0 0 -130vmax;background:conic-gradient(from 0deg,transparent 0 78%,var(--lca) 90%,transparent 100%);animation:spin 3s linear infinite;opacity:0;pointer-events:none}
+.st-alarm .b-beam{opacity:1}
+.b-flash{position:absolute;inset:0;background:var(--lc);opacity:0;pointer-events:none}
+.st-alarm .b-flash{animation:alarmFlash 1s steps(1) infinite}
+@keyframes alarmFlash{0%{opacity:.14}50%{opacity:0}}
+.b-center{position:relative;z-index:3;width:min(780px,92vw);text-align:center;padding:10px}
+.b-title{font-size:clamp(24px,5vw,52px);font-weight:800;letter-spacing:.22em;color:#fff;text-shadow:0 0 24px var(--lc),0 0 60px var(--lc);min-height:1.2em;opacity:0}
+.b-title.show{animation:bTitle .9s cubic-bezier(.2,.9,.2,1) both}
+.st-alarm .b-title.show{animation:bTitle .9s cubic-bezier(.2,.9,.2,1) both,bShake .6s linear .9s infinite}
+@keyframes bTitle{0%{opacity:0;letter-spacing:.9em;filter:blur(10px)}60%{opacity:1}100%{opacity:1;letter-spacing:.22em;filter:none}}
+@keyframes bShake{0%,100%{transform:none}20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+.b-log{display:inline-block;margin:16px auto 6px;text-align:left;font:600 15px/1.8 'Oxanium',monospace;color:var(--lc);letter-spacing:.08em;min-height:40px;text-shadow:0 0 10px var(--lcb)}
+.b-log div{opacity:0;animation:bLine .3s forwards}
+@keyframes bLine{to{opacity:1}}
+.b-menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:18px 0 6px}
+.b-tile{display:flex;flex-direction:column;align-items:center;gap:8px;margin:0;padding:16px 8px;background:rgba(6,12,28,.75);border-color:var(--lc);animation:rise .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i) * 70ms)}
+.b-tile svg{width:26px;height:26px;stroke:var(--lc);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px var(--lc))}
+.b-tile:hover{transform:translateY(-4px) scale(1.03);box-shadow:0 0 22px var(--lcb),0 0 0 1px var(--lc) inset}
+.b-tile.adm{border-color:#ff4d6a}
+.b-disc{display:none;max-width:540px;margin:18px auto 0;padding:12px 16px;border:1px solid var(--lc);border-left:4px solid var(--lc);border-radius:8px;background:rgba(0,0,0,.5);color:#ffd9dd;font-size:14px;line-height:1.55;text-align:left;animation:rise .6s both}
+.b-acts{margin-top:18px}
+.b-acts button{font-size:16px;padding:12px 22px;letter-spacing:.14em;border-color:var(--lc);margin:0 6px 8px}
+.b-acts button.pri{color:var(--lc);box-shadow:0 0 18px var(--lcb)}
+.b-chk{display:inline-flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--dim);cursor:pointer}
+.b-skip{position:absolute;right:18px;top:16px;z-index:6;margin:0}
+.b-tap{display:none;position:absolute;inset:0;z-index:5;align-items:center;justify-content:center;flex-direction:column;gap:18px}
+.b-tap button{font-size:18px;padding:18px 34px;letter-spacing:.3em;border-color:var(--cyan);color:var(--cyan);animation:tapP 2s ease-in-out infinite}
+@keyframes tapP{50%{box-shadow:0 0 34px rgba(25,227,255,.6)}}
+.b-tap small{color:var(--dim);letter-spacing:.2em}
+/* admin sub-tabs and cards */
+.sub{display:none}.sub.show{display:block}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{padding:14px;border:1px solid var(--line);border-radius:10px;background:rgba(4,9,22,.55);text-align:center}
+.stat b{display:block;font-size:34px;color:var(--cyan);text-shadow:0 0 14px currentColor}.stat span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+#bcast{display:none;margin-top:12px;padding:10px 14px;border:1px solid var(--cyan);border-left:5px solid var(--cyan);border-radius:10px;background:rgba(8,16,34,.9);align-items:center;gap:10px;animation:rise .5s both}
+#bcast.warn{border-color:var(--amber);color:var(--amber)}
+#bcast span{flex:1}
+.note{width:100%!important;margin-top:6px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -163,12 +224,11 @@ input[type=range]{accent-color:var(--cyan);vertical-align:middle}
 <div class="rail l"><div class="tk"></div><div class="ring a"></div><div class="ring b"></div><div class="vt">SYSTEM ONLINE // OVERLAY CONTROL // SYSTEM ONLINE</div></div>
 <div class="rail r"><div class="tk"></div><div class="ring a"></div><div class="ring b"></div><div class="vt">NEON GRID // STREAM TOOLS // NEON GRID</div></div>
 
-<div id="gate">
-  <div class="gatecard" id="g-load"><div class="hero"><i></i><i></i><i></i></div><h1>BOOTING</h1><p class="dots">Connecting to the grid</p></div>
-  <div class="gatecard" id="g-out"><div class="hero"><i></i><i></i><i></i></div><h1>OVERLAY CONTROL</h1><p>Run your stream overlay from one clean panel. Access is by approval.</p><button class="pri big-btn" id="signin" style="margin-top:0">SIGN IN WITH GOOGLE</button></div>
-  <div class="gatecard" id="g-pending"><div class="hero warn"><i></i><i></i><i></i></div><h1>WAITING FOR APPROVAL</h1><p>Your request was sent. Once the admin approves you, this page unlocks by itself. You can leave it open.</p><button onclick="signOut()">Sign out</button></div>
-  <div class="gatecard" id="g-paused"><div class="hero warn"><i></i><i></i><i></i></div><h1>ACCESS PAUSED</h1><p>Your access is paused for now. Contact the admin.</p><button onclick="signOut()">Sign out</button></div>
-  <div class="gatecard" id="g-denied"><div class="hero bad"><i></i><i></i><i></i></div><h1>NO ACCESS</h1><p>This account is not approved. Contact the admin if you think this is a mistake.</p><button onclick="signOut()">Sign out</button></div>
+<div id="boot" style="display:flex">
+  <div class="b-glow"></div><div class="b-floor"></div><div class="b-ceil" id="bCeil"></div><div class="b-beam"></div><div class="b-flash"></div>
+  <div class="b-center"><div class="b-title" id="bTitle"></div><div class="b-log" id="bLog"></div><div class="b-menu" id="bMenu"></div><div class="b-disc" id="bDisc"></div><div class="b-acts" id="bActs"></div></div>
+  <button class="sm b-skip" id="bSkip" onclick="skipNow()">SKIP</button>
+  <div class="b-tap" id="bTap"><button onclick="startIntro()">TAP TO INITIALIZE</button><small>SYSTEM STANDING BY</small></div>
 </div>
 
 <div id="shell" style="display:none">
@@ -179,10 +239,11 @@ input[type=range]{accent-color:var(--cyan);vertical-align:middle}
     <span class="grow"></span>
     <span class="led" id="led"></span><span class="chip" id="ledT">connecting</span>
     <img class="avatar" id="uav" alt="" referrerpolicy="no-referrer"><span id="uname" class="chip"></span>
-    <button id="uiSndBtn" class="sm" data-snd="toggle" onclick="toggleUiSound()" style="margin:0">UI sound</button>
+    <button class="sm" onclick="replayIntro()" style="margin:0">Intro</button><button id="uiSndBtn" class="sm" data-snd="toggle" onclick="toggleUiSound()" style="margin:0">Sound &amp; voice</button>
     <button class="sm" onclick="signOut()" style="margin:0">Sign out</button>
   </header>
 
+  <div id="bcast"><span id="bcastT"></span><button class="sm" onclick="dismissBcast()" style="margin:0">Dismiss</button></div>
   <div class="onair">
     <span class="lbl"><span class="led ok"></span>ON AIR</span>
     <div class="seg">
@@ -275,6 +336,25 @@ input[type=range]{accent-color:var(--cyan);vertical-align:middle}
           <details class="adv"><summary>Advanced</summary><div class="advin"><div class="fld"><span>Ignore raids smaller than (viewers)</span><input type="number" id="rMin" min="1" value="1"></div></div></details></div>
       </section>
 
+      <section class="pane needs" data-pane="game">
+        <div class="panel"><h2>Word game <small id="gmSt">stopped</small></h2>
+          <div class="gmbig" id="gmMask">_ _ _ _ _</div><p class="hint ctr" id="gmHintC" style="margin:0 0 6px"></p>
+          <p class="hint ctr" style="margin:0 0 12px">Secret word: <b id="gmSecret">-</b> &middot; round <b id="gmRound">0</b> &middot; next letter in <b id="gmNext">-</b> &middot; chat: <b id="gmChat">off</b></p>
+          <button class="pri gmrun" data-snd="toggle" onclick="gmStart()">Start game</button><button onclick="gmStop()">Stop</button><button onclick="gmSkip()">Skip word</button><button onclick="gmReveal(true)">Reveal a letter</button><button class="gmon" data-snd="toggle" onclick="gmToggleShow()">Show on stream</button>
+          <p class="hint">Keep this page open while the game runs. It reads your Twitch chat, picks the winner, and sends only the blanks, hint and scores to the overlay. The secret word never leaves this page.</p></div>
+        <div class="panel"><h2>Rules</h2>
+          <div class="inl"><label class="fld"><span>New letter every (sec)</span><input type="number" id="gmEvery" min="10" max="300" value="30"></label><label class="fld"><span>Points per win</span><input type="number" id="gmPts" min="1" max="50" value="1"></label><label class="fld"><span>Pause between rounds (sec)</span><input type="number" id="gmGap" min="3" max="120" value="12"></label><label class="fld"><span>Leaderboard names shown</span><input type="number" id="gmTop" min="3" max="10" value="5"></label></div>
+          <div class="fld" style="margin-top:12px"><span>Word categories (tap to turn on or off)</span><div id="gmCats"></div></div>
+          <details class="adv"><summary>Add your own words</summary><div class="advin"><div class="fld"><span>One per line, like  tiger:striped jungle cat  (3 to 8 letters)</span><textarea id="gmCustom" maxlength="3000"></textarea></div><button class="pri" onclick="gmSaveWords()">Save my words</button><p class="hint">Custom words are saved on this computer.</p></div></details></div>
+        <div class="panel"><h2>Where it shows</h2>
+          <div class="fld"><span>Word box</span><div><button data-gmpos="tc" onclick="save({gmPos:'tc'})">Top center</button><button data-gmpos="tl" onclick="save({gmPos:'tl'})">Top left</button><button data-gmpos="tr" onclick="save({gmPos:'tr'})">Top right</button><button data-gmpos="c" onclick="save({gmPos:'c'})">Center</button><button data-gmpos="bc" onclick="save({gmPos:'bc'})">Bottom center</button><button data-gmpos="bl" onclick="save({gmPos:'bl'})">Bottom left</button><button data-gmpos="br" onclick="save({gmPos:'br'})">Bottom right</button></div></div>
+          <div class="fld"><span>Word box size</span><div><button data-gmscale=".7" onclick="save({gmScale:.7})">Small</button><button data-gmscale="1" onclick="save({gmScale:1})">Normal</button><button data-gmscale="1.3" onclick="save({gmScale:1.3})">Large</button></div></div>
+          <div class="fld"><span>Leaderboard</span><div><button class="glon" data-snd="toggle" onclick="save({glOff:!state.glOff})">Show leaderboard</button><button data-glpos="cr" onclick="save({glPos:'cr'})">Right middle</button><button data-glpos="cl" onclick="save({glPos:'cl'})">Left middle</button><button data-glpos="tr" onclick="save({glPos:'tr'})">Top right</button><button data-glpos="tl" onclick="save({glPos:'tl'})">Top left</button><button data-glpos="br" onclick="save({glPos:'br'})">Bottom right</button><button data-glpos="bl" onclick="save({glPos:'bl'})">Bottom left</button></div></div>
+          <div class="fld"><span>Leaderboard size</span><div><button data-glscale=".7" onclick="save({glScale:.7})">Small</button><button data-glscale="1" onclick="save({glScale:1})">Normal</button><button data-glscale="1.3" onclick="save({glScale:1.3})">Large</button></div></div>
+          <p class="hint">The word box and leaderboard use the colors from the Style tab. Move them so they don't cover the scoreboard or goal.</p></div>
+        <div class="panel"><h2>Leaderboard</h2><div id="gmLb"></div><button class="danger" onclick="gmResetLb()">Reset leaderboard</button></div>
+      </section>
+
       <section class="pane needs" data-pane="style">
         <div class="panel"><h2>One-tap themes</h2><p class="hint" style="margin:0 0 10px">Changes the scoreboard, goal, celebration and raid colors together.</p>
           <button onclick="theme('#19e3ff','#ff2e88','#19e3ff')">Neon</button><button onclick="theme('#ff3b3b','#3b82ff','#ffd23b')">Red / Blue</button><button onclick="theme('#39ff88','#b84dff','#39ff88')">Toxic</button><button onclick="theme('#ffb020','#20c8ff','#ffb020')">Gold</button></div>
@@ -351,7 +431,11 @@ const UIS = (() => {
     off: () => { tone('sine', 1050, 1050, .08, .12); tone('sine', 700, 700, .12, .12, .07); },
     ok: () => [880, 1110, 1320].forEach((f, i) => tone('triangle', f, f, .16, .12, i * .07)),
     err: () => { tone('sawtooth', 160, 120, .22, .1); tone('square', 120, 100, .22, .06, .08); },
-    open: () => tone('sine', 400, 1300, .18, .1)
+    open: () => tone('sine', 400, 1300, .18, .1),
+    thunk: () => { tone('sine', 110, 35, .32, .45); tone('square', 70, 40, .18, .12); tone('sawtooth', 120, 118, .5, .035, .05); },
+    siren: () => { tone('sawtooth', 450, 950, .45, .09); tone('sawtooth', 950, 450, .45, .09, .45); },
+    power: () => { tone('sine', 120, 900, .8, .15); tone('triangle', 60, 300, .8, .1); },
+    granted: () => [523, 659, 784, 1046].forEach((f, i) => tone('triangle', f, f, .35, .12, i * .1))
   };
   return { play: n => { if (on && S[n]) S[n](); }, get on() { return on; }, set: v => { on = v; store.set('uisnd', v ? '1' : '0'); } };
 })();
@@ -379,9 +463,9 @@ document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.da
   function size() { W = cv.width = innerWidth; H = cv.height = innerHeight; N = []; for (let i = 0, n = Math.min(70, Math.floor(W * H / 24000)); i < n; i++) N.push({ x:Math.random() * W, y:Math.random() * H, vx:(Math.random() - .5) * .28, vy:(Math.random() - .5) * .28, c:Math.random() < .7 ? '25,227,255' : '255,46,136' }); }
   function frame() {
     if (!document.hidden) {
-      x.clearRect(0, 0, W, H);
-      for (const p of N) { if (!calm) { p.x += p.vx; p.y += p.vy; } if (p.x < 0 || p.x > W) p.vx *= -1; if (p.y < 0 || p.y > H) p.vy *= -1; x.fillStyle = 'rgba(' + p.c + ',.75)'; x.fillRect(p.x - 1, p.y - 1, 2.2, 2.2); }
-      for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) { const a = N[i], b = N[j], d = Math.hypot(a.x - b.x, a.y - b.y); if (d < 150) { x.strokeStyle = 'rgba(' + a.c + ',' + (1 - d / 150) * .2 + ')'; x.lineWidth = 1; x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.stroke(); } }
+      x.clearRect(0, 0, W, H); const red = document.body.classList.contains('red');
+      for (const p of N) { if (!calm) { p.x += p.vx; p.y += p.vy; } if (p.x < 0 || p.x > W) p.vx *= -1; if (p.y < 0 || p.y > H) p.vy *= -1; const pc = red ? '255,60,80' : p.c; x.fillStyle = 'rgba(' + pc + ',.75)'; x.fillRect(p.x - 1, p.y - 1, 2.2, 2.2); }
+      for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) { const a = N[i], b = N[j], d = Math.hypot(a.x - b.x, a.y - b.y); if (d < 150) { x.strokeStyle = 'rgba(' + (red ? '255,60,80' : a.c) + ',' + (1 - d / 150) * .2 + ')'; x.lineWidth = 1; x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.stroke(); } }
     }
     if (!calm) requestAnimationFrame(frame);
   }
@@ -398,15 +482,116 @@ const ICON = {
   style:'<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4c0-4.5-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="11" r="1"/></svg>',
   sound:'<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>',
   guide:'<svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M8 7h6M8 11h6"/></svg>',
+  game:'<svg viewBox="0 0 24 24"><path d="M3 20h4M10 20h4M17 20h4"/><path d="M4 15l2-7 2 7M14 15V9h3a2 2 0 0 1 0 4h-3"/></svg>',
   req:'<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-5.4A8 8 0 1 1 21 12z"/></svg>',
   admin:'<svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z"/><path d="m9 12 2 2 4-4"/></svg>'
 };
-const NAV = [['live','Live'], ['score','Scoreboard'], ['screens','Screens'], ['goal','Goal'], ['raid','Raid'], ['style','Style'], ['sound','Sound'], ['guide','Setup guide'], ['req','Requests']];
+const NAV = [['live','Live'], ['score','Scoreboard'], ['screens','Screens'], ['goal','Goal'], ['raid','Raid'], ['game','Word game'], ['style','Style'], ['sound','Sound'], ['guide','Setup guide'], ['req','Requests']];
+
+/* ---------- boot sequence, access scenes and the voice ---------- */
+const BOOT_DEF = {
+  on:true, voiceOn:true, rate:.92, pitch:.75, vol:1, voiceName:'', stagger:280, rows:5, bright:1, lineMs:600,
+  disc:'If you are seeing this message and you believe you should have access, please contact an administrator to let them know.',
+  title:{ boot:'INITIALIZING', out:'AUTHENTICATION REQUIRED', granted:'ACCESS GRANTED', pending:'WAITING FOR APPROVAL', paused:'ACCESS PAUSED', maint:'MAINTENANCE MODE', denied:'ACCESS DENIED', restricted:'ACCESS RESTRICTED' },
+  color:{ boot:'#19e3ff', out:'#19e3ff', granted:'#2dff9a', pending:'#ffb84d', paused:'#ff8a3d', maint:'#ffb84d', denied:'#ff2a3a', restricted:'#ff2a3a' },
+  style:{ boot:'warehouse', out:'warehouse', granted:'warehouse', pending:'pulse', paused:'pulse', maint:'pulse', denied:'alarm', restricted:'alarm' },
+  say:{ boot:'Initializing systems. Please stand by.', out:'Authentication required. Please sign in to continue.', granted:'{greet}, {name}. Access granted. Welcome back.', pending:'Authorization pending. An administrator will review your request shortly.', paused:'Access paused. Please contact an administrator.', maint:'System maintenance in progress. Please try again later.', denied:'Access denied. This account is not authorized.', restricted:'Access restricted. Please return to the main panels.', badpin:'Authorization code incorrect.', lock:'Too many failed attempts. Authorization locked.', nochannel:'Configuration incomplete. Please set your Twitch channel first.' },
+  lines:{ boot:'> POWER BUS ........ OK\n> NEURAL GRID ....... ONLINE\n> OVERLAY CORE ...... LOADING', out:'> IDENTITY CHECK ..... REQUIRED', granted:'> IDENTITY ........... VERIFIED\n> CLEARANCE .......... GRANTED\n> LOADING PANELS ..... OK', pending:'> IDENTITY ........... RECEIVED\n> APPROVAL ........... PENDING\n> STANDING BY ........', paused:'> ACCOUNT ............ PAUSED\n> ACCESS ............. SUSPENDED', maint:'> SYSTEM ............. MAINTENANCE\n> PANELS ............. LOCKED', denied:'> IDENTITY ........... UNVERIFIED\n> CLEARANCE .......... DENIED\n> ACCESS ............. BLOCKED', restricted:'> SECTOR ............. ADMIN\n> CLEARANCE .......... INSUFFICIENT\n> ACCESS ............. RESTRICTED' }
+};
+let CFG = JSON.parse(JSON.stringify(BOOT_DEF)), MAINT = {}, BCAST = {}, TPL = null;
+function mergeCfg(v) { const o = JSON.parse(JSON.stringify(BOOT_DEF)); if (v) Object.keys(v).forEach(k => { if (o[k] && typeof o[k] === 'object') Object.assign(o[k], v[k] || {}); else o[k] = v[k]; }); return o; }
+const TTS = window.speechSynthesis || null;
+function pickVoice() {
+  if (!TTS) return null; const vs = TTS.getVoices() || []; if (!vs.length) return null;
+  return (CFG.voiceName && vs.find(x => x.name === CFG.voiceName)) || vs.find(x => /en[-_]GB/i.test(x.lang) && /male|george|daniel|ryan|arthur|oliver/i.test(x.name) && !/female/i.test(x.name)) || vs.find(x => /en[-_]GB/i.test(x.lang)) || vs.find(x => /^en/i.test(x.lang)) || null;
+}
+function fillTokens(t) { const h = new Date().getHours(); return String(t || '').replace(/\{name\}/g, (me && (me.displayName || '').split(' ')[0]) || 'user').replace(/\{greet\}/g, h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'); }
+function speak(t) {
+  if (!TTS || !CFG.voiceOn || !UIS.on || !t) return;
+  try { TTS.cancel(); const u = new SpeechSynthesisUtterance(fillTokens(t)), v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; } u.rate = +CFG.rate || .92; u.pitch = +CFG.pitch || .75; u.volume = Math.min(1, Math.max(0, +CFG.vol)); TTS.speak(u); } catch (e) {}
+}
+const jarvis = key => speak(CFG.say[key]);
+if (TTS) TTS.onvoiceschanged = () => { if (window.fillVoices) fillVoices(); };
+
+let sceneId = 0, skipFlag = false, sleepers = [], access = 'load', introDone = false, introRunning = false, shellOpen = false, shown = null;
+const RED = { denied:1, restricted:1 }, DISC = { denied:1, restricted:1, paused:1 };
+const sleep = ms => new Promise(r => { if (skipFlag) return r(); let t; const done = () => { clearTimeout(t); sleepers = sleepers.filter(x => x !== done); r(); }; t = setTimeout(done, ms); sleepers.push(done); });
+function skipNow() { skipFlag = true; sleepers.slice().forEach(f => f()); if (TTS) { try { TTS.cancel(); } catch (e) {} } }
+const rgba = (h, a) => { const n = parseInt(String(h).slice(1), 16) || 0; return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+function buildLamps(R) {
+  const c = $('bCeil'); c.innerHTML = '';
+  for (let r = 0; r < R; r++) { const s = 1 - r * (.62 / Math.max(1, R - 1)), y = 4 + r * (38 / R); for (let k = 0; k < 5; k++) { const l = document.createElement('i'); l.className = 'lamp'; l.dataset.r = r; l.style.cssText = 'left:' + (50 + (k - 2) * 19 * s) + '%;top:' + y + '%;width:' + (13 * s) + '%;height:' + Math.max(5, 14 * s) + 'px;--r:' + r + ';--bh:' + (26 * s) + 'vh'; c.appendChild(l); } }
+}
+function sceneActions(st) {
+  if (st === 'out') return [['SIGN IN WITH GOOGLE', signIn, 'pri']];
+  if (st === 'granted') return [['ENTER CONTROL', () => enterPanel('live'), 'pri']];
+  return [['SIGN OUT', signOut, '']];
+}
+async function runScene(st, o) {
+  o = o || {}; const id = ++sceneId, live = () => id === sceneId, B = $('boot'), C = CFG; skipFlag = false;
+  const col = C.color[st] || '#19e3ff', style = C.style[st] || 'warehouse', R = Math.max(3, Math.min(7, +C.rows || 5)), stag = Math.max(60, +C.stagger || 280);
+  B.style.display = 'flex'; B.className = 'st-' + style; B.dataset.st = st;
+  if (!o.keepShell) { $('shell').style.display = 'none'; shellOpen = false; }
+  B.style.setProperty('--lc', col); B.style.setProperty('--lca', rgba(col, .3)); B.style.setProperty('--lcb', rgba(col, .12)); B.style.setProperty('--bright', +C.bright || 1); B.style.setProperty('--lit', 0);
+  document.body.classList.toggle('red', !!RED[st]);
+  buildLamps(R);
+  const T = $('bTitle'); T.className = 'b-title'; T.textContent = C.title[st] || '';
+  ['bLog', 'bMenu', 'bActs'].forEach(k => $(k).innerHTML = ''); $('bDisc').style.display = 'none'; $('bTap').style.display = 'none'; $('bSkip').style.display = o.noSkip ? 'none' : '';
+  const lamps = [...B.querySelectorAll('.lamp')];
+  const lightP = (async () => {
+    if (style === 'alarm') { lamps.forEach(l => l.classList.add('on')); B.style.setProperty('--lit', 1); UIS.play('siren'); await sleep(950); if (live()) UIS.play('siren'); return; }
+    for (let r = 0; r < R; r++) { await sleep(r === 0 ? 250 : stag); if (!live()) return; lamps.filter(l => +l.dataset.r === r).forEach(l => l.classList.add('on')); B.style.setProperty('--lit', (r + 1) / R); UIS.play('thunk'); }
+  })();
+  (async () => { await sleep(600); if (live() && !o.mute) speak(C.say[st]); })();
+  (async () => { await sleep(Math.min(stag * 2, 700)); if (live()) { T.classList.add('show'); if (st === 'granted') UIS.play('granted'); } })();
+  const lines = String(C.lines[st] || '').split('\n').map(s => s.trim()).filter(Boolean);
+  const logP = (async () => { await sleep(500); for (const t of lines) { if (!live()) return; const d = document.createElement('div'); d.textContent = t; $('bLog').appendChild(d); UIS.play('hover'); await sleep(+C.lineMs || 600); } })();
+  await Promise.all([lightP, logP]); if (!live()) return false;
+  lamps.forEach(l => l.classList.add('on')); B.style.setProperty('--lit', 1); T.classList.add('show'); $('bSkip').style.display = 'none';
+  if (st === 'boot') return true;
+  if (DISC[st]) { $('bDisc').textContent = C.disc; $('bDisc').style.display = 'block'; }
+  if (st === 'maint' && MAINT.msg) { $('bDisc').textContent = MAINT.msg; $('bDisc').style.display = 'block'; }
+  if (st === 'granted' && !o.preview) {
+    $('bMenu').innerHTML = NAV.concat([['admin', 'Admin']]).map(([k, l], i) => '<button class="b-tile' + (k === 'admin' ? ' adm' : '') + '" style="--i:' + i + '" onclick="enterPanel(\'' + k + '\')">' + ICON[k] + '<span>' + esc(l) + '</span></button>').join('');
+  }
+  (o.actions || sceneActions(st)).forEach(([label, fn, cls]) => { const b = document.createElement('button'); b.className = cls || ''; b.textContent = label; b.onclick = fn; $('bActs').appendChild(b); });
+  if (st === 'granted' && !o.preview) { const l = document.createElement('label'); l.className = 'b-chk'; l.innerHTML = '<input type="checkbox" id="skipChk"> Skip this intro next time'; $('bActs').appendChild(l); $('skipChk').checked = store.get('skipIntro') === '1'; $('skipChk').onchange = e => store.set('skipIntro', e.target.checked ? '1' : '0'); }
+  return true;
+}
+function renderTap() {
+  sceneId++; const B = $('boot'); B.style.display = 'flex'; B.className = ''; B.style.setProperty('--lit', 0); $('bCeil').innerHTML = ''; ['bLog', 'bMenu', 'bActs'].forEach(k => $(k).innerHTML = ''); $('bTitle').className = 'b-title'; $('bDisc').style.display = 'none';
+  $('bTap').style.display = 'flex'; $('bSkip').style.display = 'none'; $('shell').style.display = 'none'; shellOpen = false; shown = null;
+}
+async function startIntro() { introRunning = true; UIS.play('power'); $('bTap').style.display = 'none'; await runScene('boot'); introRunning = false; introDone = true; shown = null; syncAccess(); }
+function openShell() {
+  const B = $('boot'); sceneId++; skipFlag = true; sleepers.slice().forEach(f => f()); if (TTS) { try { TTS.cancel(); } catch (e) {} }
+  document.body.classList.remove('red'); B.classList.add('fade'); setTimeout(() => { if (B.classList.contains('fade')) { B.style.display = 'none'; B.classList.remove('fade'); } }, 520);
+  $('shell').style.display = 'block'; shellOpen = true; shown = 'app';
+}
+function enterPanel(id) { openShell(); tab(id); }
+const effAccess = () => access === 'app' && MAINT.on && role !== 'admin' ? 'maint' : access;
+function showGate(n) { access = n || 'app'; if (access === 'load') return syncAccess(); syncAccess(); }
+function syncAccess() {
+  const eff = effAccess();
+  if (!CFG.on || store.get('skipIntro') === '1') introDone = true;
+  if (eff === 'load' || !introDone) { if (!introRunning && !introDone) renderTap(); return; }
+  if (eff === shown) return; shown = eff;
+  if (eff === 'app') { if (store.get('skipIntro') === '1' || !CFG.on) openShell(); else runScene('granted'); } else runScene(eff);
+}
+function replayIntro() { shown = 'app'; $('shell').style.display = 'none'; shellOpen = false; runScene('granted'); }
+function signIn() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => toast('Sign-in failed: ' + e.message, 'err')); }
+function showRestricted() { runScene('restricted', { keepShell:true, actions:[['RETURN TO MAIN PANELS', closeRestricted, 'pri']] }); }
+function closeRestricted() { sceneId++; skipFlag = true; sleepers.slice().forEach(f => f()); if (TTS) { try { TTS.cancel(); } catch (e) {} } $('boot').style.display = 'none'; document.body.classList.remove('red'); tab('live'); }
+function previewScene(st) { runScene(st, { keepShell:true, preview:true, mute:false, actions:[['CLOSE PREVIEW', closePreview, 'pri']] }); }
+function closePreview() { sceneId++; skipFlag = true; sleepers.slice().forEach(f => f()); if (TTS) { try { TTS.cancel(); } catch (e) {} } document.body.classList.remove('red'); if (shellOpen) $('boot').style.display = 'none'; else { shown = null; syncAccess(); } }
+db.ref('config').on('value', s => { const v = s.val() || {}; CFG = mergeCfg(v.boot); MAINT = v.maintenance || {}; BCAST = v.broadcast || {}; TPL = v.template || null; syncAccess(); if (window.renderBroadcast) renderBroadcast(); if (window.adminCfgChanged) adminCfgChanged(); }, () => {});
+
 function buildNav() {
   const n = $('nav'); n.innerHTML = '';
-  NAV.concat(role === 'admin' ? [['admin', 'Admin']] : []).forEach(([id, label]) => { const b = document.createElement('button'); b.className = 'navbtn' + (id === 'admin' ? ' adm' : ''); b.dataset.go = id; b.innerHTML = ICON[id] + '<span>' + esc(label) + '</span>'; n.appendChild(b); });
+  NAV.concat([['admin', 'Admin']]).forEach(([id, label]) => { const b = document.createElement('button'); b.className = 'navbtn' + (id === 'admin' ? ' adm' : ''); b.dataset.go = id; b.innerHTML = ICON[id] + '<span>' + esc(label) + '</span>'; n.appendChild(b); });
 }
 function tab(t) {
+  if (t === 'admin' && role !== 'admin') return showRestricted();
   const p = document.querySelector('.pane[data-pane="' + t + '"]'); if (!p) return;
   $$('.pane').forEach(e => e.classList.remove('show')); p.classList.add('show');
   [...p.children].forEach((c, i) => c.style.setProperty('--i', i));
@@ -414,18 +599,16 @@ function tab(t) {
   $('noBoard').style.display = (!BID && p.classList.contains('needs')) ? 'block' : 'none';
   store.set('tab', t);
 }
-function showGate(n) { $('gate').style.display = n ? 'flex' : 'none'; $$('.gatecard').forEach(c => c.classList.toggle('show', c.id === 'g-' + n)); $('shell').style.display = n ? 'none' : 'block'; }
 function clearSubs() { subs.forEach(f => f()); subs = []; }
-function leaveApp() { clearSubs(); if (offBoard) { offBoard(); offBoard = null; } ref = null; BID = null; $$('[data-pane="admin"]').forEach(e => e.remove()); $('boardSel').style.display = 'none'; }
+function leaveApp() { if (window.gmStop) gmStop(); clearSubs(); if (offBoard) { offBoard(); offBoard = null; } ref = null; BID = null; $$('[data-pane="admin"]').forEach(e => e.remove()); $('boardSel').style.display = 'none'; }
 function signOut() { auth.signOut(); }
-$('signin').onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => toast('Sign-in failed: ' + e.message, 'err'));
 function listen(path, cb, label) { const r = db.ref(path), f = s => cb(s.val()), off = () => r.off('value', f); r.on('value', f, e => toast((label || path) + ' unavailable: ' + e.message, 'err')); subs.push(off); return off; }
 let reqOff = null;
 function enterApp(board) {
   showGate(null); buildNav(); $('uname').textContent = me.displayName || me.email || 'User'; $('uav').src = me.photoURL || ''; $('uav').style.display = me.photoURL ? '' : 'none'; $('uiSndBtn').classList.toggle('on', UIS.on);
   reqOff = listen('requests', v => { REQ = v || {}; renderReq(); }, 'Requests');
   if (role === 'admin') buildAdmin(); else loadBoard(board);
-  const want = store.get('tab'); tab(want && document.querySelector('.pane[data-pane="' + want + '"]') ? want : 'live');
+  const want = store.get('tab'); tab(want && want !== 'admin' && document.querySelector('.pane[data-pane="' + want + '"]') || (want === 'admin' && role === 'admin') ? want : 'live');
 }
 function watchUser(u) {
   let live = false;
@@ -446,7 +629,7 @@ auth.onAuthStateChanged(u => {
 });
 
 /* ---------- board data ---------- */
-const FILL = { gLabel:'', gCur:'', gGoal:'', gHold:12, gChan:'', gWorker:'', rName:'', rCount:'', rHead:'', rMsg:'', rDur:8, wHead:'', wSub:'', wLen:10, wInt:10, rMin:1 };
+const FILL = { gLabel:'', gCur:'', gGoal:'', gHold:12, gChan:'', gWorker:'', rName:'', rCount:'', rHead:'', rMsg:'', rDur:8, wHead:'', wSub:'', wLen:10, wInt:10, rMin:1, gmEvery:30, gmPts:1, gmGap:12, gmTop:5 };
 const COLORDEF = { cA:'#19e3ff', cB:'#ff2e88', cAcc:'#19e3ff', cBg:'#060a18', cText:'#eaf9ff', cGF:'#19e3ff', cGT:'#1a2440', cGB:'#060a18', cGK:'#eaf9ff', cR1:'#ff2e88', cR2:'#19e3ff', cW1:'#19e3ff', cW2:'#ff2e88' };
 const colorIds = Object.keys(COLORDEF);
 function save(p) {
@@ -454,6 +637,7 @@ function save(p) {
   Object.assign(state, p); ref.update(p).catch(e => toast('Save failed: ' + e.message, 'err'));
 }
 function loadBoard(id) {
+  if (window.gmReset) gmReset();
   if (offBoard) { offBoard(); offBoard = null; }
   BID = id || null; state = { page:'score', scoreA:0, scoreB:0 }; filled = false;
   $('boardChip').textContent = BID || 'none'; document.body.classList.toggle('nob', !BID);
@@ -461,7 +645,7 @@ function loadBoard(id) {
   const cur = document.querySelector('.pane.show'); if (cur) tab(cur.dataset.pane);
   if (!BID) { ref = null; return; }
   const r = db.ref('boards/' + BID), f = s => { state = Object.assign({ page:'score', scoreA:0, scoreB:0 }, s.val() || {}); render(); };
-  ref = r; r.on('value', f, e => toast('Cannot read this board: ' + e.message, 'err')); offBoard = () => r.off('value', f);
+  ref = r; r.on('value', f, e => toast('Cannot read this board: ' + e.message, 'err')); offBoard = () => r.off('value', f); if (window.gmLoad) gmLoad();
 }
 function setScore(sel, v) { $$(sel).forEach(e => { if (e.textContent !== String(v)) { e.textContent = v; e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop'); } }); }
 function render() {
@@ -477,7 +661,7 @@ function render() {
   $$('[data-gscale]').forEach(b => b.classList.toggle('on', Math.abs((s.gScale || 1) - +b.dataset.gscale) < .01));
   $$('[data-gpos]').forEach(b => b.classList.toggle('on', b.dataset.gpos === (s.gPos || 'br')));
   $$('[data-gmode]').forEach(b => b.classList.toggle('on', b.dataset.gmode === (s.gMode === 'always' ? 'always' : 'pop')));
-  sndSync();
+  sndSync(); if (window.gmUI) gmUI();
 }
 
 /* ---------- scoreboard, timer, screens ---------- */
@@ -508,7 +692,7 @@ function gToggle() { save({ gOn:!state.gOn }); }
 function winSave() { save({ wHead:$('wHead').value.trim().toUpperCase() || 'GOAL REACHED', wSub:$('wSub').value.trim().toUpperCase(), wLen:Math.min(20, Math.max(6, +$('wLen').value || 10)), wInt:Math.min(10, Math.max(1, +$('wInt').value || 10)) }); toast('Saved', 'ok'); }
 function winTest() { winSave(); save({ gWinTrig:TS }); }
 function playRaid() { save({ rName:$('rName').value.trim().toUpperCase(), rHead:$('rHead').value.trim().toUpperCase() || 'INCOMING RAID', rMsg:$('rMsg').value.trim(), rCount:+$('rCount').value || 0, rDur:Math.min(30, Math.max(4, +$('rDur').value || 8)), rTrig:TS }); }
-function rAutoToggle() { if (!state.rAuto && !state.gChan) return toast('Save your Twitch channel in the Goal tab first.', 'err'); save({ rAuto:!state.rAuto }); }
+function rAutoToggle() { if (!state.rAuto && !state.gChan) { jarvis('nochannel'); return toast('Save your Twitch channel in the Goal tab first.', 'err'); } save({ rAuto:!state.rAuto }); }
 function rAutoTest() { save({ rSimName:'TEST RAIDER', rSimCount:25, rSimTrig:TS }); toast('Test raid sent to the overlay', 'ok'); }
 $('rMin').addEventListener('change', e => save({ rMin:Math.max(1, +e.target.value || 1) }));
 $('gScale').addEventListener('input', e => $('gScaleV').textContent = e.target.value + '%');
@@ -516,7 +700,7 @@ $('gScale').addEventListener('change', e => save({ gScale:e.target.value / 100 }
 $('gHold').addEventListener('change', e => save({ gHold:Math.min(120, Math.max(7, +e.target.value || 12)) }));
 function gClean() { return { w:($('gWorker').value.trim() || WORKER).replace(/\/+$/, ''), ch:$('gChan').value.trim().toLowerCase().replace(/^@/, '') }; }
 function gAutoSave() { const o = gClean(); if (!/^https:\/\//.test(o.w)) return toast('Worker URL must start with https://', 'err'); save({ gChan:o.ch, gWorker:o.w === WORKER ? null : o.w }); toast('Saved', 'ok'); }
-function gAutoToggle() { if (!state.gAuto && !state.gChan) return toast('Save your Twitch channel name first.', 'err'); save({ gAuto:!state.gAuto }); }
+function gAutoToggle() { if (!state.gAuto && !state.gChan) { jarvis('nochannel'); return toast('Save your Twitch channel name first.', 'err'); } save({ gAuto:!state.gAuto }); }
 async function gTest() { const o = gClean(); if (!o.ch) return toast('Enter your Twitch channel first.', 'err'); toast('Testing...');
   try { const r = await fetch(o.w + '?login=' + encodeURIComponent(o.ch)), j = await r.json(); j.total != null ? toast('Connected. ' + o.ch + ' has ' + j.total + ' followers.', 'ok') : toast('The Worker replied with an error: ' + (j.error || r.status), 'err'); }
   catch (e) { toast('Could not reach the Worker: ' + e.message, 'err'); } }
@@ -668,6 +852,20 @@ const SFX = (() => {
       ['Hype charge', t => { for (let o = 0, g = .2; o < .35; o += g, g *= .8) S(t + o, .15); Z(t, .4, .2, 300, 6000, 1.2); horn(t + .35, .5, .1); [52, 59, 64].forEach(n => T('sawtooth', N(n), N(n), t + .35, .8, .09, .01)); K(t + .35, .5); }]]
   };
   Object.keys(X).forEach(id => D[id][2].push(...X[id]));
+  Object.assign(D, {
+    gameStart: ['New word appears', 'Word game', [
+      ['Ping', t => { P(84, t, .3, .2); P(91, t + .1, .4, .18); }],
+      ['Scan sweep', t => { Z(t, .35, .18, 500, 4000, 1.2); T('sine', 600, 1200, t, .3, .1); }],
+      ['Drum hit', t => { K(t, .4); S(t + .12, .2); }]]],
+    gameLetter: ['Letter revealed', 'Word game', [
+      ['Blip', t => T('square', 900, 1400, t, .08, .1)],
+      ['Tick up', t => P(79, t, .2, .18)],
+      ['Soft pluck', t => T('triangle', N(72), N(72), t, .25, .2)]]],
+    gameWin: ['Someone got the word', 'Word game', [
+      ['Fanfare', t => { [60, 64, 67, 72, 76].forEach((n, i) => T('triangle', N(n), N(n), t + i * .12, .5, .17)); bell(t + .6, 1000, .18); }],
+      ['Crowd cheer', t => { Z(t, 1.2, .25, 600, 1800, .8); horn(t, .4, .1); K(t, .4); }],
+      ['Arcade win', t => { for (let i = 0; i < 10; i++) { const n = 76 + i * 1.2; T('square', N(n), N(n), t + i * .07, .08, .07); } bell(t + .75, 1200, .18); }]]]
+  });
   const play = (id, v, a, vol) => {
     const e = D[id]; if (!e || !v || !e[2][v - 1] || !vol || !ctx()) return;
     out.gain.value = vol; e[2][v - 1][1](c.currentTime + .03, a || 0);
@@ -677,7 +875,7 @@ const SFX = (() => {
 
 /* ---------- sound tab ---------- */
 const SND_PREV = { followPop:.6, goalWin:8, raidIn:8 };
-const HYPE = { scoreUp:6, scoreDown:4, timerEnd:4, timerTick:0, pageChange:4, lowerIn:4, followPop:4, followFill:5, goalWin:5, raidIn:4 };
+const HYPE = { scoreUp:6, scoreDown:4, timerEnd:4, timerTick:0, pageChange:4, lowerIn:4, followPop:4, followFill:5, goalWin:5, raidIn:4, gameStart:3, gameLetter:2, gameWin:3 };
 (function () {
   const g = {};
   Object.keys(SFX.D).forEach(id => { const e = SFX.D[id]; (g[e[1]] = g[e[1]] || []).push(id); });
@@ -693,7 +891,7 @@ const HYPE = { scoreUp:6, scoreDown:4, timerEnd:4, timerTick:0, pageChange:4, lo
 })();
 function sndPrev(id) { const v = +$('s_' + id).value; if (v) SFX.play(id, v, SND_PREV[id], (+$('sVolR').value) / 100); }
 function sndPick(id) { save({ ['s_' + id]:+$('s_' + id).value }); sndPrev(id); }
-function sndPreset(n) { const p = {}; Object.keys(SFX.D).forEach(id => p['s_' + id] = n === 'hype' ? HYPE[id] : n === 'off' ? 0 : SFX.dv(id)); save(p); toast(n === 'hype' ? 'Hype set applied' : n === 'off' ? 'All sounds off' : 'Default set applied', 'ok'); }
+function sndPreset(n) { const p = {}; Object.keys(SFX.D).forEach(id => p['s_' + id] = n === 'hype' ? (HYPE[id] != null ? HYPE[id] : SFX.dv(id)) : n === 'off' ? 0 : SFX.dv(id)); save(p); toast(n === 'hype' ? 'Hype set applied' : n === 'off' ? 'All sounds off' : 'Default set applied', 'ok'); }
 function sndSync() {
   Object.keys(SFX.D).forEach(id => { const v = state['s_' + id]; $('s_' + id).value = v == null ? SFX.dv(id) : v; });
   $('sVolR').value = state.sVol == null ? 60 : state.sVol; $('sVolV').textContent = $('sVolR').value + '%';
@@ -718,7 +916,7 @@ function sendReq() {
 function renderReq() {
   const el = $('rqList'); if (!el) return;
   const ids = Object.keys(REQ).sort((a, b) => votes(REQ[b]) - votes(REQ[a]) || (REQ[b].ts || 0) - (REQ[a].ts || 0));
-  $('rqN').textContent = ids.length ? ids.length + ' total' : '';
+  $('rqN').textContent = ids.length ? ids.length + ' total' : ''; if (window.renderStats) renderStats();
   el.innerHTML = ids.length ? ids.map(id => {
     const r = REQ[id], mine = me && r.votes && r.votes[me.uid], st = ['open', 'planned', 'done'].includes(r.status) ? r.status : 'open';
     const adm = role === 'admin' ? '<div class="acts"><button class="sm" data-act="rs" data-st="open" data-id="' + esc(id) + '">Open</button><button class="sm" data-act="rs" data-st="planned" data-id="' + esc(id) + '">Planned</button><button class="sm" data-act="rs" data-st="done" data-id="' + esc(id) + '">Done</button><button class="sm danger" data-act="rdel" data-id="' + esc(id) + '">Delete</button></div>' : '';
@@ -732,46 +930,97 @@ $('rqList').addEventListener('click', e => {
   else if (a === 'rdel' && role === 'admin' && confirm('Delete this request?')) db.ref('requests/' + id).remove();
 });
 
-/* ---------- admin: approvals, PIN, boards (only built for the admin account) ---------- */
+/* ---------- admin: approvals, PIN, boards, boot editor, broadcast (only built for the admin account) ---------- */
 async function sha(pin) { const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ADMIN_UID + ':' + pin)); return [...new Uint8Array(h)].map(x => x.toString(16).padStart(2, '0')).join(''); }
-let pinTries = 0, pinLock = 0;
+let pinTries = 0, pinLock = 0, NOTES = {}, bootDirty = false;
+const STATES = [['boot', 'Startup boot'], ['out', 'Sign-in screen'], ['granted', 'Access granted and start menu'], ['pending', 'Waiting for approval'], ['paused', 'Access paused'], ['maint', 'Maintenance'], ['denied', 'Access denied (red)'], ['restricted', 'Admin area restricted (red)']];
+const TPL_SKIP = ['scoreA', 'scoreB', 'tRun', 'tStart', 'tBase', 'tInit', 'gTrig', 'gTrigN', 'gWinTrig', 'rTrig', 'rSimTrig', 'rSimName', 'rSimCount', 'gCur', 'gChan', 'gAuto', 'rAuto', 'rName', 'rCount', 'gOn', 'lowOn', 'page'];
+const newBoardData = () => Object.assign({}, TPL || {}, { page:'score', scoreA:0, scoreB:0 });
 function askPin(msg) {
   return new Promise(res => {
     if (pinHash === undefined) { toast('Still loading, try again in a second.', 'err'); return res(false); }
-    if (pinHash === null) { toast('Set your PIN first (PIN card at the top of Admin).', 'err'); return res(false); }
+    if (pinHash === null) { toast('Set your PIN first (Access tab, PIN card).', 'err'); return res(false); }
     if (Date.now() < pinLock) { toast('Too many wrong tries. Wait a minute.', 'err'); return res(false); }
     const m = $('modal'); m.innerHTML = '<div class="mbox"><h3>' + esc(msg) + '</h3><input type="password" id="pinIn" inputmode="numeric" autocomplete="off" placeholder="PIN"><div class="mrow"><button class="pri" id="pinOk">Confirm</button><button id="pinNo">Cancel</button></div></div>';
     m.style.display = 'flex'; UIS.play('open'); const inp = $('pinIn'), box = m.firstChild; inp.focus();
     const done = v => { m.style.display = 'none'; m.innerHTML = ''; res(v); };
     const go = async () => {
       if (await sha(inp.value.trim()) === pinHash) { pinTries = 0; return done(true); }
-      if (++pinTries >= 5) { pinTries = 0; pinLock = Date.now() + 60000; done(false); return toast('Locked for 60 seconds.', 'err'); }
-      inp.value = ''; box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake'); toast('Wrong PIN', 'err');
+      if (++pinTries >= 5) { pinTries = 0; pinLock = Date.now() + 60000; done(false); jarvis('lock'); return toast('Locked for 60 seconds.', 'err'); }
+      inp.value = ''; box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake'); toast('Wrong PIN', 'err'); jarvis('badpin');
     };
     $('pinOk').onclick = go; $('pinNo').onclick = () => done(false);
     inp.onkeydown = e => { if (e.key === 'Enter') go(); if (e.key === 'Escape') done(false); };
   });
 }
+function bootEditorHtml() {
+  const r = (id, lbl, min, max, step) => '<div class="fld"><span>' + lbl + ' <b id="' + id + 'V"></b></span><input type="range" id="' + id + '" min="' + min + '" max="' + max + '" step="' + (step || 1) + '"></div>';
+  let h = '<div class="panel"><h2>Intro and voice</h2><button class="bon" data-snd="toggle" data-act="bootOn">Intro on</button><button class="bvo" data-snd="toggle" data-act="voiceOn">Voice on</button><button data-act="bootVoice">Test voice</button>'
+    + '<div class="fld" style="margin-top:10px"><span>Voice (voices installed on this device)</span><select id="bVoice"></select></div><p class="hint" style="margin:0 0 10px">Other devices use their closest match (a British male voice if they have one).</p>'
+    + '<div class="grid2" style="gap:10px">' + r('bRate', 'Voice speed %', 50, 150) + r('bPitch', 'Voice pitch %', 30, 150) + r('bVol', 'Voice volume %', 0, 100) + r('bStag', 'Light speed (ms between rows)', 80, 700, 10) + r('bRows', 'Rows of lights', 3, 7) + r('bBri', 'Light brightness %', 50, 200, 5) + r('bLine', 'Text line speed (ms)', 200, 1500, 50) + '</div>'
+    + '<div class="fld"><span>Disclaimer on denied, restricted and paused screens</span><textarea id="bDisc2" maxlength="300"></textarea></div></div>';
+  h += '<div class="panel"><h2>Scenes</h2><p class="hint" style="margin:0 0 8px">Pick the title, light color, light style, spoken line and text for each screen. Preview shows your edits before you save.</p>';
+  STATES.forEach(([k, l]) => { h += '<details class="adv"><summary>' + l + '</summary><div class="advin"><div class="grid2" style="gap:10px"><div class="fld"><span>Title</span><input type="text" id="bt_' + k + '" maxlength="40"></div><div class="fld"><span>Voice line ({name} and {greet} work)</span><input type="text" id="bv_' + k + '" maxlength="160"></div></div>'
+    + '<div class="inl"><label class="fld"><span>Light color</span><input type="color" id="bc_' + k + '"></label><label class="fld"><span>Light style</span><select id="bs_' + k + '"><option value="warehouse">Warehouse power-on</option><option value="alarm">Alarm flash</option><option value="pulse">Slow pulse</option></select></label><button data-act="bootPrev" data-st="' + k + '">Preview</button></div>'
+    + '<div class="fld" style="margin-top:10px"><span>Screen text (one line each)</span><textarea id="bl_' + k + '" maxlength="400"></textarea></div></div></details>'; });
+  h += '</div><div class="panel"><h2>Warnings (spoken when someone does something wrong)</h2><div class="fld"><span>Wrong PIN</span><input type="text" id="bv_badpin" maxlength="160"></div><div class="fld"><span>PIN locked</span><input type="text" id="bv_lock" maxlength="160"></div><div class="fld"><span>Feature not set up (for example no Twitch channel)</span><input type="text" id="bv_nochannel" maxlength="160"></div>'
+    + '<p class="hint">Normal clicks never trigger the voice. The "Admin area restricted" line is in Scenes.</p><button class="pri" data-act="bootSave">Save everything</button><button class="danger" data-act="bootReset">Reset to defaults</button></div>';
+  return h;
+}
+function fillVoices() {
+  const s = $('bVoice'); if (!s) return; const vs = TTS ? TTS.getVoices() : [];
+  s.innerHTML = '<option value="">Auto (best match)</option>' + vs.map(v => '<option value="' + esc(v.name) + '">' + esc(v.name) + ' (' + esc(v.lang) + ')</option>').join(''); s.value = CFG.voiceName || '';
+}
+function fillBootEditor() {
+  const c = CFG, set = (id, v) => { const e = $(id); if (e) e.value = v; };
+  set('bRate', Math.round(c.rate * 100)); set('bPitch', Math.round(c.pitch * 100)); set('bVol', Math.round(c.vol * 100)); set('bStag', c.stagger); set('bRows', c.rows); set('bBri', Math.round(c.bright * 100)); set('bLine', c.lineMs); set('bDisc2', c.disc);
+  ['bRate', 'bPitch', 'bVol', 'bStag', 'bRows', 'bBri', 'bLine'].forEach(id => { const e = $(id + 'V'); if (e && $(id)) e.textContent = $(id).value; });
+  $$('.bon').forEach(b => b.classList.toggle('on', !!c.on)); $$('.bvo').forEach(b => b.classList.toggle('on', !!c.voiceOn));
+  STATES.forEach(([k]) => { set('bt_' + k, c.title[k] || ''); set('bc_' + k, c.color[k] || '#19e3ff'); set('bs_' + k, c.style[k] || 'warehouse'); set('bv_' + k, c.say[k] || ''); set('bl_' + k, c.lines[k] || ''); });
+  ['badpin', 'lock', 'nochannel'].forEach(k => set('bv_' + k, c.say[k] || '')); fillVoices();
+}
+function collectBoot() {
+  const g = id => $(id).value, c = { on:$$('.bon')[0].classList.contains('on'), voiceOn:$$('.bvo')[0].classList.contains('on'), voiceName:g('bVoice'), rate:g('bRate') / 100, pitch:g('bPitch') / 100, vol:g('bVol') / 100, stagger:+g('bStag'), rows:+g('bRows'), bright:g('bBri') / 100, lineMs:+g('bLine'), disc:g('bDisc2').trim(), title:{}, color:{}, style:{}, say:{}, lines:{} };
+  STATES.forEach(([k]) => { c.title[k] = g('bt_' + k).trim(); c.color[k] = g('bc_' + k); c.style[k] = g('bs_' + k); c.say[k] = g('bv_' + k).trim(); c.lines[k] = g('bl_' + k).trim(); });
+  ['badpin', 'lock', 'nochannel'].forEach(k => c.say[k] = g('bv_' + k).trim()); return c;
+}
+function adminCfgChanged() { if (!$('bootEd')) return; if (!bootDirty) fillBootEditor(); renderMaint(); renderStats(); }
+function renderMaint() { if (!$('mnSt')) return; $('mnSt').textContent = MAINT.on ? 'ON' : 'off'; $$('.mnt').forEach(b => b.classList.toggle('on', !!MAINT.on)); if (document.activeElement !== $('mnMsg')) $('mnMsg').value = MAINT.msg || ''; if ($('bcText') && document.activeElement !== $('bcText') && BCAST.text) $('bcText').value = BCAST.text; }
+function renderStats() {
+  const el = $('stats'); if (!el) return; const us = Object.values(USERS).filter(u => u.info), c = s => us.filter(u => (u.status || 'pending') === s).length, rq = Object.values(REQ), n = s => rq.filter(r => (r.status || 'open') === s).length;
+  el.innerHTML = [[c('approved'), 'Approved'], [c('pending'), 'Waiting'], [c('paused') + c('denied'), 'Paused / denied'], [Object.keys(BL).length, 'Boards'], [n('open'), 'Requests open'], [n('planned'), 'Planned'], [n('done'), 'Done']].map(([v, l]) => '<div class="stat"><b>' + v + '</b><span>' + l + '</span></div>').join('');
+}
 function buildAdmin() {
   if ($$('[data-pane="admin"]').length) return;
   const p = document.createElement('section'); p.className = 'pane'; p.dataset.pane = 'admin';
-  p.innerHTML = '<div class="panel"><h2>Approval PIN <small id="pinSt"></small></h2><div id="pinBox"></div></div>'
-    + '<div class="panel"><h2>Access requests <small id="usN"></small></h2><div id="admUsers"></div></div>'
-    + '<div class="panel"><h2>Boards</h2><div id="admBoards"></div><div class="inl" style="margin-top:12px"><label class="fld"><span>New board id</span><input type="text" id="nbId" maxlength="24" placeholder="e.g. caleb"></label><label class="fld"><span>Display name</span><input type="text" id="nbLabel" maxlength="40" placeholder="e.g. Caleb"></label><button class="pri" data-act="mkboard">Create board</button></div>'
-    + '<div style="margin-top:12px"><button data-act="import">Import Caleb\'s old board (one time)</button></div><p class="hint">Import copies the old single board into the new system as board "caleb". After that, add <b>?id=caleb</b> to Caleb\'s OBS link.</p></div>';
-  $('content').appendChild(p); p.addEventListener('click', adminClick);
+  p.innerHTML = '<div class="seg" id="admSeg" style="margin-bottom:14px">' + [['ov', 'Overview'], ['ac', 'Access'], ['bd', 'Boards'], ['bt', 'Boot &amp; voice'], ['bc', 'Broadcast']].map(([k, l], i) => '<button data-sub="' + k + '"' + (i ? '' : ' class="on"') + '>' + l + '</button>').join('') + '</div>'
+    + '<div class="sub show" data-sub="ov"><div class="panel"><h2>At a glance</h2><div class="stats" id="stats"></div></div>'
+    + '<div class="panel"><h2>Maintenance mode <small id="mnSt"></small></h2><p class="hint" style="margin:0 0 10px">While on, everyone except you sees a maintenance screen and cannot change anything.</p><div class="fld"><span>Message (optional)</span><input type="text" id="mnMsg" maxlength="120" placeholder="Back in a few minutes"></div><button class="mnt" data-snd="toggle" data-act="mnt">Maintenance mode</button></div></div>'
+    + '<div class="sub" data-sub="ac"><div class="panel"><h2>Approval PIN <small id="pinSt"></small></h2><div id="pinBox"></div></div><div class="panel"><h2>Access requests <small id="usN"></small></h2><div id="admUsers"></div></div></div>'
+    + '<div class="sub" data-sub="bd"><div class="panel"><h2>Boards</h2><div id="admBoards"></div><div class="inl" style="margin-top:12px"><label class="fld"><span>New board id</span><input type="text" id="nbId" maxlength="24" placeholder="e.g. caleb"></label><label class="fld"><span>Display name</span><input type="text" id="nbLabel" maxlength="40" placeholder="e.g. Caleb"></label><button class="pri" data-act="mkboard">Create board</button></div><div style="margin-top:12px"><button data-act="import">Import Caleb\'s old board (one time)</button></div></div>'
+    + '<div class="panel"><h2>Default look for new boards <small id="tplSt"></small></h2><p class="hint" style="margin:0 0 10px">Saves the colors, sounds and settings of the board you are editing (not scores or channel names). Every new board starts with them.</p><button class="pri" data-act="tplSave">Save current board as template</button><button class="danger" data-act="tplClear">Clear template</button></div>'
+    + '<div class="panel"><h2>Backup and restore</h2><p class="hint" style="margin:0 0 10px">Works on the board shown at the top.</p><button data-act="bkExport">Download backup</button><button data-act="bkPick">Restore from file</button><input type="file" id="bkFile" accept="application/json,.json" style="display:none"></div></div>'
+    + '<div class="sub" data-sub="bt" id="bootEd">' + bootEditorHtml() + '</div>'
+    + '<div class="sub" data-sub="bc"><div class="panel"><h2>Message to all streamers</h2><p class="hint" style="margin:0 0 10px">Shows as a banner at the top of every signed-in panel until you clear it.</p><div class="fld"><span>Message</span><input type="text" id="bcText" maxlength="200" placeholder="New sounds added. Check the Sound tab!"></div><div class="inl"><label class="fld"><span>Style</span><select id="bcLvl"><option value="info">Info</option><option value="warn">Warning</option></select></label><button class="pri" data-act="bcSend">Send</button><button data-act="bcClear">Clear</button></div></div></div>';
+  $('content').appendChild(p);
+  p.addEventListener('click', e => { const s = e.target.closest('#admSeg [data-sub]'); if (s) return subShow(s.dataset.sub); adminClick(e); });
+  p.addEventListener('input', e => { if (e.target.closest('#bootEd')) { bootDirty = true; const v = $(e.target.id + 'V'); if (v) v.textContent = e.target.value; } });
+  p.addEventListener('click', e => { if (e.target.closest('#bootEd [data-act=bootOn],#bootEd [data-act=voiceOn]')) bootDirty = true; });
+  $('bkFile').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importBoard(f); });
   const sel = $('boardSel'); sel.style.display = '';
   sel.onchange = () => { store.set('lastBoard', sel.value); loadBoard(sel.value || null); };
   listen('admin/pin', v => { pinHash = v || null; renderPin(); }, 'PIN');
-  listen('users', v => { USERS = v || {}; renderUsers(); renderBoards(); }, 'Users');
+  listen('admin/notes', v => { NOTES = v || {}; renderUsers(); }, 'Notes');
+  listen('users', v => { USERS = v || {}; renderUsers(); renderBoards(); renderStats(); }, 'Users');
   listen('boardList', v => {
     BL = v || {}; const ids = Object.keys(BL);
     sel.innerHTML = ids.map(i => '<option value="' + esc(i) + '">' + esc(BL[i].label || i) + ' (' + esc(i) + ')</option>').join('') || '<option value="">No boards yet</option>';
     const last = store.get('lastBoard'), want = BID && BL[BID] ? BID : last && BL[last] ? last : ids[0] || null;
-    sel.value = want || ''; if (want !== BID) loadBoard(want); renderBoards();
+    sel.value = want || ''; if (want !== BID) loadBoard(want); renderBoards(); renderStats();
   }, 'Boards');
-  buildNav();
+  fillBootEditor(); renderMaint(); renderStats(); buildNav();
 }
+function subShow(k) { $$('#admSeg [data-sub]').forEach(b => b.classList.toggle('on', b.dataset.sub === k)); $$('.pane[data-pane=admin] > .sub').forEach(s => { s.classList.toggle('show', s.dataset.sub === k); if (s.dataset.sub === k) { s.classList.remove('show'); void s.offsetWidth; s.classList.add('show'); } }); }
 function renderPin() {
   const b = $('pinBox'); if (!b) return; $('pinSt').textContent = pinHash === undefined ? 'loading' : pinHash ? 'set' : 'not set yet';
   b.innerHTML = (pinHash ? '<div class="fld"><span>Current PIN</span><input type="password" id="pinOld" inputmode="numeric" autocomplete="off"></div>' : '')
@@ -796,18 +1045,27 @@ function renderUsers() {
     const acts = s === 'pending' ? ask + '<button class="danger sm" data-act="deny" data-uid="' + esc(uid) + '">Deny</button>'
       : s === 'approved' ? '<button class="sm" data-act="pause" data-uid="' + esc(uid) + '">Pause</button><button class="danger sm" data-act="remove" data-uid="' + esc(uid) + '">Remove</button>'
       : s === 'paused' ? '<button class="pri sm" data-act="resume" data-uid="' + esc(uid) + '">Resume</button><button class="danger sm" data-act="remove" data-uid="' + esc(uid) + '">Remove</button>' : ask;
-    return '<div class="card">' + ph + '<div class="meta"><b>' + esc(i.name) + ' <span class="badge ' + s + '">' + s + '</span></b><span>' + esc(i.email) + (i.ts ? ' &middot; ' + esc(new Date(i.ts).toLocaleString()) : '') + '</span>' + (u.board ? '<span>board: ' + esc(u.board) + '</span>' : '') + '</div><div class="acts">' + acts + '</div></div>';
+    return '<div class="card">' + ph + '<div class="meta"><b>' + esc(i.name) + ' <span class="badge ' + s + '">' + s + '</span></b><span>' + esc(i.email) + (i.ts ? ' &middot; ' + esc(new Date(i.ts).toLocaleString()) : '') + '</span>' + (u.board ? '<span>board: ' + esc(u.board) + '</span>' : '') + '</div><div class="acts">' + acts + '</div>'
+      + '<div class="inl" style="width:100%"><input type="text" class="note" id="nt_' + esc(uid) + '" value="' + esc(NOTES[uid] || '') + '" maxlength="200" placeholder="Private note (only you can see this)"><button class="sm" data-act="note" data-uid="' + esc(uid) + '">Save note</button></div></div>';
   }).join('') : '<p class="hint">Nobody has asked for access yet.</p>';
 }
 function renderBoards() {
   const el = $('admBoards'); if (!el) return; const ids = Object.keys(BL);
+  $('tplSt').textContent = TPL ? 'saved' : 'none';
   el.innerHTML = ids.length ? ids.map(id => { const b = BL[id], o = b.uid && USERS[b.uid] && USERS[b.uid].info ? USERS[b.uid].info.name : (b.uid ? 'user' : 'no account'); return '<div class="card"><div class="meta"><b>' + esc(b.label || id) + '</b><span>id: ' + esc(id) + ' &middot; owner: ' + esc(o) + '</span></div><div class="acts"><button class="sm" data-act="copy" data-id="' + esc(id) + '">Copy link</button><button class="sm pri" data-act="edit" data-id="' + esc(id) + '">Edit</button><button class="sm danger" data-act="del" data-id="' + esc(id) + '">Delete</button></div></div>'; }).join('') : '<p class="hint">No boards yet. Create one below, or import Caleb\'s.</p>';
 }
 function adminClick(e) {
   const b = e.target.closest('[data-act]'); if (!b) return; const u = b.dataset.uid, id = b.dataset.id;
-  ({ setpin:setPin, approve:() => approve(u), deny:() => setStatus(u, 'denied'), pause:() => setStatus(u, 'paused'), resume:() => approve(u, true), remove:() => removeUser(u), mkboard:createBoard, import:importCaleb,
-    copy:() => copyText(SITE + 'board.html?id=' + id), edit:() => { $('boardSel').value = id; $('boardSel').onchange(); toast('Now editing ' + id, 'ok'); }, del:() => delBoard(id) }[b.dataset.act] || (() => {}))();
+  ({ setpin:setPin, approve:() => approve(u), deny:() => setStatus(u, 'denied'), pause:() => setStatus(u, 'paused'), resume:() => approve(u, true), remove:() => removeUser(u), note:() => saveNote(u), mkboard:createBoard, import:importCaleb,
+    copy:() => copyText(SITE + 'board.html?id=' + id), edit:() => { $('boardSel').value = id; $('boardSel').onchange(); toast('Now editing ' + id, 'ok'); }, del:() => delBoard(id),
+    mnt:() => db.ref('config/maintenance').set({ on:!MAINT.on, msg:$('mnMsg').value.trim() }).then(() => toast(MAINT.on ? 'Maintenance mode is on.' : 'Maintenance mode is off.', 'ok'), er => toast(er.message, 'err')),
+    tplSave:saveTemplate, tplClear:() => db.ref('config/template').remove().then(() => toast('Template cleared.', 'ok')), bkExport:exportBoard, bkPick:() => $('bkFile').click(),
+    bcSend:sendBroadcast, bcClear:() => db.ref('config/broadcast').set({ on:false }).then(() => toast('Message cleared.', 'ok')),
+    bootOn:() => b.classList.toggle('on'), voiceOn:() => b.classList.toggle('on'), bootVoice:() => { CFG = mergeCfg(collectBoot()); const c = CFG.voiceOn; CFG.voiceOn = true; speak('Voice check. All systems nominal.'); CFG.voiceOn = c; },
+    bootPrev:() => { CFG = mergeCfg(collectBoot()); previewScene(b.dataset.st); }, bootSave:saveBoot, bootReset:() => { if (confirm('Reset the intro, colors and voice lines to the defaults?')) { bootDirty = false; db.ref('config/boot').remove().then(() => toast('Reset.', 'ok')); } } }[b.dataset.act] || (() => {}))();
 }
+function saveBoot() { const c = collectBoot(); db.ref('config/boot').set(c).then(() => { bootDirty = false; toast('Saved. Everyone sees it on their next visit.', 'ok'); }, er => toast('Could not save: ' + er.message, 'err')); }
+function saveNote(uid) { db.ref('admin/notes/' + uid).set($('nt_' + uid).value.trim() || null).then(() => toast('Note saved.', 'ok'), er => toast(er.message, 'err')); }
 async function approve(uid, resume) {
   const u = USERS[uid]; if (!u) return;
   const b = resume ? u.board : slug(($('bn_' + uid) || {}).value);
@@ -817,7 +1075,7 @@ async function approve(uid, resume) {
   const up = {}; up['users/' + uid + '/status'] = 'approved'; up['users/' + uid + '/board'] = b;
   up['boardList/' + b + '/label'] = (ex && ex.label) || (u.info && u.info.name) || b; up['boardList/' + b + '/uid'] = uid; up['boardList/' + b + '/created'] = (ex && ex.created) || TS;
   try {
-    if (!(await db.ref('boards/' + b).once('value')).exists()) { up['boards/' + b + '/page'] = 'score'; up['boards/' + b + '/scoreA'] = 0; up['boards/' + b + '/scoreB'] = 0; }
+    if (!(await db.ref('boards/' + b).once('value')).exists()) Object.entries(newBoardData()).forEach(([k, v]) => up['boards/' + b + '/' + k] = v);
     await db.ref().update(up); toast('Approved. Board: ' + b, 'ok');
   } catch (er) { toast('Failed: ' + er.message, 'err'); }
 }
@@ -831,8 +1089,8 @@ async function createBoard() {
   const id = slug($('nbId').value), label = $('nbLabel').value.trim() || id;
   if (!id) return toast('Type a board id (letters, numbers, dashes).', 'err');
   if (BL[id]) return toast('That board already exists.', 'err');
-  try { await db.ref().update({ ['boardList/' + id + '/label']:label, ['boardList/' + id + '/created']:TS, ['boards/' + id + '/page']:'score', ['boards/' + id + '/scoreA']:0, ['boards/' + id + '/scoreB']:0 }); $('nbId').value = ''; $('nbLabel').value = ''; toast('Board created.', 'ok'); }
-  catch (er) { toast('Failed: ' + er.message, 'err'); }
+  const up = { ['boardList/' + id + '/label']:label, ['boardList/' + id + '/created']:TS }; Object.entries(newBoardData()).forEach(([k, v]) => up['boards/' + id + '/' + k] = v);
+  try { await db.ref().update(up); $('nbId').value = ''; $('nbLabel').value = ''; toast('Board created.', 'ok'); } catch (er) { toast('Failed: ' + er.message, 'err'); }
 }
 async function importCaleb() {
   if (!confirm('Copy the old Caleb board into the new system? This overwrites board "caleb" if it already exists.')) return;
@@ -849,6 +1107,129 @@ async function delBoard(id) {
   const up = { ['boardList/' + id]:null, ['boards/' + id]:null }, o = BL[id].uid; if (o) { up['users/' + o + '/board'] = null; up['users/' + o + '/status'] = 'paused'; }
   db.ref().update(up).then(() => toast('Board deleted.', 'ok'), er => toast(er.message, 'err'));
 }
+function saveTemplate() {
+  if (!BID) return toast('Pick a board first.', 'err'); const t = {}; Object.keys(state).forEach(k => { if (!TPL_SKIP.includes(k) && state[k] != null) t[k] = state[k]; });
+  db.ref('config/template').set(t).then(() => toast('Saved. New boards start with this look.', 'ok'), er => toast(er.message, 'err'));
+}
+async function exportBoard() {
+  if (!BID) return toast('Pick a board first.', 'err'); const s = await db.ref('boards/' + BID).once('value');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(s.val() || {}, null, 2)], { type:'application/json' })); a.download = 'board-' + BID + '.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast('Backup downloaded.', 'ok');
+}
+async function importBoard(f) {
+  if (!BID) return toast('Pick a board first.', 'err'); let o; try { o = JSON.parse(await f.text()); } catch (e) { return toast('That file is not valid JSON.', 'err'); }
+  if (!o || typeof o !== 'object' || Array.isArray(o)) return toast('That file does not look like a board backup.', 'err');
+  if (!confirm('Replace everything on board "' + BID + '" with this file?')) return; if (!await askPin('PIN to restore ' + BID)) return;
+  db.ref('boards/' + BID).set(o).then(() => toast('Board restored.', 'ok'), er => toast('Restore failed: ' + er.message, 'err'));
+}
+function sendBroadcast() { const t = $('bcText').value.trim(); if (!t) return toast('Type a message first.', 'err'); db.ref('config/broadcast').set({ on:true, text:t, level:$('bcLvl').value, ts:TS }).then(() => toast('Sent to everyone.', 'ok'), er => toast(er.message, 'err')); }
+function renderBroadcast() { const b = $('bcast'); if (!b) return; const show = BCAST.on && BCAST.text && store.get('bcDis') !== String(BCAST.ts); b.style.display = show ? 'flex' : 'none'; b.className = BCAST.level === 'warn' ? 'warn' : ''; if (show) { b.style.display = 'flex'; $('bcastT').textContent = BCAST.text; } }
+function dismissBcast() { store.set('bcDis', String(BCAST.ts)); renderBroadcast(); }
+
+/* ---------- word list for the guessing game (word:hint, 3 to 8 letters) ---------- */
+const WORD_DATA = {
+  Animals:'tiger:striped jungle cat|lion:king of the jungle|zebra:striped horse-like animal|panda:black and white bamboo eater|koala:eucalyptus-eating marsupial|otter:river swimmer that floats on its back|whale:largest ocean mammal|shark:fish with a famous fin|dolphin:clever ocean mammal that clicks|eagle:bird with sharp talons|falcon:fastest diving bird|parrot:bird that mimics speech|penguin:flightless bird of the cold|giraffe:tallest land animal|monkey:swings through trees|gorilla:largest great ape|rabbit:hops and loves carrots|turtle:slow reptile with a shell|snake:slithering reptile|spider:eight legs and a web|beetle:insect with hard wing covers|camel:desert animal with humps|donkey:stubborn farm animal|moose:giant antlered deer|walrus:tusked arctic giant|hamster:pet that runs in a wheel|ferret:long playful pet|badger:black and white burrower|lobster:clawed seafood turns red|octopus:eight arms and ink|jaguar:spotted big cat of the Americas|cheetah:fastest land animal|buffalo:large grazing bovine|raccoon:masked trash bandit|sparrow:small common brown bird|pigeon:city bird that coos|hornet:large angry wasp|salmon:fish that swims upstream|oyster:shellfish that makes pearls|peacock:bird with a fan of feathers',
+  Gaming:'pixel:smallest dot on a screen|level:stage in a game|quest:mission for a hero|boss:big enemy at the end|loot:treasure dropped by enemies|spawn:to appear in the game|respawn:come back after dying|combo:chain of moves|arcade:place with coin-operated games|console:box you plug into a TV|joystick:stick for old arcade control|avatar:your character in a game|mana:magic energy bar|potion:drink that heals|sword:hero blade|shield:blocks hits|dungeon:dark place full of monsters|wizard:magic user with a staff|knight:armored hero|dragon:fire-breathing beast|zombie:undead walker|sniper:long-range shooter|rookie:brand new player|noob:slang for a beginner|lag:annoying delay|ping:network response time|stream:broadcast gameplay live|gamer:person who plays|score:points you earn|bonus:extra reward|cheat:code for unfair help|patch:game update|server:computer that hosts the match|clan:team of players|guild:group in an online RPG|raid:big group boss fight|tank:high-health frontline role|healer:class that restores health|ranked:competitive mode|speedrun:finishing a game as fast as possible|crafting:making items from materials',
+  Food:'pizza:cheesy Italian slice|burger:patty in a bun|tacos:folded tortilla with filling|pasta:spaghetti or penne|salad:leafy green dish|bagel:round bread with a hole|waffle:grid-patterned breakfast|pancake:flat breakfast stack|cookie:chocolate chip treat|donut:ring-shaped fried pastry|cheese:made from aged milk|butter:spread made from cream|honey:sweet stuff from bees|mango:tropical orange fruit|banana:yellow curved fruit|orange:citrus fruit and a color|lemon:sour yellow citrus|cherry:small red fruit with a pit|peach:fuzzy summer fruit|grape:grows in bunches|melon:big juicy summer fruit|carrot:orange root vegetable|potato:fries are made from it|tomato:red fruit used in sauce|onion:makes you cry when cut|garlic:vampire-repelling bulb|pepper:spicy or sweet vegetable|cereal:breakfast in a bowl with milk|popcorn:movie snack that pops|pretzel:twisted salty snack|muffin:small baked cake|brownie:fudgy chocolate square|noodles:long strands in soup|sushi:rice and raw fish roll|burrito:wrapped tortilla meal|nachos:chips with melted cheese|steak:grilled beef cut|bacon:crispy breakfast strips|sausage:ground meat in a casing|chicken:poultry often fried|yogurt:cultured dairy snack|pudding:creamy dessert cup',
+  Tech:'laptop:portable computer|mouse:clicks on a desk|keyboard:typing device|monitor:screen on your desk|router:sends wifi around|modem:connects you to the internet|cursor:blinking arrow or line|cloud:remote internet storage|code:what programmers write|bug:error in a program|byte:eight bits|binary:ones and zeros|python:snake-named language|java:coffee-named language|script:small program|robot:programmable machine|drone:flying camera machine|email:digital letter|wifi:wireless internet|browser:app to surf the web|website:page on the internet|domain:web address name|hacker:computer intruder|firewall:digital security wall|password:secret login word|upload:send a file online|download:get a file from online|folder:holds files|icon:small picture on a desktop|widget:small app on screen|tablet:flat touch device|camera:takes pictures|speaker:makes sound|headset:headphones with a mic|webcam:camera on a computer|printer:puts text on paper|scanner:copies paper to digital|battery:stores power|charger:refills the battery|memory:what RAM provides|cache:temporary saved data|emoji:tiny face icon',
+  Nature:'river:flowing water|ocean:huge salty water|forest:lots of trees|desert:dry sandy land|canyon:deep rocky gorge|glacier:slow river of ice|volcano:mountain that erupts|island:land surrounded by water|meadow:grassy field|jungle:dense tropical forest|swamp:wet marshy land|valley:low land between hills|geyser:hot water shooting up|lagoon:shallow coastal pool|tundra:frozen treeless plain|prairie:vast grassland|cliff:steep rock edge|beach:sandy shore|reef:coral home in the sea|cave:hollow in a mountain|rainbow:colors after rain|thunder:loud storm sound|storm:wind rain and lightning|breeze:gentle wind|tornado:spinning funnel of wind|monsoon:seasonal heavy rains|blizzard:violent snowstorm|drought:long time without rain|sunrise:dawn|sunset:evening sky color show|moss:soft green growth on rocks|fern:leafy plant without flowers|cactus:spiky desert plant|maple:tree with syrup|willow:drooping tree by water|bamboo:giant grass pandas eat|orchid:fancy exotic flower|tulip:spring flower from bulbs|daisy:white petals yellow center|acorn:oak tree seed',
+  Space:'planet:orbits a star|galaxy:billions of stars together|comet:icy ball with a tail|meteor:shooting star|orbit:path around a planet|rocket:launches into space|saturn:planet with rings|jupiter:biggest planet|mars:the red planet|venus:hottest planet|pluto:dwarf planet|moon:earth satellite|sun:our star|star:twinkling point of light|nebula:cloud of space dust|eclipse:one body hides another|cosmos:the universe|asteroid:rocky space rock|gravity:force that pulls down|lunar:about the moon|solar:about the sun|shuttle:reusable spacecraft|capsule:small crew spacecraft|quasar:super bright galaxy core|zenith:highest point in the sky',
+  Sports:'soccer:football outside the US|tennis:rackets and a net|hockey:sticks and a puck|boxing:gloves and a ring|rugby:oval ball contact sport|golf:tiny ball and eighteen holes|baseball:bat ball and diamond|football:touchdowns in the US|cricket:bat ball and wickets|archery:bow and arrow sport|surfing:riding waves|skiing:gliding on snow|bowling:ten pins|karate:martial art with belts|judo:throwing martial art|rowing:oars in a boat|diving:plunge into a pool|fencing:swords with masks|cycling:pedal sport|wrestle:grappling sport|marathon:long run|goalie:guards the net|referee:calls the fouls|trophy:winner prize cup|medal:hung on a winner|stadium:big sports arena|dribble:bounce the ball|penalty:punishment kick|sprint:fast short race',
+  Music:'guitar:six strings|piano:black and white keys|drums:sticks and a kit|violin:bowed string instrument|trumpet:brass horn|singer:uses a voice|concert:live show|melody:a tune|rhythm:the beat|lyrics:words of a song|remix:song with a new twist|album:collection of songs|studio:where records are made|encore:one more song|harmony:notes that blend|actor:plays a role|movie:film|trailer:preview of a film|sequel:the next film|cinema:movie theater|director:calls the shots on set|comedy:funny genre|horror:scary genre|anime:Japanese animation|comic:illustrated story book|hero:saves the day|villain:bad guy|cartoon:animated show|mascot:team character|costume:cosplay outfit',
+  Objects:'chair:you sit on it|table:you eat on it|pillow:soft for your head|blanket:keeps you warm in bed|bottle:holds a drink|candle:wax with a flame|mirror:shows your reflection|window:glass in a wall|ladder:climbing tool|hammer:nail tool|bucket:carries water|basket:woven carrier|button:fastens a shirt|pencil:erasable writing tool|eraser:removes pencil marks|marker:felt tip pen|ticket:entry pass|wallet:holds cash and cards|helmet:protects your head|jacket:light coat|sandals:open summer shoes|blender:makes smoothies|toaster:browns bread|kettle:boils water|lantern:portable light|compass:points north|anchor:holds a ship|umbrella:keeps you dry|backpack:carried on your shoulders|luggage:suitcases for a trip'
+};
+const WORDS = (() => { const out = {}, seen = {}; Object.keys(WORD_DATA).forEach(c => { out[c] = []; WORD_DATA[c].split('|').forEach(p => { const i = p.indexOf(':'), w = p.slice(0, i).toUpperCase(); if (/^[A-Z]{3,8}$/.test(w) && !seen[w]) { seen[w] = 1; out[c].push([w, p.slice(i + 1)]); } }); }); return out; })();
+
+/* ---------- word game: runs in this panel, the secret word never goes to the overlay ---------- */
+const GM = { run:false, word:'', hint:'', cat:'', rev:[], round:0, st:'idle', nextAt:0, t:null, ws:null, wsCh:'', wsT:null, wsOk:false, used:{} };
+const gmKey = () => 'gm_' + BID;
+const gmEvery = () => Math.min(300, Math.max(10, +state.gmEvery || 30));
+const gmCats = () => state.gmCats == null ? Object.keys(WORDS) : String(state.gmCats).split(',').filter(c => WORDS[c]);
+function gmCustom() { return (store.get('gmc_' + BID) || '').split('\n').map(l => { const i = l.indexOf(':'), w = (i < 0 ? l : l.slice(0, i)).trim().toUpperCase(), h = i < 0 ? '' : l.slice(i + 1).trim(); return /^[A-Z]{3,8}$/.test(w) ? [w, h || 'custom word', 'CUSTOM'] : null; }).filter(Boolean); }
+function gmPool() { const p = []; gmCats().forEach(c => WORDS[c].forEach(([w, h]) => p.push([w, h, c.toUpperCase()]))); return p.concat(gmCustom()); }
+function gmPick() { const pool = gmPool(); if (!pool.length) return null; let free = pool.filter(p => !GM.used[p[0]]); if (!free.length) { GM.used = {}; free = pool; } const p = free[(Math.random() * free.length) | 0]; GM.used[p[0]] = 1; return p; }
+const gmMask = full => GM.word.split('').map((c, i) => full || GM.rev.includes(i) ? c : '_').join(' ');
+const gmSave = () => store.set(gmKey(), JSON.stringify({ run:GM.run, word:GM.word, hint:GM.hint, cat:GM.cat, rev:GM.rev, round:GM.round, st:GM.st, nextAt:GM.nextAt, used:GM.used }));
+function gmPublish(extra) {
+  if (!ref) return;
+  const o = Object.assign({ 'game/on':true, 'game/state':GM.st, 'game/round':GM.round, 'game/cat':GM.cat, 'game/hint':GM.hint, 'game/len':GM.word.length, 'game/mask':gmMask(GM.st === 'won' || GM.st === 'timeup'), 'game/every':gmEvery(), 'game/nextAt':GM.st === 'play' ? GM.nextAt : null }, extra || {});
+  ref.update(o).catch(e => toast('Save failed: ' + e.message, 'err'));
+}
+function gmNext() {
+  clearTimeout(GM.t); const p = gmPick();
+  if (!p) { GM.run = false; GM.st = 'idle'; gmUI(); return toast('No words available. Turn on a category or add your own.', 'err'); }
+  GM.word = p[0]; GM.hint = p[1]; GM.cat = p[2]; GM.rev = []; GM.round++; GM.st = 'play'; GM.nextAt = Date.now() + off + gmEvery() * 1000;
+  gmPublish({ 'game/winner':null, 'game/pts':null }); gmSave(); GM.t = setTimeout(gmTick, gmEvery() * 1000); gmUI();
+}
+function gmTick() { if (GM.st === 'play') gmReveal(); }
+function gmReveal(manual) {
+  if (GM.st !== 'play') return; const left = []; for (let i = 0; i < GM.word.length; i++) if (!GM.rev.includes(i)) left.push(i);
+  if (left.length <= 1) return manual ? toast('Only one letter left.', 'err') : gmTimeUp();
+  GM.rev.push(left[(Math.random() * left.length) | 0]); clearTimeout(GM.t); GM.nextAt = Date.now() + off + gmEvery() * 1000; GM.t = setTimeout(gmTick, gmEvery() * 1000); gmPublish(); gmSave(); gmUI();
+}
+function gmTimeUp() { clearTimeout(GM.t); GM.st = 'timeup'; gmPublish({ 'game/winner':null }); gmSave(); gmUI(); gmAfter(); }
+function gmWin(name, login) {
+  if (GM.st !== 'play') return; clearTimeout(GM.t); GM.st = 'won';
+  const pts = Math.min(50, Math.max(1, +state.gmPts || 1)), key = login.replace(/[^a-z0-9_]/g, ''), cur = (state.gameLb && state.gameLb[key]) || { s:0 };
+  gmPublish({ 'game/winner':name, 'game/pts':pts, ['gameLb/' + key]:{ n:name, s:(cur.s || 0) + pts } }); gmSave(); gmUI(); toast(name + ' got it: ' + GM.word, 'ok'); gmAfter();
+}
+function gmAfter() { clearTimeout(GM.t); if (GM.run) GM.t = setTimeout(() => { if (GM.run) gmNext(); }, Math.min(120, Math.max(3, +state.gmGap || 12)) * 1000); }
+function gmStart() {
+  if (!BID) return toast('Pick a board first.', 'err');
+  if (!state.gChan) { jarvis('nochannel'); return toast('Save your Twitch channel in the Goal tab first.', 'err'); }
+  GM.run = true; gmChat(); if (GM.st === 'play') gmPublish(); else gmNext(); gmSave(); gmUI();
+}
+function gmStop() { GM.run = false; clearTimeout(GM.t); clearTimeout(GM.wsT); if (GM.ws) { GM.ws.onclose = null; try { GM.ws.close(); } catch (e) {} GM.ws = null; } GM.wsCh = ''; GM.wsOk = false; if (BID) gmSave(); gmUI(); }
+function gmSkip() { if (!GM.run) return toast('Start the game first.', 'err'); gmNext(); }
+function gmToggleShow() { if (ref) ref.update({ 'game/on':!(state.game && state.game.on) }); }
+function gmChat() {
+  const ch = String(state.gChan || '').toLowerCase().replace(/[^a-z0-9_]/g, ''); if (!GM.run || !ch) return;
+  if (GM.ws && GM.wsCh === ch) return;
+  if (GM.ws) { GM.ws.onclose = null; try { GM.ws.close(); } catch (e) {} } clearTimeout(GM.wsT);
+  GM.wsCh = ch; const ws = GM.ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+  ws.onopen = () => { ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands'); ws.send('PASS SCHMOOZE'); ws.send('NICK justinfan' + (10000 + Math.floor(Math.random() * 80000))); ws.send('JOIN #' + ch); GM.wsOk = true; gmUI(); };
+  ws.onmessage = e => String(e.data).split('\r\n').forEach(l => {
+    if (l.indexOf('PING') === 0) return ws.send('PONG :tmi.twitch.tv');
+    const m = /^@(\S+) :(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :(.*)$/.exec(l); if (!m || GM.st !== 'play') return;
+    if (m[3].trim().toUpperCase().replace(/[.!?,]+$/, '') !== GM.word) return;
+    const t = {}; m[1].split(';').forEach(p => { const i = p.indexOf('='); t[p.slice(0, i)] = p.slice(i + 1); });
+    gmWin((t['display-name'] || m[2]).replace(/\\s/g, ' '), m[2].toLowerCase());
+  });
+  ws.onclose = () => { GM.wsOk = false; gmUI(); if (GM.ws === ws && GM.run) GM.wsT = setTimeout(() => { GM.ws = null; GM.wsCh = ''; gmChat(); }, 5000); };
+  ws.onerror = () => { try { ws.close(); } catch (e) {} };
+}
+function gmReset() { clearTimeout(GM.t); clearTimeout(GM.wsT); if (GM.ws) { GM.ws.onclose = null; try { GM.ws.close(); } catch (e) {} } Object.assign(GM, { run:false, word:'', hint:'', cat:'', rev:[], round:0, st:'idle', nextAt:0, t:null, ws:null, wsCh:'', wsOk:false, used:{} }); }
+function gmLoad() {
+  gmReset(); const s = BID && store.get(gmKey());
+  if (s) { try { const o = JSON.parse(s); Object.assign(GM, { word:o.word || '', hint:o.hint || '', cat:o.cat || '', rev:o.rev || [], round:o.round || 0, st:o.st || 'idle', used:o.used || {}, nextAt:o.nextAt || 0 });
+    if (o.run && GM.st === 'play') { GM.run = true; GM.t = setTimeout(gmTick, Math.max(1000, GM.nextAt - (Date.now() + off))); gmChat(); } else if (o.run && (GM.st === 'won' || GM.st === 'timeup')) { GM.run = true; gmAfter(); gmChat(); } } catch (e) {} }
+  if ($('gmCustom')) $('gmCustom').value = BID ? store.get('gmc_' + BID) || '' : ''; gmUI();
+}
+function gmSaveWords() { store.set('gmc_' + BID, $('gmCustom').value); toast(gmCustom().length + ' custom words saved.', 'ok'); }
+function gmToggleCat(c) { const on = gmCats(), n = on.includes(c) ? on.filter(x => x !== c) : on.concat(c); save({ gmCats:n.join(',') }); }
+function gmResetLb() { if (confirm('Reset the whole leaderboard to zero?')) save({ gameLb:null }); }
+$('gmCats').innerHTML = Object.keys(WORDS).map(c => '<button data-cat="' + c + '" onclick="gmToggleCat(\'' + c + '\')">' + c + ' (' + WORDS[c].length + ')</button>').join('');
+[['gmEvery', 10, 300], ['gmPts', 1, 50], ['gmGap', 3, 120], ['gmTop', 3, 10]].forEach(([id, lo, hi]) => $(id).addEventListener('change', e => save({ [id]:Math.min(hi, Math.max(lo, +e.target.value || lo)) })));
+$('gmLb').addEventListener('click', e => {
+  const b = e.target.closest('[data-lb]'); if (!b || !ref) return; const k = b.dataset.k, cur = (state.gameLb && state.gameLb[k] && state.gameLb[k].s) || 0;
+  if (b.dataset.lb === 'del') save({ ['gameLb/' + k]:null }); else save({ ['gameLb/' + k + '/s']:Math.max(0, cur + (b.dataset.lb === 'plus' ? 1 : -1)) });
+});
+function gmUI() {
+  if (!$('gmMask')) return; const live = GM.st !== 'idle' && GM.word;
+  $('gmSt').textContent = !GM.run ? 'stopped' : GM.st === 'play' ? 'running' : GM.st === 'won' ? 'winner!' : GM.st === 'timeup' ? 'time up' : 'ready';
+  $('gmMask').textContent = live ? gmMask(GM.st !== 'play') : '_ _ _ _ _'; $('gmHintC').textContent = live ? 'Hint: ' + GM.hint + ' (' + GM.cat + ')' : 'Press Start game to begin.';
+  $('gmSecret').textContent = live ? GM.word : '-'; $('gmRound').textContent = GM.round;
+  $('gmNext').textContent = GM.st === 'play' ? Math.max(0, Math.round((GM.nextAt - (Date.now() + off)) / 1000)) + 's' : '-';
+  $('gmChat').textContent = !GM.run ? 'off' : GM.wsOk ? 'listening to #' + GM.wsCh : 'connecting...';
+  if (GM.run) gmChat();
+  const t = (sel, on) => $$(sel).forEach(b => b.classList.toggle('on', !!on)), s = state;
+  t('.gmrun', GM.run); t('.gmon', s.game && s.game.on); t('.glon', !s.glOff); gmCats().length; $$('[data-cat]').forEach(b => b.classList.toggle('on', gmCats().includes(b.dataset.cat)));
+  $$('[data-gmpos]').forEach(b => b.classList.toggle('on', b.dataset.gmpos === (s.gmPos || 'bc'))); $$('[data-glpos]').forEach(b => b.classList.toggle('on', b.dataset.glpos === (s.glPos || 'cr')));
+  $$('[data-gmscale]').forEach(b => b.classList.toggle('on', Math.abs((s.gmScale || 1) - +b.dataset.gmscale) < .01)); $$('[data-glscale]').forEach(b => b.classList.toggle('on', Math.abs((s.glScale || 1) - +b.dataset.glscale) < .01));
+  const rows = Object.entries(s.gameLb || {}).filter(([, v]) => v && v.n).sort((a, b) => (b[1].s || 0) - (a[1].s || 0));
+  $('gmLb').innerHTML = rows.length ? rows.map(([k, v], i) => '<div class="card"><div class="meta"><b>' + (i + 1) + '. ' + esc(v.n) + '</b></div><span class="badge done">' + (v.s || 0) + ' pts</span><div class="acts"><button class="sm" data-lb="minus" data-k="' + esc(k) + '">-1</button><button class="sm" data-lb="plus" data-k="' + esc(k) + '">+1</button><button class="sm danger" data-lb="del" data-k="' + esc(k) + '">Remove</button></div></div>').join('') : '<p class="hint">No winners yet.</p>';
+}
+setInterval(gmUI, 500);
+
 showGate('load');
 </script>
 </body>
