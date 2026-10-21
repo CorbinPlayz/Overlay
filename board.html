@@ -160,6 +160,38 @@
   @keyframes gwFade { from{opacity:0} to{opacity:1} }
   @keyframes gwRot { to{transform:rotate(360deg)} }
   @keyframes gwRotR { to{transform:rotate(-360deg)} }
+  /* ---- word guessing game ---- */
+  .gm { position:absolute; z-index:30; display:none; }
+  .gm.on { display:block; animation:gmIn .6s cubic-bezier(.2,.9,.3,1) both; }
+  @keyframes gmIn { from{opacity:0;filter:blur(8px)} }
+  #gmBox { width:940px; padding:16px 34px 20px; text-align:center; background:var(--glass); border-top:3px solid var(--acc); border-bottom:3px solid var(--b);
+    clip-path:polygon(34px 0,100% 0,calc(100% - 34px) 100%,0 100%); filter:drop-shadow(0 0 22px rgba(0,0,0,.5)); }
+  .gm-top { display:flex; justify-content:space-between; font-size:24px; letter-spacing:.22em; color:var(--acc); text-transform:uppercase; padding:0 28px; }
+  .gm-hint { font-size:34px; letter-spacing:.08em; color:var(--ink); text-transform:uppercase; margin:6px 0 2px; text-shadow:0 0 16px var(--acc); }
+  .gm-word { font-size:92px; font-weight:800; letter-spacing:.14em; color:var(--ink); line-height:1.15; margin:4px 0 8px; white-space:nowrap; text-shadow:0 0 26px var(--acc); }
+  .gm-word i { display:inline-block; font-style:normal; min-width:.6em; }
+  .gm-word i.rv { color:var(--acc); }
+  .gm-word i.new { animation:gmPop .7s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes gmPop { 0%{transform:translateY(-46px) scale(2.2);opacity:0} 100%{transform:none;opacity:1} }
+  #gmBox[data-st=won] .gm-word i, #gmBox[data-st=timeup] .gm-word i { color:var(--b); text-shadow:0 0 30px var(--b); animation:gmWord 1s ease both; animation-delay:calc(var(--i) * 70ms); }
+  #gmBox[data-st=timeup] .gm-word i { color:var(--ink); text-shadow:0 0 14px var(--acc); }
+  @keyframes gmWord { 0%{transform:scale(1.6);opacity:.2} 60%{transform:scale(.95)} 100%{transform:none;opacity:1} }
+  .gm-bar { height:6px; margin:4px 28px 10px; background:rgba(255,255,255,.12); border-radius:3px; overflow:hidden; }
+  .gm-bar b { display:block; height:100%; width:100%; background:linear-gradient(90deg,var(--acc),var(--b)); transition:width .25s linear; }
+  #gmBox:not([data-st=play]) .gm-bar { opacity:0; }
+  .gm-foot { font-size:28px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); min-height:34px; }
+  #gmBox[data-st=won] .gm-foot { color:var(--b); font-size:36px; text-shadow:0 0 24px var(--b); animation:gmFoot 1s ease both; }
+  @keyframes gmFoot { from{opacity:0;transform:scale(1.5)} }
+  #glBox { width:400px; padding:14px 20px 16px; background:var(--glass); border-left:3px solid var(--acc); border-right:3px solid var(--b); clip-path:polygon(0 0,calc(100% - 22px) 0,100% 22px,100% 100%,22px 100%,0 calc(100% - 22px)); filter:drop-shadow(0 0 18px rgba(0,0,0,.5)); }
+  .gl-h { font-size:24px; letter-spacing:.3em; color:var(--acc); text-align:center; margin-bottom:8px; }
+  #glList { list-style:none; margin:0; padding:0; }
+  #glList li { display:flex; gap:12px; align-items:baseline; font-size:28px; padding:4px 0; border-bottom:1px solid rgba(255,255,255,.08); color:var(--ink); }
+  #glList li b { width:34px; color:var(--b); }
+  #glList li span { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-transform:uppercase; }
+  #glList li em { font-style:normal; color:var(--acc); font-weight:800; }
+  #glList li.hot { animation:glHot 1.4s ease; }
+  @keyframes glHot { 0%,40%{background:rgba(255,255,255,.22)} }
+  .gl-empty { text-align:center; font-size:22px; letter-spacing:.2em; color:rgba(255,255,255,.5); padding:8px 0; }
   #raid { position:absolute; inset:0; display:none; z-index:50; overflow:hidden; opacity:0; background:radial-gradient(circle,var(--glass) 0,var(--solid) 75%); }
   #raid::after { content:""; position:absolute; inset:0; background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 2px,transparent 2px 6px); }
   #raid.play { display:block; animation:rIn var(--d,8s) linear forwards; }
@@ -198,6 +230,8 @@
 <div id="raid"><div class="rflash"></div><b class="ring"></b><b class="ring" style="animation-delay:.25s;border-color:var(--r2)"></b><b class="ring" style="animation-delay:.5s"></b><div id="rP"></div>
 <div class="rt" id="rHead"></div><div class="rt" id="rName" style="animation-delay:.35s"></div><div class="rt" id="rCount" style="animation-delay:.7s"></div><div class="rt" id="rMsg" style="animation-delay:1s"></div></div>
 
+<div id="gmBox" class="gm"><div class="gm-top"><span id="gmCat"></span><span id="gmRnd"></span></div><div class="gm-hint" id="gmHint"></div><div class="gm-word" id="gmWord"></div><div class="gm-bar"><b id="gmBarF"></b></div><div class="gm-foot" id="gmFoot"></div></div>
+<div id="glBox" class="gm"><div class="gl-h">LEADERBOARD</div><ol id="glList"></ol></div>
 <div id="gWin"><div id="gwDim"></div><div id="gwGrid"></div><i class="gwB" style="left:7%"></i><i class="gwB" style="right:7%"></i><div id="gwScan"></div>
 <div id="gwStage"><div id="gwRays"></div><div id="gwRays2"></div><div id="gwRings"></div><svg id="gwHud" viewBox="-400 -400 800 800"><circle class="h1" r="380"/><circle class="h2" r="340"/><circle class="h3" r="300"/><circle class="h4" r="250"/></svg><div id="gwNum"></div><div id="gwBand"></div><div id="gwHead"></div><div id="gwSub"></div></div>
 <div id="gwTL">SYSTEM // OBJECTIVE COMPLETE</div><div id="gwTR">STATUS // 100% SYNCED</div><div id="gwFlash"></div><canvas id="gwC" width="1920" height="1080"></canvas></div>
@@ -235,7 +269,7 @@ function fmt(t) {
   return (h ? h + ':' + String(m).padStart(2,'0') : m) + ':' + String(x).padStart(2,'0');
 }
 function tick() {
-  timerSnd();
+  timerSnd(); gmBar();
   const t = fmt(d.tMode === 'up' ? Math.floor(ms()/1000)*1000 : ms());
   $('tBig').textContent = t;
   $('soonT').textContent = (d.tBase > 0 || d.tRun) ? t : '';
@@ -457,6 +491,20 @@ const SFX = (() => {
       ['Hype charge', t => { for (let o = 0, g = .2; o < .35; o += g, g *= .8) S(t + o, .15); Z(t, .4, .2, 300, 6000, 1.2); horn(t + .35, .5, .1); [52, 59, 64].forEach(n => T('sawtooth', N(n), N(n), t + .35, .8, .09, .01)); K(t + .35, .5); }]]
   };
   Object.keys(X).forEach(id => D[id][2].push(...X[id]));
+  Object.assign(D, {
+    gameStart: ['New word appears', 'Word game', [
+      ['Ping', t => { P(84, t, .3, .2); P(91, t + .1, .4, .18); }],
+      ['Scan sweep', t => { Z(t, .35, .18, 500, 4000, 1.2); T('sine', 600, 1200, t, .3, .1); }],
+      ['Drum hit', t => { K(t, .4); S(t + .12, .2); }]]],
+    gameLetter: ['Letter revealed', 'Word game', [
+      ['Blip', t => T('square', 900, 1400, t, .08, .1)],
+      ['Tick up', t => P(79, t, .2, .18)],
+      ['Soft pluck', t => T('triangle', N(72), N(72), t, .25, .2)]]],
+    gameWin: ['Someone got the word', 'Word game', [
+      ['Fanfare', t => { [60, 64, 67, 72, 76].forEach((n, i) => T('triangle', N(n), N(n), t + i * .12, .5, .17)); bell(t + .6, 1000, .18); }],
+      ['Crowd cheer', t => { Z(t, 1.2, .25, 600, 1800, .8); horn(t, .4, .1); K(t, .4); }],
+      ['Arcade win', t => { for (let i = 0; i < 10; i++) { const n = 76 + i * 1.2; T('square', N(n), N(n), t + i * .07, .08, .07); } bell(t + .75, 1200, .18); }]]]
+  });
   const play = (id, v, a, vol) => {
     const e = D[id]; if (!e || !v || !e[2][v - 1] || !vol || !ctx()) return;
     out.gain.value = vol; e[2][v - 1][1](c.currentTime + .03, a || 0);
@@ -544,6 +592,33 @@ function raid(who, cnt) {
   if (n > 0) rI = setInterval(() => { const k = Math.min(1, (Date.now() - t0) / 2000); c.textContent = '+' + Math.round(n * k) + ' VIEWERS'; if (k >= 1) clearInterval(rI); }, 40);
   rT = setTimeout(() => el.classList.remove('play'), dur * 1000);
 }
+/* ---- word guessing game overlay (the word itself is never sent here, only blanks, hint and scores) ---- */
+const GP = { tc:['top:40px;left:50%', 'translateX(-50%)', 'top center'], tl:['top:40px;left:40px', '', 'top left'], tr:['top:40px;right:40px', '', 'top right'], bc:['bottom:40px;left:50%', 'translateX(-50%)', 'bottom center'], bl:['bottom:40px;left:40px', '', 'bottom left'], br:['bottom:40px;right:40px', '', 'bottom right'], c:['top:50%;left:50%', 'translate(-50%,-50%)', 'center'], cl:['top:50%;left:40px', 'translateY(-50%)', 'left center'], cr:['top:50%;right:40px', 'translateY(-50%)', 'right center'] };
+let gmPrev = null;
+function gmPlace(el, pos, sc) { const p = GP[pos]; el.style.cssText = p[0] + ';transform:' + p[1] + ' scale(' + Math.min(2, Math.max(.4, +sc || 1)) + ');transform-origin:' + p[2]; }
+function gmRender() {
+  const g = d.game || {}, st = g.state, on = !!g.on, boxOn = on && (st === 'play' || st === 'won' || st === 'timeup'), box = $('gmBox'), lb = $('glBox');
+  gmPlace(box, GP[d.gmPos] ? d.gmPos : 'bc', d.gmScale); gmPlace(lb, GP[d.glPos] ? d.glPos : 'cr', d.glScale);
+  box.classList.toggle('on', boxOn); lb.classList.toggle('on', on && d.glOff !== true);
+  const rows = Object.values(d.gameLb || {}).filter(x => x && x.n && x.s > 0).sort((a, b) => b.s - a.s).slice(0, Math.min(10, Math.max(3, +d.gmTop || 5)));
+  const L = $('glList'); L.innerHTML = '';
+  if (!rows.length) { const e = document.createElement('div'); e.className = 'gl-empty'; e.textContent = 'NO WINNERS YET'; L.appendChild(e); }
+  rows.forEach((r, i) => { const li = document.createElement('li'), a = document.createElement('b'), n = document.createElement('span'), s = document.createElement('em'); a.textContent = i + 1; n.textContent = r.n; s.textContent = r.s; li.append(a, n, s); if (st === 'won' && g.winner === r.n) li.className = 'hot'; L.appendChild(li); });
+  if (boxOn) {
+    box.dataset.st = st; $('gmCat').textContent = g.cat || ''; $('gmRnd').textContent = 'ROUND ' + (g.round || 1); $('gmHint').textContent = 'HINT: ' + (g.hint || '');
+    const W = $('gmWord'), old = gmPrev && gmPrev.round === g.round && gmPrev.mask ? gmPrev.mask.split(' ') : [], chars = String(g.mask || '').split(' '); W.innerHTML = '';
+    chars.forEach((c, i) => { const e = document.createElement('i'); e.textContent = c; e.style.setProperty('--i', i); if (c !== '_') e.className = 'rv' + (old.length && old[i] === '_' ? ' new' : ''); W.appendChild(e); });
+    $('gmFoot').textContent = st === 'play' ? 'TYPE THE WORD IN CHAT' : st === 'won' ? g.winner + ' GOT IT!  +' + (g.pts || 1) : "TIME'S UP";
+  }
+  if (gmPrev && boxOn) {
+    if (g.round !== gmPrev.round && st === 'play') snd('gameStart'); else if (st === 'play' && g.round === gmPrev.round && g.mask !== gmPrev.mask) snd('gameLetter'); else if (st === 'won' && gmPrev.st !== 'won') snd('gameWin');
+  }
+  gmPrev = { round:g.round, mask:g.mask, st:st };
+}
+function gmBar() {
+  const g = d.game; if (!g || g.state !== 'play' || !g.nextAt || !g.every) return;
+  $('gmBarF').style.width = Math.max(0, Math.min(100, (g.nextAt - (Date.now() + off)) / (g.every * 10))) + '%';
+}
 /* ---- automatic raids: listens to the Twitch chat of the channel (read-only, no login needed) ---- */
 let chatWS = null, chatCh = '', chatT, seenRaid = {};
 const chatDbg = /[?&]debug=1/.test(location.search);
@@ -596,7 +671,7 @@ firebase.database().ref(BID ? 'boards/' + BID : 'board').on('value', snap => {
   $('soon').classList.toggle('on', p === 'soon');
   const lo = !!d.lowOn && !!d.lowN; if (lo && lowPrev === false) snd('lowerIn'); lowPrev = lo;
   $('lower').classList.toggle('on', lo);
-  goal(); trigCheck(); raidCheck(); chatSync(); tick();
+  goal(); trigCheck(); raidCheck(); chatSync(); gmRender(); tick();
   const pk = [d.gAuto, d.gChan, d.gWorker].join('|'); if (pk !== pollKey) { pollKey = pk; autoN = null; poll(); }
 });
 </script>
