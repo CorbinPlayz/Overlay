@@ -634,7 +634,7 @@ const COLORDEF = { cA:'#19e3ff', cB:'#ff2e88', cAcc:'#19e3ff', cBg:'#060a18', cT
 const colorIds = Object.keys(COLORDEF);
 function save(p) {
   if (!ref) return toast('Pick a board first (Admin tab).', 'err');
-  Object.assign(state, p); ref.update(p).catch(e => toast('Save failed: ' + e.message, 'err'));
+  Object.assign(state, p); ref.update(p).catch(e => toast(/permission/i.test(e.message) ? 'This account is not allowed to change board "' + BID + '". Ask the admin to use Move to board or Repair link.' : 'Save failed: ' + e.message, 'err'));
 }
 function loadBoard(id) {
   if (window.gmReset) gmReset();
@@ -1004,6 +1004,7 @@ function buildAdmin() {
     + '<div class="sub" data-sub="bc"><div class="panel"><h2>Message to all streamers</h2><p class="hint" style="margin:0 0 10px">Shows as a banner at the top of every signed-in panel until you clear it.</p><div class="fld"><span>Message</span><input type="text" id="bcText" maxlength="200" placeholder="New sounds added. Check the Sound tab!"></div><div class="inl"><label class="fld"><span>Style</span><select id="bcLvl"><option value="info">Info</option><option value="warn">Warning</option></select></label><button class="pri" data-act="bcSend">Send</button><button data-act="bcClear">Clear</button></div></div></div>';
   $('content').appendChild(p);
   p.addEventListener('click', e => { const s = e.target.closest('#admSeg [data-sub]'); if (s) return subShow(s.dataset.sub); adminClick(e); });
+  p.addEventListener('change', e => { const s = e.target.closest('select[data-pick]'); if (s && s.value) $('bn_' + s.dataset.pick).value = s.value; });
   p.addEventListener('input', e => { if (e.target.closest('#bootEd')) { bootDirty = true; const v = $(e.target.id + 'V'); if (v) v.textContent = e.target.value; } });
   p.addEventListener('click', e => { if (e.target.closest('#bootEd [data-act=bootOn],#bootEd [data-act=voiceOn]')) bootDirty = true; });
   $('bkFile').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importBoard(f); });
@@ -1016,7 +1017,7 @@ function buildAdmin() {
     BL = v || {}; const ids = Object.keys(BL);
     sel.innerHTML = ids.map(i => '<option value="' + esc(i) + '">' + esc(BL[i].label || i) + ' (' + esc(i) + ')</option>').join('') || '<option value="">No boards yet</option>';
     const last = store.get('lastBoard'), want = BID && BL[BID] ? BID : last && BL[last] ? last : ids[0] || null;
-    sel.value = want || ''; if (want !== BID) loadBoard(want); renderBoards(); renderStats();
+    sel.value = want || ''; if (want !== BID) loadBoard(want); renderBoards(); renderUsers(); renderStats();
   }, 'Boards');
   fillBootEditor(); renderMaint(); renderStats(); buildNav();
 }
@@ -1034,20 +1035,43 @@ async function setPin() {
   if (pinHash && await sha($('pinOld').value.trim()) !== pinHash) return toast('Current PIN is wrong.', 'err');
   try { await db.ref('admin/pin').set(await sha(n)); toast('PIN saved.', 'ok'); } catch (e) { toast('Could not save: ' + e.message, 'err'); }
 }
+const freeBoards = uid => Object.keys(BL).filter(id => !BL[id].uid || BL[id].uid === uid);
+function guessBoard(i, uid) {
+  const ns = slug(i.name), fn = slug(String(i.name || '').split(' ')[0]), free = freeBoards(uid);
+  return free.find(id => id === ns) || free.find(id => id === fn) || free.find(id => ns.indexOf(id) === 0 && id.length >= 3) || ns;
+}
+function boardOpts(uid, sel) { return freeBoards(uid).map(id => '<option value="' + esc(id) + '"' + (id === sel ? ' selected' : '') + '>' + esc((BL[id].label || id) + ' (' + id + ')') + '</option>').join(''); }
 function renderUsers() {
   const el = $('admUsers'); if (!el) return;
   const rank = { pending:0, approved:1, paused:2, denied:3 }, st = u => USERS[u].status || 'pending';
   const ids = Object.keys(USERS).filter(u => USERS[u].info).sort((a, b) => rank[st(a)] - rank[st(b)] || (USERS[b].info.ts || 0) - (USERS[a].info.ts || 0));
   const w = ids.filter(u => st(u) === 'pending').length; $('usN').textContent = w ? w + ' waiting' : ids.length ? 'none waiting' : '';
-  el.innerHTML = ids.length ? ids.map(uid => {
-    const u = USERS[uid], i = u.info, s = st(uid), ph = /^https:\/\//.test(i.photo || '') ? '<img class="avatar lg" referrerpolicy="no-referrer" src="' + esc(i.photo) + '" alt="">' : '<div class="avatar lg"></div>';
-    const ask = '<input type="text" id="bn_' + esc(uid) + '" value="' + esc(slug(i.name)) + '" maxlength="24" placeholder="board id"><button class="pri sm" data-act="approve" data-uid="' + esc(uid) + '">Approve</button>';
+  el.innerHTML = (ids.length ? '<p class="hint" style="margin:0 0 10px">Board id: pick an <b>existing board</b> (like caleb) to give this person that board, or type a new id to create a new one. The overlay link only changes if they control the same board it uses.</p>' : '') + (ids.length ? ids.map(uid => {
+    const u = USERS[uid], i = u.info, s = st(uid), ph = /^https:\/\//.test(i.photo || '') ? '<img class="avatar lg" referrerpolicy="no-referrer" src="' + esc(i.photo) + '" alt="">' : '<div class="avatar lg"></div>', g = guessBoard(i, uid);
+    const ask = '<select data-pick="' + esc(uid) + '" style="width:auto;max-width:170px"><option value="">Existing board...</option>' + boardOpts(uid, g) + '</select><input type="text" id="bn_' + esc(uid) + '" value="' + esc(g) + '" maxlength="24" placeholder="board id"><button class="pri sm" data-act="approve" data-uid="' + esc(uid) + '">Approve</button>';
+    const ok = u.board && BL[u.board] && BL[u.board].uid === uid, link = u.board ? '<button class="sm" data-act="copy" data-id="' + esc(u.board) + '">Copy link</button>' : '';
     const acts = s === 'pending' ? ask + '<button class="danger sm" data-act="deny" data-uid="' + esc(uid) + '">Deny</button>'
-      : s === 'approved' ? '<button class="sm" data-act="pause" data-uid="' + esc(uid) + '">Pause</button><button class="danger sm" data-act="remove" data-uid="' + esc(uid) + '">Remove</button>'
+      : s === 'approved' ? link + '<select id="mv_' + esc(uid) + '" style="width:auto;max-width:170px">' + boardOpts(uid, u.board) + '</select><button class="sm" data-act="move" data-uid="' + esc(uid) + '">Move to board</button>' + (ok ? '' : '<button class="sm pink" data-act="repair" data-uid="' + esc(uid) + '">Repair link</button>') + '<button class="sm" data-act="pause" data-uid="' + esc(uid) + '">Pause</button><button class="danger sm" data-act="remove" data-uid="' + esc(uid) + '">Remove</button>'
       : s === 'paused' ? '<button class="pri sm" data-act="resume" data-uid="' + esc(uid) + '">Resume</button><button class="danger sm" data-act="remove" data-uid="' + esc(uid) + '">Remove</button>' : ask;
-    return '<div class="card">' + ph + '<div class="meta"><b>' + esc(i.name) + ' <span class="badge ' + s + '">' + s + '</span></b><span>' + esc(i.email) + (i.ts ? ' &middot; ' + esc(new Date(i.ts).toLocaleString()) : '') + '</span>' + (u.board ? '<span>board: ' + esc(u.board) + '</span>' : '') + '</div><div class="acts">' + acts + '</div>'
+    return '<div class="card">' + ph + '<div class="meta"><b>' + esc(i.name) + ' <span class="badge ' + s + '">' + s + '</span>' + (s === 'approved' && !ok ? ' <span class="badge denied">board link broken</span>' : '') + '</b><span>' + esc(i.email) + (i.ts ? ' &middot; ' + esc(new Date(i.ts).toLocaleString()) : '') + '</span>' + (u.board ? '<span>controls board: <b>' + esc(u.board) + '</b>' + (BL[u.board] ? '' : ' (does not exist)') + '</span>' : '') + '</div><div class="acts">' + acts + '</div>'
       + '<div class="inl" style="width:100%"><input type="text" class="note" id="nt_' + esc(uid) + '" value="' + esc(NOTES[uid] || '') + '" maxlength="200" placeholder="Private note (only you can see this)"><button class="sm" data-act="note" data-uid="' + esc(uid) + '">Save note</button></div></div>';
-  }).join('') : '<p class="hint">Nobody has asked for access yet.</p>';
+  }).join('') : '<p class="hint">Nobody has asked for access yet.</p>');
+}
+async function moveUser(uid) {
+  const u = USERS[uid], to = $('mv_' + uid) && $('mv_' + uid).value; if (!u || !to) return toast('Pick a board first.', 'err');
+  if (u.board === to && BL[to] && BL[to].uid === uid) return toast('They already control that board.', 'ok');
+  if (!await askPin('PIN to move ' + ((u.info && u.info.name) || 'this user') + ' to board ' + to)) return;
+  const up = {}; if (u.board && u.board !== to && BL[u.board] && BL[u.board].uid === uid) up['boardList/' + u.board + '/uid'] = null;
+  up['boardList/' + to + '/uid'] = uid; up['users/' + uid + '/board'] = to; if (!(BL[to] && BL[to].label)) up['boardList/' + to + '/label'] = (u.info && u.info.name) || to;
+  db.ref().update(up).then(() => toast('Moved. They now control board ' + to + '.', 'ok'), er => toast('Failed: ' + er.message, 'err'));
+}
+async function repairUser(uid) {
+  const u = USERS[uid]; if (!u || !u.board) return toast('This person has no board assigned.', 'err');
+  const ex = BL[u.board]; if (ex && ex.uid && ex.uid !== uid) return toast('That board belongs to someone else. Use Move to board.', 'err');
+  if (!await askPin('PIN to repair the link for ' + ((u.info && u.info.name) || 'this user'))) return;
+  const up = {}; up['boardList/' + u.board + '/uid'] = uid; up['boardList/' + u.board + '/label'] = (ex && ex.label) || (u.info && u.info.name) || u.board; if (!(ex && ex.created)) up['boardList/' + u.board + '/created'] = TS;
+  const bx = await db.ref('boards/' + u.board).once('value'); if (!bx.exists()) Object.entries(newBoardData()).forEach(([k, v]) => up['boards/' + u.board + '/' + k] = v);
+  db.ref().update(up).then(() => toast('Link repaired.', 'ok'), er => toast('Failed: ' + er.message, 'err'));
 }
 function renderBoards() {
   const el = $('admBoards'); if (!el) return; const ids = Object.keys(BL);
@@ -1056,7 +1080,7 @@ function renderBoards() {
 }
 function adminClick(e) {
   const b = e.target.closest('[data-act]'); if (!b) return; const u = b.dataset.uid, id = b.dataset.id;
-  ({ setpin:setPin, approve:() => approve(u), deny:() => setStatus(u, 'denied'), pause:() => setStatus(u, 'paused'), resume:() => approve(u, true), remove:() => removeUser(u), note:() => saveNote(u), mkboard:createBoard, import:importCaleb,
+  ({ setpin:setPin, approve:() => approve(u), move:() => moveUser(u), repair:() => repairUser(u), deny:() => setStatus(u, 'denied'), pause:() => setStatus(u, 'paused'), resume:() => approve(u, true), remove:() => removeUser(u), note:() => saveNote(u), mkboard:createBoard, import:importCaleb,
     copy:() => copyText(SITE + 'board.html?id=' + id), edit:() => { $('boardSel').value = id; $('boardSel').onchange(); toast('Now editing ' + id, 'ok'); }, del:() => delBoard(id),
     mnt:() => db.ref('config/maintenance').set({ on:!MAINT.on, msg:$('mnMsg').value.trim() }).then(() => toast(MAINT.on ? 'Maintenance mode is on.' : 'Maintenance mode is off.', 'ok'), er => toast(er.message, 'err')),
     tplSave:saveTemplate, tplClear:() => db.ref('config/template').remove().then(() => toast('Template cleared.', 'ok')), bkExport:exportBoard, bkPick:() => $('bkFile').click(),
