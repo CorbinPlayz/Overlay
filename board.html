@@ -652,6 +652,12 @@ function chatRaid(id, name, n, force) {
   if (!force) { if (!d.rAuto) return; if (id) { if (seenRaid[id]) return; seenRaid[id] = 1; } if (n < Math.max(1, +d.rMin || 1)) return; }
   raid(String(name).toUpperCase() || 'A FRIEND', n);
 }
+let snapN = 0;
+function boardDbg(has) {
+  if (!chatDbg) return; snapN++; let e = $('boardDbg');
+  if (!e) { e = document.createElement('div'); e.id = 'boardDbg'; e.style.cssText = 'position:fixed;left:8px;top:40px;z-index:99;font:14px monospace;color:#0f0;background:rgba(0,0,0,.75);padding:4px 8px'; document.body.appendChild(e); }
+  e.style.color = has ? '#0f0' : '#f55'; e.textContent = 'board: ' + (BID || '(old /board)') + ' | ' + (has ? 'data OK' : 'NO DATA - wrong id?') + ' | updates: ' + snapN + ' | last: ' + new Date().toLocaleTimeString();
+}
 const DEFAULT_WORKER = 'https://follower-goal.clayton-fifer.workers.dev';
 const BID = (new URLSearchParams(location.search).get('id') || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
 firebase.database().ref(BID ? 'boards/' + BID : 'board').on('value', snap => {
@@ -671,7 +677,10 @@ firebase.database().ref(BID ? 'boards/' + BID : 'board').on('value', snap => {
   $('soon').classList.toggle('on', p === 'soon');
   const lo = !!d.lowOn && !!d.lowN; if (lo && lowPrev === false) snd('lowerIn'); lowPrev = lo;
   $('lower').classList.toggle('on', lo);
-  goal(); trigCheck(); raidCheck(); chatSync(); gmRender(); tick();
+  goal(); trigCheck(); raidCheck();
+  try { chatSync(); } catch (e) { console.error(e); }
+  try { gmRender(); } catch (e) { console.error(e); }
+  tick(); boardDbg(snap.exists());
   const pk = [d.gAuto, d.gChan, d.gWorker].join('|'); if (pk !== pollKey) { pollKey = pk; autoN = null; poll(); }
 });
 </script>
